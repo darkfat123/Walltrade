@@ -440,7 +440,7 @@ class _HomePageState extends State<HomePage> {
                                 Text("รายการเฝ้าดู",
                                     style: TextStyle(
                                         fontWeight: FontWeight.w600,
-                                        fontSize: 18)),
+                                        fontSize: 18),),
                                 SizedBox(
                                   width: 5,
                                 ),
