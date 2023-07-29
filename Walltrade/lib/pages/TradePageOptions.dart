@@ -11,7 +11,6 @@ import '../model/news.dart';
 import '../variables/serverURL.dart';
 import 'KnowledgeDetailPage.dart';
 import 'SettingsPage.dart';
-import 'TradePage.dart';
 import 'notify_and_activity.dart';
 
 class TradePageOptions extends StatefulWidget {
