@@ -7,20 +7,6 @@ class CustomAutoTrade extends StatefulWidget {
 
 class _CustomAutoTradeState extends State<CustomAutoTrade> {
   // สร้างรายการคำถามและคำตอบเป็น List ของ Map
-  List<Map<String, dynamic>> faqData = [
-    {
-      'question': 'คำถาม 1',
-      'answer': 'คำตอบของคำถาม 1',
-    },
-    {
-      'question': 'คำถาม 2',
-      'answer': 'คำตอบของคำถาม 2',
-    },
-    {
-      'question': 'คำถาม 3',
-      'answer': 'คำตอบของคำถาม 3',
-    },
-  ];
 
   @override
   Widget build(BuildContext context) {
