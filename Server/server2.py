@@ -275,6 +275,41 @@ def update_watchlist():
 
     return 'Watchlist updated successfully'
 
+@app.route('/delete_watchlist', methods=['POST'])
+def delete_watchlist():
+    # รับข้อมูลจากผู้ใช้ผ่านตัวแปร form
+    name = request.form.get('name')
+    username = request.form.get('username')
+    conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
+    cursor = conn.cursor()
+    # ส่งคำสั่ง SQL เพื่อดึงข้อมูล
+    query = f"SELECT watchlist FROM users_info WHERE username = '{username}'"
+    cursor.execute(query)
+
+    # ดึงข้อมูลจากการสอบถาม
+    result = cursor.fetchone()
+
+    try:
+        stock_names = json.loads(result[0])
+    except json.decoder.JSONDecodeError:
+        # หากมีข้อผิดพลาดในการแปลง JSON
+        stock_names = []
+
+    # เพิ่มชื่อใหม่ในรายการ
+    stock_names.append(name)
+
+    # แปลงรายการ Python เป็น JSON ใหม่
+    delete_json = json.dumps(stock_names)
+
+    # อัปเดตข้อมูลในฐานข้อมูล
+    delete_query = f"DELETE users_info SET watchlist = %s WHERE username = '{username}'"
+    cursor.execute(delete_query, (delete_json,))
+
+    # ยืนยันการเปลี่ยนแปลงข้อมูล
+    conn.commit()
+
+    return 'Watchlist deleted successfully'
+
 @app.route('/displayWatchlist', methods=['POST'])
 def displayWatchlist():
     username = request.form.get('username')
