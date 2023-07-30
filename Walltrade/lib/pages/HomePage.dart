@@ -512,37 +512,38 @@ class _HomePageState extends State<HomePage> {
                                               runSpacing: 8.0,
                                               children:
                                                   stockSymbols.map((symbol) {
-                                                return Chip(
-                                                  label: Row(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      Text(
-                                                        symbol,
-                                                        style: TextStyle(
-                                                          fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                          color: Colors.white,
+                                                return GestureDetector(
+                                                  onTap: () {
+                                                    deleteWatchlist(symbol);
+                                                    Navigator.of(context)
+                                                        .pop(); 
+                                                  },
+                                                  child: Chip(
+                                                    label: Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        Text(
+                                                          symbol,
+                                                          style: TextStyle(
+                                                            fontSize: 14,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            color: Colors.white,
+                                                          ),
                                                         ),
-                                                      ),
-                                                      SizedBox(width: 4),
-                                                      GestureDetector(
-                                                        onTap: () {
-                                                          deleteWatchlist(
-                                                              symbol);
-                                                        },
-                                                        child: FaIcon(
+                                                        SizedBox(width: 4),
+                                                        FaIcon(
                                                           FontAwesomeIcons
                                                               .circleMinus,
                                                           size: 16,
                                                           color: Colors.red,
                                                         ),
-                                                      )
-                                                    ],
+                                                      ],
+                                                    ),
+                                                    backgroundColor:
+                                                        Color(0xFF212436),
                                                   ),
-                                                  backgroundColor:
-                                                      Color(0xFF212436),
                                                 );
                                               }).toList(),
                                             ),
