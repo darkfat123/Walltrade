@@ -131,7 +131,7 @@ class _AssetListScreenState extends State<AssetListScreen>
                 labelText: 'พิมพ์ชื่อหุ้นหรืออักษรย่อ...',
                 prefixIcon: Icon(Icons.search),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
               onChanged: (value) {

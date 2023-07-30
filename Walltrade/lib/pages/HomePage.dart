@@ -31,6 +31,8 @@ class _HomePageState extends State<HomePage> {
   Map<String, double> stockPrices = {};
   Map<String, double> stockPercentage = {};
 
+  bool isChecked = false;
+
   bool isLoading = true;
   String ans = '';
 
@@ -89,19 +91,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> fetchWatchlist() async {
-    final response = await http.post(
-      Uri.parse('${Constants.serverUrl}/displayWatchlist'),
-      body: {'username': username},
-    );
-
-    if (response.statusCode == 200) {
-      setState(() {
-        watchlist = List<String>.from(jsonDecode(response.body));
-      });
-    }
-  }
-
   Future<void> getStockPrices() async {
     var url = '${Constants.serverUrl}/getStockPriceUS';
     var body = jsonEncode({'username': username});
@@ -123,6 +112,30 @@ class _HomePageState extends State<HomePage> {
           });
         },
       );
+    }
+  }
+
+  Future<void> deleteWatchlist(String symbol) async {
+    var url = '${Constants.serverUrl}/deleteWatchlist';
+    var body = jsonEncode(
+        {'username': username, 'symbol': symbol}); // Add the 'symbol' parameter
+
+    var response = await http.post(
+      Uri.parse(url),
+      body: body,
+      headers: {'Content-Type': 'application/json'},
+    );
+    print(body);
+
+    if (response.statusCode == 200) {
+      // Handle a successful response from the server (if needed)
+      var data = jsonDecode(response.body);
+      print('$data , $symbol');
+      // Perform any further actions with the data if required
+    } else {
+      // Handle errors or unsuccessful responses from the server (if needed)
+      print(
+          'Failed to delete watchlist item. Status code: ${response.statusCode}');
     }
   }
 
@@ -277,11 +290,13 @@ class _HomePageState extends State<HomePage> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(
-                                   _balanceChange.toString().startsWith("-")
+                                    _balanceChange.toString().startsWith("-")
                                         ? Icons.arrow_downward
                                         : Icons.arrow_upward,
                                     size: 18,
-                                    color: _balanceChange.toString().startsWith("-")
+                                    color: _balanceChange
+                                            .toString()
+                                            .startsWith("-")
                                         ? Color(0xFFFF002E)
                                         : Color(0xFF00FFA3),
                                   ),
@@ -291,7 +306,9 @@ class _HomePageState extends State<HomePage> {
                                     style: TextStyle(
                                       fontWeight: FontWeight.w700,
                                       fontSize: 12,
-                                      color: _balanceChange.toString().startsWith("-")
+                                      color: _balanceChange
+                                              .toString()
+                                              .startsWith("-")
                                           ? Color(0xFFFF002E)
                                           : Color(0xFF00FFA3),
                                     ),
@@ -436,41 +453,107 @@ class _HomePageState extends State<HomePage> {
                           Padding(
                             padding: const EdgeInsets.only(left: 6),
                             child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text("รายการเฝ้าดู",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 18),),
-                                SizedBox(
-                                  width: 5,
+                                Row(
+                                  children: [
+                                    Text(
+                                      "รายการเฝ้าดู",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 18),
+                                    ),
+                                    SizedBox(
+                                      width: 5,
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: Text('รายการเฝ้าดู'),
+                                              content: Text(
+                                                  'รายการเฝ้าดูจะแสดงสิ่งที่เราสนใจจากที่เราได้เพิ่มลงรายการ จะแสดงราคาปัจจุบันและเปอร์เซ็นต์การเปลี่ยนแปลงของราคาเปิดและปิดในวันนั้น'),
+                                              actions: <Widget>[
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context)
+                                                        .pop(); // Close the dialog
+                                                  },
+                                                  child: Text('ตกลง'),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                      },
+                                      child: Icon(
+                                        Icons.info_outline,
+                                        size: 20,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 GestureDetector(
                                   onTap: () {
                                     showDialog(
                                       context: context,
-                                      builder: (BuildContext context) {
+                                      builder: (context) {
                                         return AlertDialog(
-                                          title: Text('รายการเฝ้าดู'),
-                                          content:
-                                              Text('รายการเฝ้าดูจะแสดงสิ่งที่เราสนใจจากที่เราได้เพิ่มลงรายการ จะแสดงราคาปัจจุบันและเปอร์เซ็นต์การเปลี่ยนแปลงของราคาเปิดและปิดในวันนั้น'),
-                                          actions: <Widget>[
-                                            TextButton(
-                                              onPressed: () {
-                                                Navigator.of(context)
-                                                    .pop(); // Close the dialog
-                                              },
-                                              child: Text('ตกลง'),
+                                          title: Text("ลบรายการเฝ้าดู"),
+                                          content: Container(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.7,
+                                            child: Wrap(
+                                              spacing: 8.0,
+                                              runSpacing: 8.0,
+                                              children:
+                                                  stockSymbols.map((symbol) {
+                                                return Chip(
+                                                  label: Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Text(
+                                                        symbol,
+                                                        style: TextStyle(
+                                                          fontSize: 14,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          color: Colors.white,
+                                                        ),
+                                                      ),
+                                                      SizedBox(width: 4),
+                                                      GestureDetector(
+                                                        onTap: () {
+                                                          deleteWatchlist(
+                                                              symbol);
+                                                        },
+                                                        child: FaIcon(
+                                                          FontAwesomeIcons
+                                                              .circleMinus,
+                                                          size: 16,
+                                                          color: Colors.red,
+                                                        ),
+                                                      )
+                                                    ],
+                                                  ),
+                                                  backgroundColor:
+                                                      Color(0xFF212436),
+                                                );
+                                              }).toList(),
                                             ),
-                                          ],
+                                          ),
                                         );
                                       },
                                     );
                                   },
-                                  child: Icon(
-                                    Icons.info_outline,
-                                    size: 20,
-                                  ),
-                                )
+                                  child: FaIcon(FontAwesomeIcons.trashCan,
+                                      size: 18),
+                                ),
                               ],
                             ),
                           ),
@@ -494,8 +577,9 @@ class _HomePageState extends State<HomePage> {
                                         child: CircularProgressIndicator(),
                                       )
                                     : Container(
-                                      decoration: BoxDecoration(color: Color(0xFFECF8F9)),
-                                      child: ListView.builder(
+                                        decoration: BoxDecoration(
+                                            color: Color(0xFFECF8F9)),
+                                        child: ListView.builder(
                                           scrollDirection: Axis.horizontal,
                                           itemCount: stockSymbols.length,
                                           itemBuilder: (context, index) {
@@ -525,8 +609,10 @@ class _HomePageState extends State<HomePage> {
                                                             style: TextStyle(
                                                               fontSize: 14,
                                                               fontWeight:
-                                                                  FontWeight.w600,
-                                                              color: Colors.white,
+                                                                  FontWeight
+                                                                      .w600,
+                                                              color:
+                                                                  Colors.white,
                                                             ),
                                                           ),
                                                           Text(
@@ -577,7 +663,7 @@ class _HomePageState extends State<HomePage> {
                                             );
                                           },
                                         ),
-                                    ),
+                                      ),
                           ),
                           SizedBox(
                             height: 20,

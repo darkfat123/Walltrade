@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: primary,
         fontFamily: "IBMPlexSansThai",
       ),
-      home: Home(username: "foczz123",initialIndex: 4),
+      home: Home(username: "foczz123",initialIndex: 0),
     );
   }
 }

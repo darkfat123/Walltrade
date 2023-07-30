@@ -275,40 +275,42 @@ def update_watchlist():
 
     return 'Watchlist updated successfully'
 
-@app.route('/delete_watchlist', methods=['POST'])
-def delete_watchlist():
+@app.route('/deleteWatchlist', methods=['POST'])
+def deleteWatchlist():
     # รับข้อมูลจากผู้ใช้ผ่านตัวแปร form
-    name = request.form.get('name')
-    username = request.form.get('username')
+    data = request.get_json()
+    symbol = data.get('symbol')
+    username = data.get('username')
+
     conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
     cursor = conn.cursor()
-    # ส่งคำสั่ง SQL เพื่อดึงข้อมูล
+
+    # ดึงข้อมูล watchlist ของผู้ใช้
     query = f"SELECT watchlist FROM users_info WHERE username = '{username}'"
     cursor.execute(query)
-
-    # ดึงข้อมูลจากการสอบถาม
     result = cursor.fetchone()
 
-    try:
-        stock_names = json.loads(result[0])
-    except json.decoder.JSONDecodeError:
-        # หากมีข้อผิดพลาดในการแปลง JSON
-        stock_names = []
+    if result:
+        watchlist = json.loads(result[0]) if result[0] else []  # แปลง JSON เป็น List
 
-    # เพิ่มชื่อใหม่ในรายการ
-    stock_names.append(name)
+        if symbol in watchlist:
+            watchlist.remove(symbol)  # ลบรายการหุ้นจาก List
 
-    # แปลงรายการ Python เป็น JSON ใหม่
-    delete_json = json.dumps(stock_names)
+        updated_watchlist = json.dumps(watchlist)  # แปลง List เป็น JSON เพื่อบันทึกในฐานข้อมูล
 
-    # อัปเดตข้อมูลในฐานข้อมูล
-    delete_query = f"DELETE users_info SET watchlist = %s WHERE username = '{username}'"
-    cursor.execute(delete_query, (delete_json,))
+        # อัปเดตข้อมูล watchlist ในฐานข้อมูล
+        update_query = f"UPDATE users_info SET watchlist = %s WHERE username = '{username}'"
+        cursor.execute(update_query, (updated_watchlist,))
 
-    # ยืนยันการเปลี่ยนแปลงข้อมูล
-    conn.commit()
+        # ยืนยันการเปลี่ยนแปลงข้อมูล
+        conn.commit()
+        conn.close()
 
-    return 'Watchlist deleted successfully'
+        return 'Watchlist deleted successfully'
+
+    conn.close()
+    return 'User not found or watchlist is empty'
+
 
 @app.route('/displayWatchlist', methods=['POST'])
 def displayWatchlist():

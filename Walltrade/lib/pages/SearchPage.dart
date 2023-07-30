@@ -44,7 +44,7 @@ class _SearchPageState extends State<SearchPage>
                   // height: 50,
                   width: MediaQuery.of(context).size.height,
                   decoration: BoxDecoration(
-                      color: primary, borderRadius: BorderRadius.circular(30)),
+                      color: primary, borderRadius: BorderRadius.circular(10)),
                   child: Column(
                     children: [
                       Padding(
@@ -56,7 +56,7 @@ class _SearchPageState extends State<SearchPage>
                           indicatorWeight: 2,
                           indicator: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(30),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           controller: tabController,
                           tabs: [
