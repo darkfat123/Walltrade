@@ -501,65 +501,81 @@ class _HomePageState extends State<HomePage> {
                                                 BorderRadius.circular(10.0),
                                           ),
                                           title: Text("ลบรายการเฝ้าดู"),
-                                          content: Container(
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.7,
-                                            child: Wrap(
-                                              spacing: 6.0,
-                                              runSpacing: 6.0,
-                                              children:
-                                                  stockSymbols.map((symbol) {
-                                                return GestureDetector(
-                                                  onTap: () {
-                                                    deleteWatchlist(symbol);
-                                                    setState(() {
-                                                      stockSymbols.removeWhere(
-                                                          (item) =>
-                                                              item == symbol);
-                                                    });
-                                                    ScaffoldMessenger.of(
-                                                            context)
-                                                        .showSnackBar(
-                                                      SnackBar(
-                                                        content: Text(
-                                                            'ลบรายการ $symbol ออกจาก Watchlist'),
-                                                        duration: Duration(
-                                                            seconds:
-                                                                3), // ระยะเวลาที่ SnackBar แสดง
+                                          content: StatefulBuilder(
+                                            builder: (context,
+                                                setStateInsideDialog) {
+                                              return Container(
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.7,
+                                                child: Wrap(
+                                                  spacing: 6.0,
+                                                  runSpacing: 6.0,
+                                                  children: stockSymbols
+                                                      .map((symbol) {
+                                                    return GestureDetector(
+                                                      onTap: () {
+                                                        deleteWatchlist(symbol);
+                                                        setState(() {
+                                                          stockSymbols
+                                                              .removeWhere(
+                                                                  (item) =>
+                                                                      item ==
+                                                                      symbol);
+                                                        });
+                                                        setStateInsideDialog(
+                                                            () {
+                                                          stockSymbols
+                                                              .removeWhere(
+                                                                  (item) =>
+                                                                      item ==
+                                                                      symbol);
+                                                        });
+                                                        ScaffoldMessenger.of(
+                                                                context)
+                                                            .showSnackBar(
+                                                          SnackBar(
+                                                            content: Text(
+                                                                'ลบรายการ $symbol ออกจาก Watchlist'),
+                                                            duration: Duration(
+                                                                seconds: 3),
+                                                          ),
+                                                        );
+                                                      },
+                                                      child: Chip(
+                                                        label: Row(
+                                                          mainAxisSize:
+                                                              MainAxisSize.min,
+                                                          children: [
+                                                            Text(
+                                                              symbol,
+                                                              style: TextStyle(
+                                                                fontSize: 14,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                color: Colors
+                                                                    .white,
+                                                              ),
+                                                            ),
+                                                            SizedBox(width: 4),
+                                                            FaIcon(
+                                                              FontAwesomeIcons
+                                                                  .circleMinus,
+                                                              size: 16,
+                                                              color: Colors.red,
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        backgroundColor:
+                                                            Color(0xFF212436),
                                                       ),
                                                     );
-                                                  },
-                                                  child: Chip(
-                                                    label: Row(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        Text(
-                                                          symbol,
-                                                          style: TextStyle(
-                                                            fontSize: 14,
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                            color: Colors.white,
-                                                          ),
-                                                        ),
-                                                        SizedBox(width: 4),
-                                                        FaIcon(
-                                                          FontAwesomeIcons
-                                                              .circleMinus,
-                                                          size: 16,
-                                                          color: Colors.red,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    backgroundColor:
-                                                        Color(0xFF212436),
-                                                  ),
-                                                );
-                                              }).toList(),
-                                            ),
+                                                  }).toList(),
+                                                ),
+                                              );
+                                            },
                                           ),
                                         );
                                       },

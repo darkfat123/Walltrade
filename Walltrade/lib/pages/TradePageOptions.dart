@@ -456,12 +456,12 @@ class _TradePageOptionsState extends State<TradePageOptions>
               ),
               SizedBox(height: 10),
               Container(
-                height: 1000,
+                height: 800,
                 child: Column(
                   children: [
                     Container(
                       height: 50,
-                      width: 400,
+                      width: MediaQuery.of(context).size.width * 0.8,
                       decoration: BoxDecoration(
                           color: primary,
                           borderRadius: BorderRadius.circular(10)),

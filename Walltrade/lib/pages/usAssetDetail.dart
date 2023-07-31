@@ -146,7 +146,7 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
                         ),
                       ),
                       Text(
-                        "market status",
+                        "Market Status: ",
                         style: TextStyle(
                           fontSize: 14,
                         ),
