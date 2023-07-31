@@ -28,6 +28,7 @@ class _HomePageState extends State<HomePage> {
   String _balanceChange = '';
   String _percentageChange = '';
   List<String> stockSymbols = [];
+  
   Map<String, double> stockPrices = {};
   Map<String, double> stockPercentage = {};
 
@@ -125,15 +126,9 @@ class _HomePageState extends State<HomePage> {
       body: body,
       headers: {'Content-Type': 'application/json'},
     );
-    print(body);
-
     if (response.statusCode == 200) {
-      // Handle a successful response from the server (if needed)
-      var data = jsonDecode(response.body);
-      print('$data , $symbol');
-      // Perform any further actions with the data if required
+      print(response.body);
     } else {
-      // Handle errors or unsuccessful responses from the server (if needed)
       print(
           'Failed to delete watchlist item. Status code: ${response.statusCode}');
     }
@@ -515,8 +510,11 @@ class _HomePageState extends State<HomePage> {
                                                 return GestureDetector(
                                                   onTap: () {
                                                     deleteWatchlist(symbol);
-                                                    Navigator.of(context)
-                                                        .pop(); 
+                                                    setState(() {
+                                                      stockSymbols.removeWhere(
+                                                          (item) =>
+                                                              item == symbol);
+                                                    });
                                                   },
                                                   child: Chip(
                                                     label: Row(
@@ -552,7 +550,7 @@ class _HomePageState extends State<HomePage> {
                                       },
                                     );
                                   },
-                                  child: FaIcon(FontAwesomeIcons.trashCan,
+                                  child: FaIcon(FontAwesomeIcons.trashAlt,
                                       size: 18),
                                 ),
                               ],

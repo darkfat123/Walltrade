@@ -278,9 +278,9 @@ def update_watchlist():
 @app.route('/deleteWatchlist', methods=['POST'])
 def deleteWatchlist():
     # รับข้อมูลจากผู้ใช้ผ่านตัวแปร form
-    symbol = request.form.get('symbol')
-    username = request.form.get('username')
-
+    symbol = request.json.get('symbol')
+    username = request.json.get('username')
+    print(symbol)
     conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
     cursor = conn.cursor()
 
@@ -288,7 +288,6 @@ def deleteWatchlist():
     query = f"SELECT watchlist FROM users_info WHERE username = '{username}'"
     cursor.execute(query)
     result = cursor.fetchone()
-
     if result:
         watchlist = json.loads(result[0]) if result[0] else []  # แปลง JSON เป็น List
 
