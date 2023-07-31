@@ -28,7 +28,7 @@ class _HomePageState extends State<HomePage> {
   String _balanceChange = '';
   String _percentageChange = '';
   List<String> stockSymbols = [];
-  
+
   Map<String, double> stockPrices = {};
   Map<String, double> stockPercentage = {};
 
@@ -496,6 +496,10 @@ class _HomePageState extends State<HomePage> {
                                       context: context,
                                       builder: (context) {
                                         return AlertDialog(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                          ),
                                           title: Text("ลบรายการเฝ้าดู"),
                                           content: Container(
                                             width: MediaQuery.of(context)
@@ -503,8 +507,8 @@ class _HomePageState extends State<HomePage> {
                                                     .width *
                                                 0.7,
                                             child: Wrap(
-                                              spacing: 8.0,
-                                              runSpacing: 8.0,
+                                              spacing: 6.0,
+                                              runSpacing: 6.0,
                                               children:
                                                   stockSymbols.map((symbol) {
                                                 return GestureDetector(
@@ -515,6 +519,17 @@ class _HomePageState extends State<HomePage> {
                                                           (item) =>
                                                               item == symbol);
                                                     });
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                            'ลบรายการ $symbol ออกจาก Watchlist'),
+                                                        duration: Duration(
+                                                            seconds:
+                                                                3), // ระยะเวลาที่ SnackBar แสดง
+                                                      ),
+                                                    );
                                                   },
                                                   child: Chip(
                                                     label: Row(
