@@ -843,6 +843,43 @@ def getStockPriceUS():
                 })
                 
             return jsonify(prices)
+
+
+
+@app.route('/getAutoOrders', methods=['POST'])
+def getAutoOrders():
+    username = request.json.get('username')
+    conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
+    cursor = conn.cursor()
+    query = f"SELECT * FROM auto_order WHERE username = '{username}'"
+    cursor.execute(query)
+    result = cursor.fetchall()  # ใช้ fetchall() เพื่อดึงข้อมูลทั้งหมดที่ตรงเงื่อนไข
+    conn.close()
+    
+    if result:
+        columns = [col[0] for col in cursor.description]
+        data = [dict(zip(columns, row)) for row in result]  # แปลงเป็น List ของ Dictionary
+        json_data = json.dumps(data,default=str)  # Convert the list of dictionaries to a JSON string
+        print(json_data)
+        return json_data
+    else:
+        return jsonify({"message": "No auto orders found for the username."})
+
+
+@app.route('/checkMarketStatus', methods=['POST'])
+def checkMarketStatus():
+    # กำหนดคีย์และตัวระบุสำหรับเข้าถึง Alpaca API
+    API_KEY = 'PK8NXGV44WWTJA356CDG'
+    API_SECRET = 'nR9ySdpMSTKbnflGrJaBueH3EVCJ9fRV9gxOhnod'
+    APCA_API_BASE_URL = 'https://paper-api.alpaca.markets'
+
+    # ส่งคำสั่งซื้อ
+    api = tradeapi.REST(API_KEY, API_SECRET,
+                        APCA_API_BASE_URL, api_version='v2')
+
+    # Check if the market is open now.
+    clock = api.get_clock()
+    return jsonify('{}'.format('open' if clock.is_open else 'closed'))
     
 if __name__ == '__main__':
     app.run(host="0.0.0.0")

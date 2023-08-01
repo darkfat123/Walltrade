@@ -27,22 +27,36 @@ class _TradePageOptionsState extends State<TradePageOptions>
     with SingleTickerProviderStateMixin {
   late TabController tabController;
   final String username;
+  List<dynamic> autoOrders = [];
   int _selectedIndex = 0;
   String _walletBalance = "";
+  bool isLoading = true;
   _TradePageOptionsState({required this.username});
+
+  Future<void> getAutoOrders() async {
+    final url = '${Constants.serverUrl}/getAutoOrders';
+    final headers = {'Content-Type': 'application/json'}; // Add this line
+    final body =
+        jsonEncode({'username': username}); // Encode the request body as JSON
+    final response =
+        await http.post(Uri.parse(url), headers: headers, body: body);
+    if (response.statusCode == 200) {
+      autoOrders = jsonDecode(response.body);
+      isLoading = false;
+      for (final order in autoOrders) {
+        print(order['techniques']);
+      }
+    } else {
+      print("Error");
+    }
+  }
 
   @override
   void initState() {
     tabController = TabController(length: 2, vsync: this);
     super.initState();
-    tabController.addListener(_handleTabSelection);
     getCash();
-  }
-
-  void _handleTabSelection() {
-    setState(() {
-      _selectedIndex = tabController.index;
-    });
+    getAutoOrders();
   }
 
   @override
@@ -314,14 +328,15 @@ class _TradePageOptionsState extends State<TradePageOptions>
                   height: 110,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    itemCount: 5,
+                    itemCount: autoOrders.length,
                     itemBuilder: (context, index) {
+                      final order = autoOrders[index];
                       return Padding(
                         padding: EdgeInsets.all(6.0),
                         child: Container(
                           width: 100,
                           decoration: BoxDecoration(
-                            color: Color(0xFFFFFFFF),
+                            color: order['side'] == 'buy' ? Colors.green: Colors.red,
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
@@ -338,7 +353,7 @@ class _TradePageOptionsState extends State<TradePageOptions>
                               Column(
                                 children: [
                                   Text(
-                                    "stockName",
+                                    order['symbol'],
                                     style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w500,
@@ -346,7 +361,7 @@ class _TradePageOptionsState extends State<TradePageOptions>
                                     ),
                                   ),
                                   Text(
-                                    "technique",
+                                    "${order['quantity'].toString()} หน่วย",
                                     style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w500,
@@ -354,7 +369,7 @@ class _TradePageOptionsState extends State<TradePageOptions>
                                     ),
                                   ),
                                   Text(
-                                    "buy or sell",
+                                    order['side'] == 'buy' ? 'ซื้อ' : 'ขาย',
                                     style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w500,

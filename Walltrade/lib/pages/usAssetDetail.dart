@@ -25,6 +25,7 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
   TextEditingController typeController = TextEditingController();
   TextEditingController timeInForceController = TextEditingController();
   String result = '';
+  String marketStatus = '';
   Future<void> updateWatchlist(String stockName) async {
     final url = '${Constants.serverUrl}/update_watchlist';
     final response = await http.post(
@@ -41,6 +42,20 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
     }
   }
 
+  void checkMarketStatus() async {
+    var url = '${Constants.serverUrl}/checkMarketStatus';
+    var response = await http.post(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      setState(() {
+        marketStatus = data;
+      });
+    } else {
+      print('Request failed with status: ${response.statusCode}.');
+    }
+  }
+
   Future<void> placeOrder(String symbol, String side) async {
     final url = Uri.parse('${Constants.serverUrl}/place_order');
     final headers = {'Content-Type': 'application/json'};
@@ -51,7 +66,6 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
         'qty': double.parse(qtyController.text),
         'side': side,
         'type': typeController.text,
-        
       },
     );
 
@@ -67,6 +81,12 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
         result = 'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ';
       });
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    checkMarketStatus();
   }
 
   @override
@@ -145,11 +165,29 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
                           fontSize: 24,
                         ),
                       ),
-                      Text(
-                        "Market Status: ",
-                        style: TextStyle(
-                          fontSize: 14,
+                      SizedBox(height: 10,),
+                      Chip(
+                        label: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.circle,
+                              color: marketStatus == 'closed' ? Colors.red : Colors.green,
+                              size: 16,
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              marketStatus == 'closed'
+                                  ? "สถานะตลาด: ปิด"
+                                  : "สถานะตลาด: เปิด",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
                         ),
+                        backgroundColor: Colors.blue.shade200,
                       ),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(50),
@@ -192,13 +230,13 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
                                                 children: [
                                                   Text(
                                                       'Market Order: คำสั่งซื้อหรือขายที่ดำเนินการในราคาปัจจุบันที่มีอยู่บนตลาด โดยไม่ระบุราคาซื้อหรือขายเฉพาะ สั่งซื้อหรือขายในราคาที่พร้อมใช้งานในขณะนั้น'),
-        
+
                                                   SizedBox(
                                                       height:
                                                           10), // เพิ่มระยะห่างระหว่างบรรทัด
                                                   Text(
                                                       'Limit Order: คำสั่งซื้อหรือขายที่ระบุราคาซื้อหรือขายที่ต้องการ เช่น ในกรณีของคำสั่งซื้อราคาที่ระบุจะต่ำกว่าราคาปัจจุบันของตลาด ในกรณีของคำสั่งขายราคาที่ระบุจะสูงกว่าราคาปัจจุบันของตลาด'),
-        
+
                                                   // เพิ่มระยะห่างระหว่างบรรทัด
                                                 ],
                                               ),
@@ -319,7 +357,7 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
                                                 children: [
                                                   Text(
                                                       'Limit Order: กำหนดราคาที่ต้องการซื้อขาย'),
-        
+
                                                   SizedBox(
                                                       height:
                                                           10), // เพิ่มระยะห่างระหว่างบรรทัด
@@ -413,10 +451,12 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
                                               ElevatedButton(
                                                 style: ElevatedButton.styleFrom(
                                                   padding: EdgeInsets.symmetric(
-                                                      vertical: 20, horizontal: 24),
+                                                      vertical: 20,
+                                                      horizontal: 24),
                                                   shape: RoundedRectangleBorder(
                                                     borderRadius:
-                                                        BorderRadius.circular(20),
+                                                        BorderRadius.circular(
+                                                            20),
                                                   ),
                                                 ),
                                                 child: Text('ตกลง'),
@@ -448,7 +488,8 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
                               ),
                               SizedBox(height: 30),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
                                 children: [
                                   ElevatedButton(
                                     onPressed: () {
@@ -483,7 +524,8 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
                                               TextButton(
                                                 child: Text(
                                                   "ยกเลิก",
-                                                  style: TextStyle(fontSize: 18),
+                                                  style:
+                                                      TextStyle(fontSize: 18),
                                                 ),
                                                 onPressed: () {
                                                   Navigator.of(context).pop();
@@ -492,10 +534,12 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
                                               TextButton(
                                                 child: Text(
                                                   "ยืนยัน",
-                                                  style: TextStyle(fontSize: 18),
+                                                  style:
+                                                      TextStyle(fontSize: 18),
                                                 ),
                                                 onPressed: () {
-                                                  placeOrder(widget.symbol, "buy");
+                                                  placeOrder(
+                                                      widget.symbol, "buy");
                                                   Navigator.of(context).pop();
                                                 },
                                               ),
@@ -509,7 +553,8 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
                                       backgroundColor:
                                           MaterialStateProperty.all<Color>(
                                               Colors.green),
-                                      fixedSize: MaterialStateProperty.all<Size>(
+                                      fixedSize:
+                                          MaterialStateProperty.all<Size>(
                                         Size(180,
                                             40), // กำหนดขนาดความกว้างและความสูงของปุ่ม
                                       ),
@@ -558,7 +603,8 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
                                               TextButton(
                                                 child: Text(
                                                   "ยกเลิก",
-                                                  style: TextStyle(fontSize: 18),
+                                                  style:
+                                                      TextStyle(fontSize: 18),
                                                 ),
                                                 onPressed: () {
                                                   Navigator.of(context).pop();
@@ -567,10 +613,12 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
                                               TextButton(
                                                 child: Text(
                                                   "ยืนยัน",
-                                                  style: TextStyle(fontSize: 18),
+                                                  style:
+                                                      TextStyle(fontSize: 18),
                                                 ),
                                                 onPressed: () {
-                                                  placeOrder(widget.symbol, "sell");
+                                                  placeOrder(
+                                                      widget.symbol, "sell");
                                                   Navigator.of(context).pop();
                                                 },
                                               ),
@@ -581,10 +629,11 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
                                     },
                                     child: Text('ขาย'),
                                     style: ButtonStyle(
-                                      backgroundColor:
-                                          MaterialStateProperty.all<Color>(Colors
+                                      backgroundColor: MaterialStateProperty
+                                          .all<Color>(Colors
                                               .red), // Change the background color here
-                                      fixedSize: MaterialStateProperty.all<Size>(
+                                      fixedSize:
+                                          MaterialStateProperty.all<Size>(
                                         Size(180,
                                             40), // กำหนดขนาดความกว้างและความสูงของปุ่ม
                                       ),
