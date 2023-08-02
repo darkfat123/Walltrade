@@ -18,6 +18,7 @@ from alpaca_trade_api import REST
 import websockets
 import asyncio
 from tradingview_ta import TA_Handler, Interval, Exchange
+from settrade_v2 import Investor
 
 
 
@@ -214,14 +215,30 @@ def get_asset_list():
     return jsonify(assets=asset_list)
 
 @app.route('/asset_list2', methods=['GET'])
-def get_th_list():
-    all_ticker_list = ['EE.bk', 'GFPT.bk', 'LEE.bk', 'MAX.bk', 'NER.bk', 'PPPM.bk', 'STA.bk', 'TEGH.bk', 'TFM.bk', 'TRUBB.bk', 'TWPC.bk', 'UPOIC.bk', 'UVAN.bk', 'VPO.bk', 'AAI.bk', 'APURE.bk', 'ASIAN.bk', 'BR.bk', 'BRR.bk', 'BTG.bk', 'CBG.bk', 'CFRESH.bk', 'CH.bk', 'CHOTI.bk', 'CM.bk', 'CPF.bk', 'CPI.bk', 'F&D.bk', 'GLOCON.bk', 'HTC.bk', 'ICHI.bk', 'JDF.bk', 'KBS.bk', 'KSL.bk', 'KTIS.bk', 'LST.bk', 'M.bk', 'MALEE.bk', 'MINT.bk', 'NRF.bk', 'NSL.bk', 'OISHI.bk', 'OSP.bk', 'PB.bk', 'PLUS.bk', 'PM.bk', 'PRG.bk', 'RBF.bk', 'SAPPE.bk', 'SAUCE.bk', 'SFP.bk', 'SNNP.bk', 'SNP.bk', 'SORKON.bk', 'SSC.bk', 'SSF.bk', 'SST.bk', 'SUN.bk', 'TC.bk', 'TFG.bk', 'TFMAMA.bk', 'TIPCO.bk', 'TKN.bk', 'TU.bk', 'TVO.bk', 'W.bk', 'ZEN.bk', 'AFC.bk', 'BTNC.bk', 'CPH.bk', 'CPL.bk', 'NC.bk', 'PAF.bk', 'PDJ.bk', 'PG.bk', 'SABINA.bk', 'SAWANG.bk', 'SUC.bk', 'TNL.bk', 'TR.bk', 'TTI.bk', 'TTT.bk', 'UPF.bk', 'WACOAL.bk', 'WFX.bk', 'AJA.bk', 'DTCI.bk', 'FANCY.bk', 'FTI.bk', 'KYE.bk', 'L&E.bk', 'MODERN.bk', 'OGC.bk', 'ROCK.bk', 'SIAM.bk', 'TCMC.bk', 'TSR.bk', 'APCO.bk', 'BIZ.bk', 'DDD.bk', 'JCT.bk', 'KISS.bk', 'NV.bk', 'OCC.bk', 'S&J.bk', 'STGT.bk', 'STHAI.bk', 'TNR.bk', 'TOG.bk', 'BAY.bk', 'BBL.bk']
+def asset_list2():
+    set_stocks = [
+        "ADVANC", "AOT", "BBL", "BCP", "BDMS", "BEM", "BGRIM", "BH", "BJC", "BPP",
+        "BTS", "CBG", "CENTEL", "CK", "CPALL", "CPF", "CPN", "CRC", "DELTA", "EA",
+        "EGCO", "GGC", "GPSC", "GULF", "HANA", "IRPC", "IVL", "KBANK", "KCE", "KKP",
+        "KTB", "LH", "M", "MAJOR", "OR", "PTT", "PTTEP", "PTTGC", "S", "SAMART",
+        "SAWAD", "SCB", "SCC", "SCP", "SCGP", "SIRI", "SPALI", "SPRC", "STA", "SUPER",
+        "TCAP", "THANI", "TISCO", "TKN", "TOA", "TOP", "TPIPP", "TRUE", "TTW", "TU", "WHA"
+    ]
 
-    # Filter the assets down to just those on NASDAQ.
-    th_assets = [a for a in all_ticker_list]
+    investor = Investor(
+        app_id="uOz2y7jYG7rWtD2w",
+        app_secret="eO4iENpX4CIN6Yb+jVKdcQrlcEVD4GuKPDi+YFD4qng=",
+        broker_id="SANDBOX",
+        app_code="SANDBOX",
+        is_auto_queue=False)
 
-    # Return the asset list as JSON.
-    return jsonify(assets=th_assets)
+    market_data = investor.MarketData()
+    stock_list = []
+    for symbol in set_stocks:
+        res = market_data.get_quote_symbol(symbol)
+        stock_list.append(res['symbol'])
+
+    return jsonify(stock_list)
 
 
 @app.route('/api/user', methods=['POST'])
