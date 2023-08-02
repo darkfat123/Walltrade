@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:html';
 import 'package:Walltrade/pages/FAQpage.dart';
+import 'package:Walltrade/pages/HistoryAutoTrade.dart';
 import 'package:flutter_octicons/flutter_octicons.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -10,7 +12,7 @@ import 'package:flutter/material.dart';
 import '../main.dart';
 import '../model/news.dart';
 import '../variables/serverURL.dart';
-import 'notify_and_activity.dart';
+
 
 class HomePage extends StatefulWidget {
   final String username;
@@ -213,12 +215,12 @@ class _HomePageState extends State<HomePage> {
                       right: 0,
                       child: IconButton(
                         iconSize: 30,
-                        icon: Icon(Icons.notifications),
+                        icon: Icon(Icons.access_time),
                         onPressed: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => NotifyActivity()),
+                                builder: (context) => NotifyActivity(username: username,)),
                           );
                           // Handle settings button press here
                         },

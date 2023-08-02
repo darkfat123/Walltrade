@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../variables/serverURL.dart';
 import 'SettingsPage.dart';
-import 'notify_and_activity.dart';
+import 'HistoryAutoTrade.dart';
 import 'package:syncfusion_flutter_treemap/treemap.dart';
 import 'Treemap.dart';
 
@@ -213,7 +213,7 @@ class _WalletPageState extends State<WalletPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => NotifyActivity()),
+                                builder: (context) => NotifyActivity(username:username)),
                           );
                           // Handle settings button press here
                         },

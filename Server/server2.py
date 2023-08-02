@@ -650,8 +650,14 @@ def autotradeMACD():
             
     else:
         while True:
-            print(handler.get_analysis().indicators["RSI"])
-            if handler.get_analysis().indicators["RSI"] <= lowerRSI:
+            macd = handler.get_analysis().indicators["MACD.macd"]
+            signal = handler.get_analysis().indicators["MACD.signal"]
+
+            print("Last MACD: ", last_macd)
+            print("Last Signal: ", last_signal)
+            print("MACD: ", macd)
+            print("Signal: ", signal)
+            if (last_macd > last_signal and macd < signal) and (macd and signal > 0):
                 try:
                     api.submit_order(
                     symbol=symbol,

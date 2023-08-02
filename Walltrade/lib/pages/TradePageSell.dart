@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:Walltrade/pages/SettingsPage.dart';
 import 'package:flutter/material.dart';
 import '../variables/serverURL.dart';
-import 'notify_and_activity.dart';
+import 'HistoryAutoTrade.dart';
 import 'package:http/http.dart' as http;
 
 class TradePageSell extends StatefulWidget {

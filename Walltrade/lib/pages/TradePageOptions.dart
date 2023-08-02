@@ -11,7 +11,7 @@ import '../model/news.dart';
 import '../variables/serverURL.dart';
 import 'KnowledgeDetailPage.dart';
 import 'SettingsPage.dart';
-import 'notify_and_activity.dart';
+import 'HistoryAutoTrade.dart';
 
 class TradePageOptions extends StatefulWidget {
   const TradePageOptions({Key? key, required this.username}) : super(key: key);
@@ -43,9 +43,6 @@ class _TradePageOptionsState extends State<TradePageOptions>
     if (response.statusCode == 200) {
       autoOrders = jsonDecode(response.body);
       isLoading = false;
-      for (final order in autoOrders) {
-        print(order['techniques']);
-      }
     } else {
       print("Error");
     }
@@ -169,7 +166,8 @@ class _TradePageOptionsState extends State<TradePageOptions>
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => NotifyActivity()),
+                                builder: (context) =>
+                                    NotifyActivity(username: username)),
                           );
                           // Handle settings button press here
                         },
@@ -307,7 +305,9 @@ class _TradePageOptionsState extends State<TradePageOptions>
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => NotifyActivity()),
+                              builder: (context) => NotifyActivity(
+                                    username: username,
+                                  )),
                         );
                       },
                       child: Text(
@@ -336,8 +336,8 @@ class _TradePageOptionsState extends State<TradePageOptions>
                         child: Container(
                           width: 100,
                           decoration: BoxDecoration(
-                            color: order['side'] == 'buy' ? Colors.green: Colors.red,
-                            borderRadius: BorderRadius.circular(20),
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
                             boxShadow: [
                               BoxShadow(
                                 color: Color.fromARGB(128, 0, 0, 0),
@@ -368,12 +368,20 @@ class _TradePageOptionsState extends State<TradePageOptions>
                                       color: Colors.black,
                                     ),
                                   ),
-                                  Text(
-                                    order['side'] == 'buy' ? 'ซื้อ' : 'ขาย',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.black,
+                                  Chip(
+                                    backgroundColor: order['side'] == 'buy'
+                                        ? Colors.green
+                                        : Colors.red,
+                                    
+                                    label: Text(
+                                      order['side'] == 'buy'
+                                          ? '  ซื้อ  '
+                                          : ' ขาย ',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.black,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -392,7 +400,10 @@ class _TradePageOptionsState extends State<TradePageOptions>
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => NotifyActivity()),
+                    MaterialPageRoute(
+                        builder: (context) => NotifyActivity(
+                              username: username,
+                            )),
                   );
                 },
                 child: Container(

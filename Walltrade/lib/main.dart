@@ -1,6 +1,6 @@
 import 'package:Walltrade/pages/TradePageOptions.dart';
 import 'package:Walltrade/pages/login_page.dart';
-import 'package:Walltrade/pages/notify_and_activity.dart';
+import 'package:Walltrade/pages/HistoryAutoTrade.dart';
 import 'package:Walltrade/pages/thStockView.dart';
 import 'package:Walltrade/pages/usStockView.dart';
 import 'package:Walltrade/primary.dart';

@@ -1,11 +1,48 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 
+import '../variables/serverURL.dart';
+
 class NotifyActivity extends StatefulWidget {
+  final String username;
+  NotifyActivity({required this.username});
   @override
-  _NotifyActivity createState() => _NotifyActivity();
+  _NotifyActivity createState() => _NotifyActivity(username: username);
 }
 
 class _NotifyActivity extends State<NotifyActivity> {
+  final String username;
+  List<dynamic> autoOrders = [];
+  bool isLoading = true;
+  _NotifyActivity({required this.username});
+
+  Future<void> getAutoOrders() async {
+    final url = '${Constants.serverUrl}/getAutoOrders';
+    final headers = {'Content-Type': 'application/json'};
+    final body = jsonEncode({'username': username});
+    final response =
+        await http.post(Uri.parse(url), headers: headers, body: body);
+    if (response.statusCode == 200) {
+      setState(() {
+        autoOrders = jsonDecode(response.body);
+        isLoading = false;
+      });
+      for (final order in autoOrders) {
+        print(order['techniques']);
+      }
+      print(autoOrders.length);
+    } else {
+      print("Error");
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getAutoOrders();
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -14,7 +51,7 @@ class _NotifyActivity extends State<NotifyActivity> {
         backgroundColor: Color(0xFFECF8F9),
         appBar: AppBar(
           backgroundColor: Color(0xFF212436),
-          title: Text('Hi! darkfat'),
+          title: Text('คำสั่งเทรดอัตโนมัติ'),
           bottom: TabBar(
             tabs: [
               Tab(text: 'กำลังดำเนินการ'),
@@ -26,8 +63,10 @@ class _NotifyActivity extends State<NotifyActivity> {
           children: [
             ListView.builder(
               scrollDirection: Axis.vertical,
-              itemCount: 8,
+              itemCount: autoOrders.length,
               itemBuilder: (context, index) {
+                final order = autoOrders[index];
+
                 return Container(
                   padding: EdgeInsets.all(16),
                   margin: EdgeInsets.all(14),
@@ -50,24 +89,32 @@ class _NotifyActivity extends State<NotifyActivity> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "stockName",
+                            order['symbol'],
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 18,
                               fontWeight: FontWeight.w500,
                               color: Colors.black,
                             ),
                           ),
-                          Text(
-                            "status",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
-                            ),
+                          Row(
+                            children: [
+                              Icon(Icons.circle,size: 14,color: Colors.yellow.shade800,),
+                              SizedBox(width: 8,),
+                              Text(
+                                "กำลังดำเนินการ",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                      SizedBox(height: 10,),
+                      SizedBox(
+                        height: 10,
+                      ),
                       Row(
                         children: [
                           Text(
@@ -81,7 +128,7 @@ class _NotifyActivity extends State<NotifyActivity> {
                           Chip(
                             backgroundColor: Colors.blue.shade300,
                             label: Text(
-                              "RSI น้อยกว่า 40",
+                              order['techniques'],
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
@@ -102,7 +149,7 @@ class _NotifyActivity extends State<NotifyActivity> {
                             ),
                           ),
                           Text(
-                            "1.5 หน่วย",
+                            "${order['quantity'].toString()} หน่วย",
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
@@ -122,13 +169,13 @@ class _NotifyActivity extends State<NotifyActivity> {
                             ),
                           ),
                           Text(
-                        "ซื้อ",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black,
-                        ),
-                      ),
+                            order['side'],
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black,
+                            ),
+                          ),
                         ],
                       ),
 
