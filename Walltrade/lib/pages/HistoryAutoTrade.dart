@@ -98,8 +98,14 @@ class _NotifyActivity extends State<NotifyActivity> {
                           ),
                           Row(
                             children: [
-                              Icon(Icons.circle,size: 14,color: Colors.yellow.shade800,),
-                              SizedBox(width: 8,),
+                              Icon(
+                                Icons.circle,
+                                size: 14,
+                                color: Colors.yellow.shade800,
+                              ),
+                              SizedBox(
+                                width: 8,
+                              ),
                               Text(
                                 "กำลังดำเนินการ",
                                 style: TextStyle(
@@ -108,6 +114,16 @@ class _NotifyActivity extends State<NotifyActivity> {
                                   color: Colors.black,
                                 ),
                               ),
+                              SizedBox(
+                                width: 8,
+                              ),
+                              GestureDetector(
+                                onTap: () {},
+                                child: Icon(
+                                  Icons.cancel,
+                                  color: Colors.red,
+                                ),
+                              )
                             ],
                           ),
                         ],
