@@ -945,27 +945,6 @@ def getStockPriceUS():
             return jsonify(prices)
 
 
-
-@app.route('/getAutoOrders', methods=['POST'])
-def getAutoOrders():
-    username = request.json.get('username')
-    conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
-    cursor = conn.cursor()
-    query = f"SELECT * FROM auto_order WHERE username = '{username}'"
-    cursor.execute(query)
-    result = cursor.fetchall()  # ใช้ fetchall() เพื่อดึงข้อมูลทั้งหมดที่ตรงเงื่อนไข
-    conn.close()
-    
-    if result:
-        columns = [col[0] for col in cursor.description]
-        data = [dict(zip(columns, row)) for row in result]  # แปลงเป็น List ของ Dictionary
-        json_data = json.dumps(data,default=str)  # Convert the list of dictionaries to a JSON string
-        print(json_data)
-        return json_data
-    else:
-        return jsonify({"message": "No auto orders found for the username."})
-
-
 @app.route('/checkMarketStatus', methods=['POST'])
 def checkMarketStatus():
     # กำหนดคีย์และตัวระบุสำหรับเข้าถึง Alpaca API
