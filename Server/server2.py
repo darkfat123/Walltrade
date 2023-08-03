@@ -295,6 +295,9 @@ def thStockList():
         stock_data = {'Symbol': res['symbol'], 'Last': res['last']}
         stocks_list.append(stock_data)
 
+    print(stocks_list)
+    return jsonify(stocks_list)
+
 
 @app.route('/api/user', methods=['POST'])
 def create_user():

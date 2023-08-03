@@ -2,13 +2,12 @@ import 'package:Walltrade/pages/TradePageOptions.dart';
 import 'package:Walltrade/pages/login_page.dart';
 import 'package:Walltrade/pages/HistoryAutoTrade.dart';
 import 'package:Walltrade/pages/thStockView.dart';
-import 'package:Walltrade/pages/usStockView.dart';
 import 'package:Walltrade/primary.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'pages/HomePage.dart';
 import 'pages/PredictPage.dart';
-import 'pages/TradePageBuy.dart';
+
 import 'package:Walltrade/pages/SearchPage.dart';
 import 'pages/WalletPage.dart';
 

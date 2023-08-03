@@ -32,6 +32,7 @@ class _AssetTHListScreenState extends State<AssetTHListScreen> {
         final List<dynamic> jsonBody = json.decode(response.body);
         setState(() {
           assetList = List<Map<String, dynamic>>.from(jsonBody);
+          filteredList = assetList;
           isLoading = false;
         });
       } else {
@@ -93,6 +94,7 @@ class _AssetTHListScreenState extends State<AssetTHListScreen> {
   @override
   void initState() {
     super.initState();
+    filteredList = assetList;
     fetchAssetList();
   }
 
@@ -106,18 +108,19 @@ class _AssetTHListScreenState extends State<AssetTHListScreen> {
             padding: EdgeInsets.only(top: 20, bottom: 20),
             child: TextField(
               controller: _searchController,
+              onChanged: (value) {
+                // Call the filterAssets method on text change
+                filterAssets(value);
+              },
               decoration: InputDecoration(
-                fillColor: Colors.white, // Change the color here
+                fillColor: Colors.white,
                 filled: true,
-                labelText: 'พิมพ์ชื่อหุ้นหรืออักษรย่อ...',
+                labelText: 'พิมพ์อักษรย่อของหุ้น...',
                 prefixIcon: Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              onChanged: (value) {
-                filterAssets(value);
-              },
             ),
           ),
           Expanded(
@@ -129,9 +132,10 @@ class _AssetTHListScreenState extends State<AssetTHListScreen> {
                     itemCount: filteredList.length,
                     itemBuilder: (context, index) {
                       final asset = filteredList[index];
+                      final symbol = asset['Symbol'];
                       return ListTile(
                         title: Text(
-                          asset['Symbol'],
+                          symbol,
                           style: TextStyle(fontWeight: FontWeight.w500),
                         ),
                         onTap: () {
@@ -139,7 +143,7 @@ class _AssetTHListScreenState extends State<AssetTHListScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  AssetTHDetailsScreen(symbol: asset['Symbol']),
+                                  AssetTHDetailsScreen(symbol: symbol),
                             ),
                           );
                         },
@@ -149,7 +153,7 @@ class _AssetTHListScreenState extends State<AssetTHListScreen> {
                             size: 18,
                           ),
                           onPressed: () {
-                            updateWatchlist(asset['Symbol'].toString());
+                            updateWatchlist(symbol);
                           },
                         ),
                       );

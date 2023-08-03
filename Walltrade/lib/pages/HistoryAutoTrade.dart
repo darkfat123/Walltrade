@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-
 import '../variables/serverURL.dart';
 
 class NotifyActivity extends StatefulWidget {
@@ -66,7 +65,6 @@ class _NotifyActivity extends State<NotifyActivity> {
               itemCount: autoOrders.length,
               itemBuilder: (context, index) {
                 final order = autoOrders[index];
-
                 return Container(
                   padding: EdgeInsets.all(16),
                   margin: EdgeInsets.all(14),
@@ -203,7 +201,139 @@ class _NotifyActivity extends State<NotifyActivity> {
               },
             ),
             Center(
-              child: Text("Activity Page"),
+              child: ListView.builder(
+                scrollDirection: Axis.vertical,
+                itemCount: autoOrders.length,
+                itemBuilder: (context, index) {
+                  final order = autoOrders[index];
+
+                  return Container(
+                    padding: EdgeInsets.all(16),
+                    margin: EdgeInsets.all(14),
+                    height: 150,
+                    decoration: BoxDecoration(
+                      color: Color(0xFFFFFFFF),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color.fromARGB(128, 0, 0, 0),
+                          offset: Offset(0, 2),
+                          blurRadius: 4,
+                          spreadRadius: 0,
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              order['symbol'],
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black,
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.circle,
+                                  size: 14,
+                                  color: Colors.green,
+                                ),
+                                SizedBox(
+                                  width: 8,
+                                ),
+                                Text(
+                                  "สำเร็จแล้ว",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 8,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              "เทคนิคชี้วัดที่ใช้: ",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black,
+                              ),
+                            ),
+                            Chip(
+                              backgroundColor: Colors.blue.shade300,
+                              label: Text(
+                                order['techniques'],
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              "จำนวน: ",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black,
+                              ),
+                            ),
+                            Text(
+                              "${order['quantity'].toString()} หน่วย",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              "buy or sell: ",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black,
+                              ),
+                            ),
+                            Text(
+                              order['side'],
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        // Add additional information or widgets related to the stock here
+                      ],
+                    ),
+                  );
+                },
+              ),
             )
           ],
         ),
