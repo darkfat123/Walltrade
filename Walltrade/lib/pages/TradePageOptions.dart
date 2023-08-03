@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import '../model/knowledge.dart';
 import '../model/news.dart';
 import '../variables/serverURL.dart';
+
 import 'KnowledgeDetailPage.dart';
 import 'SettingsPage.dart';
 import 'HistoryAutoTrade.dart';
@@ -372,7 +373,6 @@ class _TradePageOptionsState extends State<TradePageOptions>
                                     backgroundColor: order['side'] == 'buy'
                                         ? Colors.green
                                         : Colors.red,
-                                    
                                     label: Text(
                                       order['side'] == 'buy'
                                           ? '  ซื้อ  '
