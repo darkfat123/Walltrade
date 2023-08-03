@@ -214,16 +214,71 @@ def get_asset_list():
     # Return the asset list as JSON.
     return jsonify(assets=asset_list)
 
-@app.route('/asset_list2', methods=['GET'])
-def asset_list2():
+@app.route('/thStockList', methods=['GET'])
+def thStockList():
     set_stocks = [
-        "ADVANC", "AOT", "BBL", "BCP", "BDMS", "BEM", "BGRIM", "BH", "BJC", "BPP",
-        "BTS", "CBG", "CENTEL", "CK", "CPALL", "CPF", "CPN", "CRC", "DELTA", "EA",
-        "EGCO", "GGC", "GPSC", "GULF", "HANA", "IRPC", "IVL", "KBANK", "KCE", "KKP",
-        "KTB", "LH", "M", "MAJOR", "OR", "PTT", "PTTEP", "PTTGC", "S", "SAMART",
-        "SAWAD", "SCB", "SCC", "SCP", "SCGP", "SIRI", "SPALI", "SPRC", "STA", "SUPER",
-        "TCAP", "THANI", "TISCO", "TKN", "TOA", "TOP", "TPIPP", "TRUE", "TTW", "TU", "WHA"
-    ]
+    "ADVANC",
+    "AOT",
+    "BBL",
+    "BCP",
+    "BDMS",
+    "BEM",
+    "BGRIM",
+    "BH",
+    "BJC",
+    "BPP",
+    "BTS",
+    "CBG",
+    "CENTEL",
+    "CK",
+    "CPALL",
+    "CPF",
+    "CPN",
+    "CRC",
+    "DELTA",
+    "EA",
+    "EGCO",
+    "GGC",
+    "GPSC",
+    "GULF",
+    "HANA",
+    "IRPC",
+    "IVL",
+    "KBANK",
+    "KCE",
+    "KKP",
+    "KTB",
+    "LH",
+    "M",
+    "MAJOR",
+    "OR",
+    "PTT",
+    "PTTEP",
+    "PTTGC",
+    "S",
+    "SAMART",
+    "SAWAD",
+    "SCB",
+    "SCC",
+    "SCP",
+    "SCGP",
+    "SIRI",
+    "SPALI",
+    "SPRC",
+    "STA",
+    "SUPER",
+    "TCAP",
+    "THANI",
+    "TISCO",
+    "TKN",
+    "TOA",
+    "TOP",
+    "TPIPP",
+    "TRUE",
+    "TTW",
+    "TU",
+    "WHA"
+]
 
     investor = Investor(
         app_id="uOz2y7jYG7rWtD2w",
@@ -231,14 +286,14 @@ def asset_list2():
         broker_id="SANDBOX",
         app_code="SANDBOX",
         is_auto_queue=False)
+          
+    mkt_data = investor.MarketData()
+    stocks_list = []
 
-    market_data = investor.MarketData()
-    stock_list = []
     for symbol in set_stocks:
-        res = market_data.get_quote_symbol(symbol)
-        stock_list.append(res['symbol'])
-
-    return jsonify(stock_list)
+        res = mkt_data.get_quote_symbol(symbol)
+        stock_data = {'Symbol': res['symbol'], 'Last': res['last']}
+        stocks_list.append(stock_data)
 
 
 @app.route('/api/user', methods=['POST'])
@@ -421,7 +476,29 @@ def get_balance_change():
     # Return the result as JSON
     return jsonify({'balance_change': balance_change, 'percentage_change': percentage_change})
 
+@app.route('/getAutoOrders', methods=['POST'])
+def getAutoOrders():
+    username = request.json.get('username')
+    conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
+    cursor = conn.cursor()
+    query = f"SELECT * FROM auto_order WHERE username = '{username}'"
+    cursor.execute(query)
+    result = cursor.fetchall()
+    conn.close()
 
+    if result:
+        columns = [col[0] for col in cursor.description]
+        data = [dict(zip(columns, row)) for row in result]
+
+        # แก้ไขข้อมูลคอลัมน์ Date ใน data เป็นสตริงในรูปแบบที่กำหนด
+        for entry in data:
+            entry['Date'] = entry['Date'].strftime('%Y-%m-%d %H:%M:%S')
+
+        json_data = json.dumps(data)  # แปลงเป็น JSON string
+        print(json_data)
+        return json_data
+    else:
+        return jsonify({"message": "No auto orders found for the username."})
 
 
 @app.route('/place_order', methods=['POST'])

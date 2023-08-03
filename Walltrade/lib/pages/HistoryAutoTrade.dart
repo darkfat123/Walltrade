@@ -122,6 +122,7 @@ class _NotifyActivity extends State<NotifyActivity> {
                                 child: Icon(
                                   Icons.cancel,
                                   color: Colors.red,
+                                  size: 18,
                                 ),
                               )
                             ],
