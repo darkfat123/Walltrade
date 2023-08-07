@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import '../variables/serverURL.dart';
+import 'HistoryAutoTrade.dart';
+import 'SettingsPage.dart';
 
 class PredictPage extends StatefulWidget {
   @override
@@ -49,26 +51,159 @@ class _PredictPageState extends State<PredictPage> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Color(0xFFECF8F9),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
+        body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              TextField(
-                controller: _textEditingController,
-                decoration: InputDecoration(
-                  labelText: 'Enter stock name',
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Stack(
+                  children: [
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            // Handle the press event here
+                          },
+                          child: CircleAvatar(
+                            radius: 25,
+                            backgroundImage:
+                                AssetImage('assets/img/profile.png'),
+                            backgroundColor: Colors.transparent,
+                            child: Container(
+                              height: 80,
+                              width: 80,
+                              decoration: const BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Color(0xFFE55807),
+                                    Color(0xFF7E1717),
+                                  ],
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                ),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Padding(
+                                //this padding will be your border size
+                                padding: const EdgeInsets.all(3.5),
+                                child: Container(
+                                  decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const CircleAvatar(
+                                    backgroundColor: Colors.white,
+                                    foregroundImage:
+                                        AssetImage("assets/img/profile.png"),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Text(
+                          "ทำนายราคาหุ้น",
+                          style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: IconButton(
+                        iconSize: 30,
+                        icon: Icon(Icons.notifications),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    NotifyActivity(username: 'foczz123')),
+                          );
+                          // Handle settings button press here
+                        },
+                      ),
+                    ),
+                    Positioned(
+                      top: 0,
+                      right: 50,
+                      child: IconButton(
+                        iconSize: 30,
+                        icon: Icon(Icons.settings),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    Settings(username: 'foczz123')),
+                          );
+                          // Handle settings button press here
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(height: 16.0),
-              ElevatedButton(
-                onPressed: _predictStock,
-                child: Text('Predict'),
-              ),
-              SizedBox(height: 16.0),
-              Text(
-                _prediction,
-                style: TextStyle(fontSize: 16.0),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Container(
+                        margin:
+                            EdgeInsets.only(left: 16, bottom: 16, right: 16),
+                        padding: EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Color(0xFF2A3547),
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: Offset(
+                                  0, 3), // changes the position of the shadow
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          "ข้อควรระวัง: การลงทุนในหุ้นเป็นเรื่องที่มีความเสี่ยงสูง การใช้โมเดลทำนายอาจไม่แม่นยำเสมอไป โปรดพิจารณาเพิ่มเติม",
+                          style: TextStyle(
+                              color: Colors.yellow.shade800, fontSize: 14),
+                        )),
+                    TextField(
+                      controller: _textEditingController,
+                      decoration: InputDecoration(
+                        labelText: 'พิมพ์อักษรย่อของหุ้น',
+                      ),
+                    ),
+                    SizedBox(
+                      height: 16,
+                    ),
+                    Container(
+                      height: 40,
+                      child: ElevatedButton(
+                        onPressed: _predictStock,
+                        child: Text(
+                          'ทำนาย',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600, fontSize: 16),
+                        ),
+                      ),
+                    ),
+                    Text(
+                      _prediction,
+                      style: TextStyle(fontSize: 16.0),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
