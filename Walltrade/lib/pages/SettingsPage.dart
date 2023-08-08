@@ -66,22 +66,17 @@ class _SettingsState extends State<Settings> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xFFECF8F9),
-      appBar: AppBar(
-        backgroundColor: Color(0xFF212436),
-        title: Text('การตั้งค่า'),
-      ),
-      body: SingleChildScrollView(
-        child: Container(
-          height: 700,
-          margin: EdgeInsets.all(16),
-          padding: EdgeInsets.all(10),
-          decoration: BoxDecoration(color: Colors.white,borderRadius: BorderRadius.circular(20),),
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: Color(0xFFECF8F9),
+        appBar: AppBar(
+          backgroundColor: Color(0xFF212436),
+          title: Text('การตั้งค่า'),
+        ),
+        body: SingleChildScrollView(
           child: Column(
             children: [
               Container(
-                height: 300,
                 padding: EdgeInsets.all(20),
                 margin: EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -92,7 +87,8 @@ class _SettingsState extends State<Settings> {
                       color: Colors.grey.withOpacity(0.5),
                       spreadRadius: 2,
                       blurRadius: 5,
-                      offset: Offset(0, 3), // changes the position of the shadow
+                      offset:
+                          Offset(0, 3), // changes the position of the shadow
                     ),
                   ],
                 ),
@@ -109,29 +105,29 @@ class _SettingsState extends State<Settings> {
                                 fontWeight: FontWeight.w600, fontSize: 18),
                           ),
                           CircleAvatar(
-                              radius: 25,
-                              backgroundColor: Colors.transparent,
-                              child: Container(
-                                height: 80,
-                                width: 80,
-                                decoration: const BoxDecoration(                         
-                                    shape: BoxShape.circle),
-                                child: Padding(
-                                  //this padding will be you border size
-                                  padding: const EdgeInsets.all(3.5),
-                                  child: Container(
-                                    decoration: const BoxDecoration(
-                                        color: Colors.white,
-                                        shape: BoxShape.circle),
-                                    child: const CircleAvatar(
-                                      backgroundColor: Colors.white,
-                                      foregroundImage:
-                                          AssetImage("assets/img/usflag.png"),
-                                    ),
+                            radius: 25,
+                            backgroundColor: Colors.transparent,
+                            child: Container(
+                              height: 80,
+                              width: 80,
+                              decoration:
+                                  const BoxDecoration(shape: BoxShape.circle),
+                              child: Padding(
+                                //this padding will be you border size
+                                padding: const EdgeInsets.all(3.5),
+                                child: Container(
+                                  decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle),
+                                  child: const CircleAvatar(
+                                    backgroundColor: Colors.white,
+                                    foregroundImage:
+                                        AssetImage("assets/img/usflag.png"),
                                   ),
                                 ),
                               ),
                             ),
+                          ),
                         ],
                       ),
                     ),
@@ -141,8 +137,8 @@ class _SettingsState extends State<Settings> {
                     Container(
                       decoration: BoxDecoration(
                           color: Colors.white, // สีพื้นหลัง
-                          borderRadius:
-                              BorderRadius.circular(20.0), // กำหนดความโค้งของมุม
+                          borderRadius: BorderRadius.circular(
+                              20.0), // กำหนดความโค้งของมุม
                           border: Border.all()),
                       child: TextField(
                         controller: _apiKeyController,
@@ -161,8 +157,8 @@ class _SettingsState extends State<Settings> {
                     Container(
                       decoration: BoxDecoration(
                           color: Colors.white, // สีพื้นหลัง
-                          borderRadius:
-                              BorderRadius.circular(20.0), // กำหนดความโค้งของมุม
+                          borderRadius: BorderRadius.circular(
+                              20.0), // กำหนดความโค้งของมุม
                           border: Border.all()),
                       child: TextField(
                         controller: _secretKeyController,
@@ -197,7 +193,8 @@ class _SettingsState extends State<Settings> {
                       color: Colors.grey.withOpacity(0.5),
                       spreadRadius: 2,
                       blurRadius: 5,
-                      offset: Offset(0, 3), // changes the position of the shadow
+                      offset:
+                          Offset(0, 3), // changes the position of the shadow
                     ),
                   ],
                 ),
@@ -214,30 +211,29 @@ class _SettingsState extends State<Settings> {
                                 fontWeight: FontWeight.w600, fontSize: 18),
                           ),
                           CircleAvatar(
-                              radius: 25,
-                              backgroundColor: Colors.transparent,
-                              child: Container(
-                                height: 80,
-                                width: 80,
-                                decoration: const BoxDecoration(
-                                    
-                                    shape: BoxShape.circle),
-                                child: Padding(
-                                  //this padding will be you border size
-                                  padding: const EdgeInsets.all(3.5),
-                                  child: Container(
-                                    decoration: const BoxDecoration(
-                                        color: Colors.white,
-                                        shape: BoxShape.circle),
-                                    child: const CircleAvatar(
-                                      backgroundColor: Colors.white,
-                                      foregroundImage:
-                                          AssetImage("assets/img/thaiflag.png"),
-                                    ),
+                            radius: 25,
+                            backgroundColor: Colors.transparent,
+                            child: Container(
+                              height: 80,
+                              width: 80,
+                              decoration:
+                                  const BoxDecoration(shape: BoxShape.circle),
+                              child: Padding(
+                                //this padding will be you border size
+                                padding: const EdgeInsets.all(3.5),
+                                child: Container(
+                                  decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle),
+                                  child: const CircleAvatar(
+                                    backgroundColor: Colors.white,
+                                    foregroundImage:
+                                        AssetImage("assets/img/thaiflag.png"),
                                   ),
                                 ),
                               ),
                             ),
+                          ),
                         ],
                       ),
                     ),
@@ -247,8 +243,8 @@ class _SettingsState extends State<Settings> {
                     Container(
                       decoration: BoxDecoration(
                           color: Colors.white, // สีพื้นหลัง
-                          borderRadius:
-                              BorderRadius.circular(20.0), // กำหนดความโค้งของมุม
+                          borderRadius: BorderRadius.circular(
+                              20.0), // กำหนดความโค้งของมุม
                           border: Border.all()),
                       child: TextField(
                         controller: _apiKeyController,
@@ -267,8 +263,8 @@ class _SettingsState extends State<Settings> {
                     Container(
                       decoration: BoxDecoration(
                           color: Colors.white, // สีพื้นหลัง
-                          borderRadius:
-                              BorderRadius.circular(20.0), // กำหนดความโค้งของมุม
+                          borderRadius: BorderRadius.circular(
+                              20.0), // กำหนดความโค้งของมุม
                           border: Border.all()),
                       child: TextField(
                         controller: _secretKeyController,

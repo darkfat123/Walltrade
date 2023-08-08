@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:Walltrade/pages/MoreTechinalOrder.dart';
 import 'package:Walltrade/pages/TradePageSell.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:http/http.dart' as http;
@@ -401,7 +402,7 @@ class _TradePageOptionsState extends State<TradePageOptions>
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => NotifyActivity(
+                        builder: (context) => MoreTechnicalOrder(
                               username: username,
                             )),
                   );

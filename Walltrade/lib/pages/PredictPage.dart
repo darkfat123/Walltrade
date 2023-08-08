@@ -1,7 +1,9 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../model/technicalAnaylyze.dart';
 import '../variables/serverURL.dart';
 import 'HistoryAutoTrade.dart';
 import 'SettingsPage.dart';
@@ -204,6 +206,74 @@ class _PredictPageState extends State<PredictPage> {
                     ),
                   ],
                 ),
+              ),
+              FutureBuilder<List<TechnicalAnaylyze>>(
+                future: fetchTechnicalAnaylyze(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    final newsList =
+                        snapshot.data!; // Extract the fetched news list
+                    return CarouselSlider(
+                      options: CarouselOptions(
+                        autoPlay: true,
+                        autoPlayInterval: Duration(seconds: 5),
+                        height: 180.0,
+                      ),
+                      items: newsList.map((news) {
+                        return Builder(
+                          builder: (BuildContext context) {
+                            return Container(
+                              margin: EdgeInsets.symmetric(horizontal: 5),
+                              child: Stack(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(20),
+                                    child: Image(
+                                      fit: BoxFit.cover,
+                                      image: NetworkImage(news.image),
+                                      width: MediaQuery.of(context).size.width,
+                                    ),
+                                  ),
+                                  Container(
+                                    width: MediaQuery.of(context).size.width,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          const Color(0x00000000),
+                                          const Color(0xCC000000),
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                  ),
+                                  Align(
+                                    alignment: Alignment.bottomCenter,
+                                    child: Container(
+                                      padding: EdgeInsets.all(20),
+                                      child: Text(
+                                        news.title,
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      }).toList(),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text('Failed to load news');
+                  } else {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                },
               ),
             ],
           ),
