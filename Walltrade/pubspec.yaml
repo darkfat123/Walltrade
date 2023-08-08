@@ -45,6 +45,7 @@ dependencies:
   intl: ^0.17.0
   flutter_octicons: ^0.3.0
   syncfusion_flutter_treemap: ^22.1.39
+  fl_chart: ^0.63.0
   
 
 dev_dependencies:

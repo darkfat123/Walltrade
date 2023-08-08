@@ -1,8 +1,9 @@
+import 'package:Walltrade/model/pricePoints.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+import 'package:fl_chart/fl_chart.dart';
 import '../model/technicalAnaylyze.dart';
 import '../variables/serverURL.dart';
 import 'HistoryAutoTrade.dart';
@@ -16,6 +17,8 @@ class PredictPage extends StatefulWidget {
 class _PredictPageState extends State<PredictPage> {
   TextEditingController _textEditingController = TextEditingController();
   String _prediction = '';
+  String selectedInterval = 'nextDay';
+  late final List<PricePoint> points;
 
   Future<void> _predictStock() async {
     String stockName = _textEditingController.text;
@@ -154,7 +157,7 @@ class _PredictPageState extends State<PredictPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: const EdgeInsets.only(left:20.0,bottom:20.0,right:20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -180,32 +183,155 @@ class _PredictPageState extends State<PredictPage> {
                           style: TextStyle(
                               color: Colors.yellow.shade800, fontSize: 14),
                         )),
-                    TextField(
-                      controller: _textEditingController,
-                      decoration: InputDecoration(
-                        labelText: 'พิมพ์อักษรย่อของหุ้น',
-                      ),
-                    ),
-                    SizedBox(
-                      height: 16,
-                    ),
                     Container(
-                      height: 40,
-                      child: ElevatedButton(
-                        onPressed: _predictStock,
-                        child: Text(
-                          'ทำนาย',
-                          style: TextStyle(
-                              fontWeight: FontWeight.w600, fontSize: 16),
-                        ),
+                      padding: EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: Offset(
+                                0, 3), // changes the position of the shadow
+                          ),
+                        ],
                       ),
-                    ),
-                    Text(
-                      _prediction,
-                      style: TextStyle(fontSize: 16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          TextField(
+                            controller: _textEditingController,
+                            decoration: InputDecoration(
+                              labelText: 'พิมพ์อักษรย่อของหุ้น',
+                            ),
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          TimeframeDropdown(
+                            selectedInterval: selectedInterval,
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                selectedInterval = newValue!;
+                              });
+                            },
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          Container(
+                            height: 40,
+                            child: ElevatedButton(
+                              onPressed: _predictStock,
+                              child: Text(
+                                'ทำนาย',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w600, fontSize: 16),
+                              ),
+                            ),
+                          ),
+                          Text(
+                            _prediction,
+                            style: TextStyle(fontSize: 16.0),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.stacked_line_chart_rounded,
+                                    color: Colors.blue,
+                                  ),
+                                  SizedBox(
+                                    width: 2,
+                                  ),
+                                  Text("ราคาจริง")
+                                ],
+                              ),
+                              SizedBox(
+                                width: 6,
+                              ),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.stacked_line_chart_rounded,
+                                    color: Colors.red,
+                                  ),
+                                  SizedBox(
+                                    width: 2,
+                                  ),
+                                  Text("ราคาทำนาย")
+                                ],
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          AspectRatio(
+                            aspectRatio: 2,
+                            child: LineChart(
+                              LineChartData(
+                                lineBarsData: [
+                                  LineChartBarData(
+                                    spots: pricePoints.map((point) {
+                                      return FlSpot(point.x, point.y);
+                                    }).toList(),
+                                  ),
+                                  LineChartBarData(
+                                    spots: [
+                                      FlSpot(0, 3),
+                                      FlSpot(1, 5),
+                                      FlSpot(2, 5),
+                                      FlSpot(3, 10),
+                                      FlSpot(4, 2),
+                                      FlSpot(5, 5),
+                                      FlSpot(6, 4),
+                                      FlSpot(7, 8),
+                                      // ... ข้อมูลเส้นกราฟแสดงข้อมูลแบบเส้นที่สอง
+                                    ],
+                                    color: Colors
+                                        .red, // สีของเส้นกราฟแสดงข้อมูลแบบเส้นที่สอง
+                                    isCurved:
+                                        true, // แสดงเส้นกราฟแบบโค้งหรือไม่
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 20,),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.summarize,
+                                color: Colors.green,
+                              ),
+                              SizedBox(
+                                width: 4,
+                              ),
+                              Text("ราคาในวันถัดไปของ PLTR คือ 8 USD",style: TextStyle(fontSize: 16,fontWeight: FontWeight.w400),)
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
+              ),
+              Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 20, bottom: 10),
+                    child: Text(
+                      "วิเคราะห์กราฟ",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                    ),
+                  )
+                ],
               ),
               FutureBuilder<List<TechnicalAnaylyze>>(
                 future: fetchTechnicalAnaylyze(),
@@ -279,6 +405,73 @@ class _PredictPageState extends State<PredictPage> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class TimeframeDropdown extends StatelessWidget {
+  final String selectedInterval;
+  final Function(String?) onChanged;
+
+  const TimeframeDropdown({
+    required this.selectedInterval,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text('โปรดเลือกระยะเวลาที่ต้องการทำนาย'),
+        DropdownButton<String>(
+          value: selectedInterval,
+          onChanged: onChanged,
+          items: [
+            DropdownMenuItem(
+              value: 'nextDay',
+              child: Text('วันถัดไป'),
+            ),
+            DropdownMenuItem(
+              value: 'nextWeek',
+              child: Text('สัปดาห์ถัดไป'),
+            ),
+            DropdownMenuItem(
+              value: 'nextMonth',
+              child: Text('เดือนถัดไป'),
+            ),
+            DropdownMenuItem(
+              value: 'nextYear',
+              child: Text('ปีถัดไป'),
+            ),
+          ],
+        ),
+        IconButton(
+          icon: Icon(
+            Icons.info,
+            size: 24,
+          ),
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text('More Info'),
+                  content: Text('Additional information about timeframes.'),
+                  actions: [
+                    TextButton(
+                      child: Text('OK'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        ),
+      ],
     );
   }
 }
