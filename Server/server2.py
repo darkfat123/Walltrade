@@ -295,7 +295,6 @@ def thStockList():
         stock_data = {'Symbol': res['symbol'], 'Last': res['last']}
         stocks_list.append(stock_data)
 
-    print(stocks_list)
     return jsonify(stocks_list)
 
 
@@ -994,20 +993,20 @@ def news():
             # Join the descriptions together into a single string
             description_combined = '\n'.join(description_list)
 
-            large_images = []
             for image in images:
                 if image.get('size') == 'large':
-                    large_images.append(image.get('url'))
-            
+                    large_images = image.get('url')
+
+            symbol_string = ', '.join(symbol)
+           
             news_entry = {
                 "Author": source,
                 "Headline": headline,
-                "Symbols": symbol,
+                "Symbols": symbol_string,
                 "URL": news_url,
-                "Large Image URLs": large_images,
+                "Image": large_images,
                 "Description": description_combined
             }
-            
             output_data.append(news_entry)
         
         return jsonify(output_data)
