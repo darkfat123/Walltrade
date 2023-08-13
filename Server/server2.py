@@ -19,7 +19,7 @@ import websockets
 import asyncio
 from tradingview_ta import TA_Handler, Interval, Exchange
 from settrade_v2 import Investor
-
+from bs4 import BeautifulSoup
 
 
 app = Flask(__name__)
@@ -962,6 +962,62 @@ def checkMarketStatus():
     # Check if the market is open now.
     clock = api.get_clock()
     return jsonify('{}'.format('open' if clock.is_open else 'closed'))
+
+@app.route('/news', methods=['GET'])
+def news():
+    url = 'https://data.alpaca.markets/v1beta1/news'
+    headers = {
+        'Apca-Api-Key-Id': 'PK8NXGV44WWTJA356CDG',
+        'Apca-Api-Secret-Key': 'nR9ySdpMSTKbnflGrJaBueH3EVCJ9fRV9gxOhnod'
+    }
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        news_data = response.json()
+        news_list = news_data.get('news', [])
+        
+        output_data = []
+        
+        for news_item in news_list:
+            source = news_item.get('author')
+            headline = news_item.get('headline')
+            symbol = news_item.get('symbols')
+            news_url = news_item.get('url')
+            news_response = requests.get(news_url)
+            soup = BeautifulSoup(news_response.content, 'html.parser')
+            paragraphs = soup.find_all("p", class_="core-block")
+            images = news_item.get('images', [])
+            description_list = []
+            for paragraph in paragraphs:
+                description_list.append(paragraph.get_text(strip=""))
+            # Join the descriptions together into a single string
+            description_combined = '\n'.join(description_list)
+
+            large_images = []
+            for image in images:
+                if image.get('size') == 'large':
+                    large_images.append(image.get('url'))
+            
+            news_entry = {
+                "Author": source,
+                "Headline": headline,
+                "Symbols": symbol,
+                "URL": news_url,
+                "Large Image URLs": large_images,
+                "Description": description_combined
+            }
+            
+            output_data.append(news_entry)
+        
+        # Convert the output data to JSON format and print it
+        output_json = json.dumps(output_data, indent=4)
+        print(output_json)
+        return jsonify(output_json)
+        
+    else:
+        return jsonify({"message": "Failed to fetch news. Status code:", "status_code": response.status_code})
+
     
 if __name__ == '__main__':
     app.run(host="0.0.0.0")

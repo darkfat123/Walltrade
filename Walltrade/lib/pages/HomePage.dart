@@ -41,7 +41,7 @@ class _HomePageState extends State<HomePage> {
 
   _HomePageState({required this.username});
   int index = 1;
-
+  
   Future<void> getBalance() async {
     var url = Uri.parse('${Constants.serverUrl}/getBalance');
     var headers = {'Content-Type': 'application/x-www-form-urlencoded'};

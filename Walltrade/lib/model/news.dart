@@ -29,7 +29,7 @@ class StaticValues {
 
       for (var article in articles.reversed) {
         final title = article['title'];
-        final description = article['description'] ?? ''; // Provide default value when description is null
+        final description = article['description'] ?? ''; 
         final image = article['urlToImage'];
         
         if (image != null && image.startsWith("https")) {
