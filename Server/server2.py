@@ -1010,10 +1010,7 @@ def news():
             
             output_data.append(news_entry)
         
-        # Convert the output data to JSON format and print it
-        output_json = json.dumps(output_data, indent=4)
-        print(output_json)
-        return jsonify(output_json)
+        return jsonify(output_data)
         
     else:
         return jsonify({"message": "Failed to fetch news. Status code:", "status_code": response.status_code})
