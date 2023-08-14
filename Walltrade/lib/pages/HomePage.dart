@@ -1,8 +1,6 @@
 import 'dart:convert';
-import 'dart:html';
 import 'package:Walltrade/pages/FAQpage.dart';
 import 'package:Walltrade/pages/HistoryAutoTrade.dart';
-import 'package:flutter_octicons/flutter_octicons.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:Walltrade/pages/SettingsPage.dart';
@@ -595,6 +593,9 @@ class _HomePageState extends State<HomePage> {
                             height: 10,
                           ),
                           Container(
+                            decoration: BoxDecoration(
+                              color: Color(0xFFECF8F9),
+                            ),
                             height: 110,
                             child: ans == '{error: Empty}'
                                 ? Center(
@@ -611,8 +612,6 @@ class _HomePageState extends State<HomePage> {
                                         child: CircularProgressIndicator(),
                                       )
                                     : Container(
-                                        decoration: BoxDecoration(
-                                            color: Color(0xFFECF8F9)),
                                         child: ListView.builder(
                                           scrollDirection: Axis.horizontal,
                                           itemCount: stockSymbols.length,
@@ -746,7 +745,7 @@ class _HomePageState extends State<HomePage> {
                                   options: CarouselOptions(
                                     autoPlay: true,
                                     autoPlayInterval: Duration(seconds: 5),
-                                    height: 180.0,
+                                    height: 170.0,
                                   ),
                                   items: newsList.map((news) {
                                     return Builder(
@@ -801,12 +800,20 @@ class _HomePageState extends State<HomePage> {
                                               ),
                                               news.symbol != ''
                                                   ? Container(
-                                                      margin: EdgeInsets.all(10.0),
+                                                      margin:
+                                                          EdgeInsets.all(10.0),
                                                       padding:
                                                           EdgeInsets.all(6.0),
                                                       decoration: BoxDecoration(
-                                                        color:
-                                                            Color(0xFF212436),
+                                                        gradient: LinearGradient(
+                                                            colors: [
+                                                              Color(0xFFFF5E00),
+                                                              Color(0xFFFF0000),
+                                                            ],
+                                                            begin: Alignment
+                                                                .topCenter,
+                                                            end: Alignment
+                                                                .bottomCenter),
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(20.0),
@@ -815,7 +822,7 @@ class _HomePageState extends State<HomePage> {
                                                         news.symbol,
                                                         style: TextStyle(
                                                             color: Colors.white,
-                                                            fontSize: 12),
+                                                            fontSize: 10),
                                                       ),
                                                     )
                                                   : Container()

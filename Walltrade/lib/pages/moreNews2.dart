@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 
 class News2 {
   String title;
@@ -8,6 +9,7 @@ class News2 {
   String description;
   String source_name;
   String symbol;
+  String url;
 
   News2({
     required this.title,
@@ -15,6 +17,7 @@ class News2 {
     required this.description,
     required this.source_name,
     required this.symbol,
+    required this.url,
   });
 }
 
@@ -24,7 +27,6 @@ class NewsListPage extends StatefulWidget {
 }
 
 class _NewsListPageState extends State<NewsListPage> {
-
   List<Map<String, dynamic>> newsData = [];
   @override
   void initState() {
@@ -55,6 +57,7 @@ class _NewsListPageState extends State<NewsListPage> {
       description: newsItemData['Description'],
       source_name: newsItemData['Author'],
       symbol: newsItemData['Symbols'],
+      url: newsItemData['URL'],
     );
 
     Navigator.push(
@@ -204,7 +207,6 @@ class NewsDetailPage extends StatelessWidget {
               ),
             ],
           ),
-          
           child: Column(
             children: [
               ClipRRect(
@@ -253,6 +255,65 @@ class NewsDetailPage extends StatelessWidget {
               Text(
                 newsItem.description,
                 style: TextStyle(fontSize: 14),
+              ),
+              SizedBox(height: 16.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(10.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10.0),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 5,
+                          offset: Offset(
+                              0, 3), // changes the position of the shadow
+                        ),
+                      ],
+                    ),
+                    child: GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text("เปิด Browser"),
+                              content: Text("คุณต้องการไปยังเว็บไซต์ของข่าวสาร?"),
+                              actions: [
+                                TextButton(
+                                  child: Text("Cancel"),
+                                  onPressed: () {
+                                    Navigator.of(context)
+                                        .pop(); // Close the dialog
+                                  },
+                                ),
+                                TextButton(
+                                  child: Text("Open"),
+                                  onPressed: () {
+                                    launchUrl(Uri.parse(newsItem.url),
+                                        mode: LaunchMode.externalApplication);
+                                    Navigator.of(context)
+                                        .pop(); // Close the dialog
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      child: Text(
+                        "Read More..",
+                        style: TextStyle(
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

@@ -5,11 +5,13 @@ class News {
   String title;
   String image;
   String symbol;
+  String url;
 
   News({
     required this.title,
     required this.image,
     required this.symbol,
+    required this.url,
   });
 }
 
@@ -27,11 +29,13 @@ class StaticValues {
         final title = article['Headline'];
         final image = article['Image'];
         final symbol = article['Symbols'];
+        final url = article['URL'];
 
         final newsItem = News(
           title: title,
           symbol: symbol,
           image: image,
+          url:url
         );
         news.add(newsItem);
       }
