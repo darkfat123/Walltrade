@@ -7,12 +7,14 @@ class News2 {
   String image;
   String description;
   String source_name;
+  String symbol;
 
   News2({
     required this.title,
     required this.image,
     required this.description,
     required this.source_name,
+    required this.symbol,
   });
 }
 
@@ -22,7 +24,7 @@ class NewsListPage extends StatefulWidget {
 }
 
 class _NewsListPageState extends State<NewsListPage> {
-  List<News2> news = [];
+
   List<Map<String, dynamic>> newsData = [];
   @override
   void initState() {
@@ -43,45 +45,18 @@ class _NewsListPageState extends State<NewsListPage> {
           newsData = List<Map<String, dynamic>>.from(decodedData);
         });
       }
-      print(newsData);
     }
   }
 
-  Future<void> fetchNews() async {
-    final response = await http.get(
-      Uri.parse(
-        'https://newsapi.org/v2/top-headlines?country=us&category=business&apiKey=2a062b05d3424b8ea2bfc6d1eb328133',
-      ),
+  void navigateToDetailPage(Map<String, dynamic> newsItemData) {
+    final newsItem = News2(
+      title: newsItemData['Headline'],
+      image: newsItemData['Image'],
+      description: newsItemData['Description'],
+      source_name: newsItemData['Author'],
+      symbol: newsItemData['Symbols'],
     );
 
-    if (response.statusCode == 200) {
-      final parsedResponse = jsonDecode(response.body);
-      final articles = parsedResponse['articles'];
-
-      for (var article in articles.reversed) {
-        final title = article['title'];
-        final description = article['description'] ?? '';
-        final image = article['urlToImage'];
-        final source_name = article['source']['name'];
-
-        if (image != null) {
-          final newsItem = News2(
-            title: title,
-            description: description,
-            image: image,
-            source_name: source_name,
-          );
-          setState(() {
-            news.add(newsItem);
-          });
-        }
-      }
-    } else {
-      throw Exception('Failed to load news');
-    }
-  }
-
-  void navigateToDetailPage(News2 newsItem) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -111,7 +86,9 @@ class _NewsListPageState extends State<NewsListPage> {
             final newsItem = newsData[index];
 
             return GestureDetector(
-              onTap: () {},
+              onTap: () {
+                navigateToDetailPage(newsItem);
+              },
               child: Container(
                 margin: EdgeInsets.all(12.0),
                 padding: EdgeInsets.all(8.0),
@@ -168,9 +145,7 @@ class _NewsListPageState extends State<NewsListPage> {
                                 child: Text(
                                   newsItem['Symbols'],
                                   style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12
-                                  ),
+                                      color: Colors.white, fontSize: 12),
                                 ),
                               )
                             : Container()
@@ -205,6 +180,7 @@ class NewsDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFECF8F9),
       appBar: AppBar(
         backgroundColor: Color(0xFF212436),
         title: Text(
@@ -212,26 +188,74 @@ class NewsDetailPage extends StatelessWidget {
           style: TextStyle(fontSize: 16),
         ),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(
-                  10.0), // Adjust the border radius as needed
-              child: Image.network(newsItem.image),
-            ),
-            SizedBox(height: 16.0),
-            Text(
-              newsItem.title,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            SizedBox(height: 10.0),
-            Text(
-              newsItem.description,
-              style: TextStyle(fontSize: 16),
-            ),
-          ],
+      body: SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.all(16.0),
+          margin: EdgeInsets.all(8.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 2,
+                blurRadius: 5,
+                offset: Offset(0, 3), // changes the position of the shadow
+              ),
+            ],
+          ),
+          
+          child: Column(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(
+                    10.0), // Adjust the border radius as needed
+                child: Image.network(newsItem.image),
+              ),
+              SizedBox(height: 16.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(6.0),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(30.0),
+                    ),
+                    child: Text(
+                      newsItem.source_name,
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  newsItem.symbol != ''
+                      ? Container(
+                          padding: EdgeInsets.all(6.0),
+                          decoration: BoxDecoration(
+                            color: Color(0xFF212436),
+                            borderRadius: BorderRadius.circular(30.0),
+                          ),
+                          child: Text(
+                            newsItem.symbol,
+                            style: TextStyle(color: Colors.white, fontSize: 12),
+                          ),
+                        )
+                      : Container()
+                ],
+              ),
+              SizedBox(height: 16.0),
+              Text(
+                newsItem.title,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              SizedBox(height: 16.0),
+              Text(
+                newsItem.description,
+                style: TextStyle(fontSize: 14),
+              ),
+            ],
+          ),
         ),
       ),
     );

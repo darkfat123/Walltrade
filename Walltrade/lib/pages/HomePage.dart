@@ -13,7 +13,6 @@ import '../main.dart';
 import '../model/news.dart';
 import '../variables/serverURL.dart';
 
-
 class HomePage extends StatefulWidget {
   final String username;
   HomePage({required this.username});
@@ -21,7 +20,7 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState(username: username);
 }
 
-final StaticValues staticValues = StaticValues();
+late Future<List<News>> _newsFuture;
 
 class _HomePageState extends State<HomePage> {
   List<String> watchlist = [];
@@ -41,7 +40,7 @@ class _HomePageState extends State<HomePage> {
 
   _HomePageState({required this.username});
   int index = 1;
-  
+
   Future<void> getBalance() async {
     var url = Uri.parse('${Constants.serverUrl}/getBalance');
     var headers = {'Content-Type': 'application/x-www-form-urlencoded'};
@@ -142,6 +141,7 @@ class _HomePageState extends State<HomePage> {
     getBalanceChange();
     getBalance();
     getStockPrices();
+    _newsFuture = StaticValues().fetchNews();
   }
 
   @override
@@ -220,7 +220,9 @@ class _HomePageState extends State<HomePage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => NotifyActivity(username: username,)),
+                                builder: (context) => NotifyActivity(
+                                      username: username,
+                                    )),
                           );
                           // Handle settings button press here
                         },
@@ -735,7 +737,7 @@ class _HomePageState extends State<HomePage> {
                             height: 20,
                           ),
                           FutureBuilder<List<News>>(
-                            future: staticValues.fetchNews(),
+                            future: _newsFuture,
                             builder: (context, snapshot) {
                               if (snapshot.hasData) {
                                 final newsList = snapshot
@@ -744,7 +746,7 @@ class _HomePageState extends State<HomePage> {
                                   options: CarouselOptions(
                                     autoPlay: true,
                                     autoPlayInterval: Duration(seconds: 5),
-                                    height: 170.0,
+                                    height: 180.0,
                                   ),
                                   items: newsList.map((news) {
                                     return Builder(
@@ -797,6 +799,26 @@ class _HomePageState extends State<HomePage> {
                                                   ),
                                                 ),
                                               ),
+                                              news.symbol != ''
+                                                  ? Container(
+                                                      margin: EdgeInsets.all(10.0),
+                                                      padding:
+                                                          EdgeInsets.all(6.0),
+                                                      decoration: BoxDecoration(
+                                                        color:
+                                                            Color(0xFF212436),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(20.0),
+                                                      ),
+                                                      child: Text(
+                                                        news.symbol,
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 12),
+                                                      ),
+                                                    )
+                                                  : Container()
                                             ],
                                           ),
                                         );

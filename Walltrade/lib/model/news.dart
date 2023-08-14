@@ -4,12 +4,12 @@ import 'package:http/http.dart' as http;
 class News {
   String title;
   String image;
-  String description;
+  String symbol;
 
   News({
     required this.title,
     required this.image,
-    required this.description,
+    required this.symbol,
   });
 }
 
@@ -17,33 +17,27 @@ class StaticValues {
   List<News> news = [];
 
   Future<List<News>> fetchNews() async {
-    final response = await http.get(
-      Uri.parse(
-        'https://newsapi.org/v2/top-headlines?country=us&category=business&apiKey=2a062b05d3424b8ea2bfc6d1eb328133',
-      ),
+    final response2 = await http.get(
+      Uri.parse('http://192.168.1.36:5000/news'),
     );
+    if (response2.statusCode == 200) {
+      final parsedResponse = jsonDecode(response2.body);
+      final articles = parsedResponse;
+      for (var article in articles) {
+        final title = article['Headline'];
+        final image = article['Image'];
+        final symbol = article['Symbols'];
 
-    if (response.statusCode == 200) {
-      final parsedResponse = jsonDecode(response.body);
-      final articles = parsedResponse['articles'];
-
-      for (var article in articles.reversed) {
-        final title = article['title'];
-        final description = article['description'] ?? ''; 
-        final image = article['urlToImage'];
-        
-        if (image != null && image.startsWith("https")) {
-          final newsItem = News(
-            title: title,
-            description: description,
-            image: image,
-          );
-          news.add(newsItem);
-        }
+        final newsItem = News(
+          title: title,
+          symbol: symbol,
+          image: image,
+        );
+        news.add(newsItem);
       }
       return news.take(5).toList();
     } else {
-      throw Exception(response.statusCode);
+      throw Exception(response2.statusCode);
     }
   }
 }

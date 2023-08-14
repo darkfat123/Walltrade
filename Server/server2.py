@@ -964,7 +964,7 @@ def checkMarketStatus():
 
 @app.route('/news', methods=['GET'])
 def news():
-    url = 'https://data.alpaca.markets/v1beta1/news'
+    url = 'https://data.alpaca.markets/v1beta1/news?limit=15&exclude_contentless=true'
     headers = {
         'Apca-Api-Key-Id': 'PK8NXGV44WWTJA356CDG',
         'Apca-Api-Secret-Key': 'nR9ySdpMSTKbnflGrJaBueH3EVCJ9fRV9gxOhnod'
@@ -981,34 +981,24 @@ def news():
         for news_item in news_list:
             source = news_item.get('author')
             headline = news_item.get('headline')
-            symbol = news_item.get('symbols')
+            symbol = ', '.join(news_item.get('symbols', []))
             news_url = news_item.get('url')
             news_response = requests.get(news_url)
             soup = BeautifulSoup(news_response.content, 'html.parser')
-            paragraphs = soup.find_all("p", class_="core-block")
-            images = news_item.get('images', [])
-            description_list = []
-            for paragraph in paragraphs:
-                description_list.append(paragraph.get_text(strip=""))
-            # Join the descriptions together into a single string
-            description_combined = '\n'.join(description_list)
+            paragraphs = soup.find_all("p", class_="core-block")[:5]
+            description_combined = '\n'.join(paragraph.get_text(strip=True) for paragraph in paragraphs)
 
-            for image in images:
-                if image.get('size') == 'large':
-                    large_images = image.get('url')
-
-            symbol_string = ', '.join(symbol)
-           
+            large_images = next((image.get('url') for image in news_item.get('images', []) if image.get('size') == 'large'), '')
+            
             news_entry = {
                 "Author": source,
                 "Headline": headline,
-                "Symbols": symbol_string,
+                "Symbols": symbol,
                 "URL": news_url,
                 "Image": large_images,
                 "Description": description_combined
             }
             output_data.append(news_entry)
-        
         return jsonify(output_data)
         
     else:
