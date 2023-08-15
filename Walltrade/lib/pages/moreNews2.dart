@@ -28,6 +28,7 @@ class NewsListPage extends StatefulWidget {
 
 class _NewsListPageState extends State<NewsListPage> {
   List<Map<String, dynamic>> newsData = [];
+  bool isLoading = true;
   @override
   void initState() {
     super.initState();
@@ -46,6 +47,7 @@ class _NewsListPageState extends State<NewsListPage> {
         setState(() {
           newsData = List<Map<String, dynamic>>.from(decodedData);
         });
+        isLoading = false;
       }
     }
   }
@@ -80,97 +82,102 @@ class _NewsListPageState extends State<NewsListPage> {
         backgroundColor: Color(0xFF212436),
       ),
       body: Container(
-        decoration: BoxDecoration(
-          color: Color(0xFFECF8F9),
-        ),
-        child: ListView.builder(
-          itemCount: newsData.length,
-          itemBuilder: (context, index) {
-            final newsItem = newsData[index];
+          decoration: BoxDecoration(
+            color: Color(0xFFECF8F9),
+          ),
+          child: !isLoading
+              ? ListView.builder(
+                  itemCount: newsData.length,
+                  itemBuilder: (context, index) {
+                    final newsItem = newsData[index];
 
-            return GestureDetector(
-              onTap: () {
-                navigateToDetailPage(newsItem);
-              },
-              child: Container(
-                margin: EdgeInsets.all(12.0),
-                padding: EdgeInsets.all(8.0),
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 3.0,
-                      ),
-                    ]),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      height: 200.0,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        //let's add the height
-                        image: DecorationImage(
-                            image: NetworkImage(newsItem['Image']),
-                            fit: BoxFit.cover),
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 8.0,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(6.0),
-                          decoration: BoxDecoration(
-                            color: Colors.red,
-                            borderRadius: BorderRadius.circular(30.0),
-                          ),
-                          child: Text(
-                            newsItem['Author'],
-                            style: TextStyle(
-                              color: Colors.white,
+                    return GestureDetector(
+                      onTap: () {
+                        navigateToDetailPage(newsItem);
+                      },
+                      child: Container(
+                        margin: EdgeInsets.all(12.0),
+                        padding: EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 3.0,
+                              ),
+                            ]),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              height: 200.0,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                //let's add the height
+                                image: DecorationImage(
+                                    image: NetworkImage(newsItem['Image']),
+                                    fit: BoxFit.cover),
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
                             ),
-                          ),
+                            SizedBox(
+                              height: 8.0,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.all(6.0),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    borderRadius: BorderRadius.circular(30.0),
+                                  ),
+                                  child: Text(
+                                    newsItem['Author'],
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                newsItem['Symbols'] != ''
+                                    ? Container(
+                                        padding: EdgeInsets.all(6.0),
+                                        decoration: BoxDecoration(
+                                          color: Color(0xFF212436),
+                                          borderRadius:
+                                              BorderRadius.circular(30.0),
+                                        ),
+                                        child: Text(
+                                          newsItem['Symbols'],
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 12),
+                                        ),
+                                      )
+                                    : Container()
+                              ],
+                            ),
+                            SizedBox(
+                              height: 8.0,
+                            ),
+                            Text(
+                              newsItem['Headline'],
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16.0,
+                              ),
+                            )
+                          ],
                         ),
-                        newsItem['Symbols'] != ''
-                            ? Container(
-                                padding: EdgeInsets.all(6.0),
-                                decoration: BoxDecoration(
-                                  color: Color(0xFF212436),
-                                  borderRadius: BorderRadius.circular(30.0),
-                                ),
-                                child: Text(
-                                  newsItem['Symbols'],
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 12),
-                                ),
-                              )
-                            : Container()
-                      ],
-                    ),
-                    SizedBox(
-                      height: 8.0,
-                    ),
-                    Text(
-                      newsItem['Headline'],
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.0,
                       ),
-                    )
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      ),
+                    );
+                  },
+                )
+              : Center(
+                  child: CircularProgressIndicator(),
+                )),
     );
   }
 }
@@ -282,7 +289,8 @@ class NewsDetailPage extends StatelessWidget {
                           builder: (BuildContext context) {
                             return AlertDialog(
                               title: Text("เปิด Browser"),
-                              content: Text("คุณต้องการไปยังเว็บไซต์ของข่าวสาร?"),
+                              content:
+                                  Text("คุณต้องการไปยังเว็บไซต์ของข่าวสาร?"),
                               actions: [
                                 TextButton(
                                   child: Text("Cancel"),

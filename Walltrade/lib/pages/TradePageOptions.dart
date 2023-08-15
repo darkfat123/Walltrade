@@ -163,23 +163,6 @@ class _TradePageOptionsState extends State<TradePageOptions>
                       right: 0,
                       child: IconButton(
                         iconSize: 30,
-                        icon: Icon(Icons.notifications),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    NotifyActivity(username: username)),
-                          );
-                          // Handle settings button press here
-                        },
-                      ),
-                    ),
-                    Positioned(
-                      top: 0,
-                      right: 50,
-                      child: IconButton(
-                        iconSize: 30,
                         icon: Icon(Icons.settings),
                         onPressed: () {
                           Navigator.push(
