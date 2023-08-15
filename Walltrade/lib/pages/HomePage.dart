@@ -64,20 +64,22 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       throw Exception('Error: $e');
     }
-  }
 
-  Future<void> getBalanceTH() async {
-    var url = Uri.parse('${Constants.serverUrl}/th_portfolio');
-    var headers = {'Content-Type': 'application/json'};
-    var body = {'username': username};
+    var url2 = Uri.parse('${Constants.serverUrl}/th_portfolio');
+    var headers2 = {'Content-Type': 'application/json'};
+    var body2 = {'username': username};
     var response =
-        await http.post(url, headers: headers, body: jsonEncode(body));
+        await http.post(url2, headers: headers2, body: jsonEncode(body2));
 
     if (response.statusCode == 200) {
-      TH_balance = double.parse(response.body);
-      print(TH_balance);
+      setState(() {
+        TH_balance = double.parse(response.body);
+      });
     }
+    totalBalance = _walletBalance+TH_balance;
+    print(totalBalance);
   }
+
 
   Future<void> getBalanceChange() async {
     var url = Uri.parse('${Constants.serverUrl}/get_balance_change');
@@ -146,10 +148,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void calculateTotal() {
-    totalBalance = _walletBalance+TH_balance;
-    print(totalBalance);
-  }
+
 
   @override
   void initState() {
@@ -157,10 +156,8 @@ class _HomePageState extends State<HomePage> {
     getBalanceChange();
     getBalance();
     getStockPrices();
-    getBalanceTH();
     _newsFuture = StaticValues().fetchNews();
-    calculateTotal();
-    print(TH_balance);
+
   }
 
   @override
@@ -285,7 +282,7 @@ class _HomePageState extends State<HomePage> {
                           Container(
                             alignment: Alignment.topCenter,
                             child: Text(
-                              '\$ $_walletBalance',
+                              '\$ ${totalBalance}',
                               style: TextStyle(
                                 fontSize: 40,
                                 letterSpacing: 1,
