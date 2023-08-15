@@ -23,10 +23,12 @@ late Future<List<News>> _newsFuture;
 class _HomePageState extends State<HomePage> {
   List<String> watchlist = [];
   final String username;
-  String _walletBalance = '';
+  double _walletBalance = 0;
+  double totalBalance = 0;
   String _balanceChange = '';
   String _percentageChange = '';
   List<String> stockSymbols = [];
+  double TH_balance = 0;
 
   Map<String, double> stockPrices = {};
   Map<String, double> stockPercentage = {};
@@ -50,19 +52,30 @@ class _HomePageState extends State<HomePage> {
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
         var walletBalance = data['wallet_balance'];
-        setState(
-          () {
-            _walletBalance = walletBalance.toString();
-            _walletBalance =
-                double.tryParse(walletBalance)?.toStringAsFixed(2) ?? "Invalid";
-          },
-        );
+
+        setState(() {
+          _walletBalance = double.parse(double.parse(walletBalance)
+              .toStringAsFixed(2)); // แปลง String เป็น double
+        });
       } else {
         throw Exception(
             'Failed to retrieve wallet balance. Error: ${response.body}');
       }
     } catch (e) {
       throw Exception('Error: $e');
+    }
+  }
+
+  Future<void> getBalanceTH() async {
+    var url = Uri.parse('${Constants.serverUrl}/th_portfolio');
+    var headers = {'Content-Type': 'application/json'};
+    var body = {'username': username};
+    var response =
+        await http.post(url, headers: headers, body: jsonEncode(body));
+
+    if (response.statusCode == 200) {
+      TH_balance = double.parse(response.body);
+      print(TH_balance);
     }
   }
 
@@ -133,13 +146,21 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void calculateTotal() {
+    totalBalance = _walletBalance+TH_balance;
+    print(totalBalance);
+  }
+
   @override
   void initState() {
     super.initState();
     getBalanceChange();
     getBalance();
     getStockPrices();
+    getBalanceTH();
     _newsFuture = StaticValues().fetchNews();
+    calculateTotal();
+    print(TH_balance);
   }
 
   @override
@@ -836,7 +857,8 @@ class _HomePageState extends State<HomePage> {
                               } else if (snapshot.hasError) {
                                 return Text('Failed to load news');
                               } else {
-                                return Center(child: CircularProgressIndicator());
+                                return Center(
+                                    child: CircularProgressIndicator());
                               }
                             },
                           ),

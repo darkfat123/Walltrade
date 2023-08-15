@@ -20,6 +20,7 @@ import asyncio
 from tradingview_ta import TA_Handler, Interval, Exchange
 from settrade_v2 import Investor
 from bs4 import BeautifulSoup
+from forex_python.converter import CurrencyRates
 
 
 app = Flask(__name__)
@@ -1003,7 +1004,70 @@ def news():
         
     else:
         return jsonify({"message": "Failed to fetch news. Status code:", "status_code": response.status_code})
-
     
+@app.route('/th_portfolio', methods=['POST'])
+def th_portfolio():
+    username = request.json.get('username')
+
+    conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
+    query = f"SELECT th_api_key, th_secret_key FROM users_info WHERE username = '{username}'"
+    cursor = conn.cursor()
+    cursor.execute(query)
+    result = cursor.fetchone()
+
+    investor = Investor(
+                app_id=result[0],                                 
+                app_secret=result[1], 
+                broker_id="SANDBOX",
+                app_code="SANDBOX",
+                is_auto_queue = False)
+
+    equity = investor.Equity(account_no=f"{username}-E")
+
+    account_info = equity.get_account_info()
+    cashBalance = account_info.get('cashBalance') 
+    print(account_info)
+    cash = CurrencyRates().get_rate('THB', 'USD')
+    balance = f"{cashBalance * cash:.2f}"
+    return balance
+
+@app.route('/place_order_th', methods=['POST'])
+def place_order_th():
+    username = request.json.get('username')
+    symbol = request.json.get('symbol')
+    qty = request.json.get('qty')
+    side = request.json.get('side')
+    limitPrice = request.json.get('limitPrice')
+
+    conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
+    query = f"SELECT th_api_key, th_secret_key FROM users_info WHERE username = '{username}'"
+    cursor = conn.cursor()
+    cursor.execute(query)
+    result = cursor.fetchone()
+    print(result)
+    investor = Investor(
+                app_id=result[0],                                 
+                app_secret=result[1], 
+                broker_id="SANDBOX",
+                app_code="SANDBOX",
+                is_auto_queue = False)
+
+    equity = investor.Equity(account_no="foczz123-E")     
+    try:
+        place_order = equity.place_order(
+                                side= side,
+                                symbol= symbol,
+                                volume= qty,
+                                price = limitPrice,
+                                price_type= "Limit",
+                                pin= "000000"
+                                )
+        print('คำสั่งซื้อขายถูกส่งไปยัง Settrade Sandbox แล้ว')
+        return jsonify('success')
+    except Exception as e:
+        print(f'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ: {str(e)}')
+        return jsonify(f'error: {str(e)}')
+
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0")
