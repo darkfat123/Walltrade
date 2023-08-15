@@ -282,8 +282,8 @@ def thStockList():
 ]
 
     investor = Investor(
-        app_id="uOz2y7jYG7rWtD2w",
-        app_secret="eO4iENpX4CIN6Yb+jVKdcQrlcEVD4GuKPDi+YFD4qng=",
+        app_id="l6A2nvIv9t5YnPTE",
+        app_secret="AJqOuo549hxwITYkBKDnd5dFQ08ogVG5qp6e7pBxnIdi",
         broker_id="SANDBOX",
         app_code="SANDBOX",
         is_auto_queue=False)
@@ -933,8 +933,13 @@ def getStockPriceUS():
                     handler = TA_Handler(symbol=symbol, screener="america", exchange="NASDAQ", interval="1d")
                     analysis = handler.get_analysis()
                 except Exception:
-                    handler = TA_Handler(symbol=symbol, screener="america", exchange="NYSE", interval="1d")
-                    analysis = handler.get_analysis()
+                    try:
+                        handler = TA_Handler(symbol=symbol, screener="america", exchange="NYSE", interval="1d")
+                        analysis = handler.get_analysis()
+                    except Exception:
+                        # เพิ่มการจัดการสำหรับ Exception อื่น ๆ ที่คุณต้องการ
+                        handler = TA_Handler(symbol=symbol, screener="thailand", exchange="SET", interval="1d")
+                        analysis = handler.get_analysis()
 
                 close_price = round(analysis.indicators["close"], 2)
                 percentage_change = round(analysis.indicators["change"], 2)
