@@ -1030,6 +1030,12 @@ def th_portfolio():
     equity = investor.Equity(account_no=f"{username}-E")
 
     account_info = equity.get_account_info()
+    portfolio = equity.get_portfolios()
+
+    #(profit - cashBalance) / 100 = percentage of intialcashBalance
+    print(portfolio.get('portfolioList'))
+    print()
+    print(portfolio.get('totalPortfolio'))
     cashBalance = account_info.get('cashBalance') 
     print(account_info)
     cash = CurrencyRates().get_rate('THB', 'USD')

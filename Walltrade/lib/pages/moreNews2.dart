@@ -252,7 +252,7 @@ class NewsDetailPage extends StatelessWidget {
                             color: Color(0xFF212436),
                             borderRadius: BorderRadius.circular(30.0),
                           ),
-                          child: newsItem.symbol.split(" ,").length > 5
+                          child: newsItem.symbol.split(", ").length > 5
                               ? Text(
                                   '${newsItem.symbol.split(", ").take(5).join(", ")} and more',
                                   style: TextStyle(
@@ -262,7 +262,8 @@ class NewsDetailPage extends StatelessWidget {
                                   newsItem.symbol,
                                   style: TextStyle(
                                       color: Colors.white, fontSize: 12),
-                                ))
+                                ),
+                        )
                       : Container()
                 ],
               ),

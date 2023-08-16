@@ -76,9 +76,8 @@ class _HomePageState extends State<HomePage> {
         TH_balance = double.parse(response.body);
       });
     }
-    totalBalance = _walletBalance+TH_balance;
+    totalBalance = _walletBalance + TH_balance;
   }
-
 
   Future<void> getBalanceChange() async {
     var url = Uri.parse('${Constants.serverUrl}/get_balance_change');
@@ -147,8 +146,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-
-
   @override
   void initState() {
     super.initState();
@@ -156,7 +153,6 @@ class _HomePageState extends State<HomePage> {
     getBalance();
     getStockPrices();
     _newsFuture = StaticValues().fetchNews();
-
   }
 
   @override
@@ -815,34 +811,77 @@ class _HomePageState extends State<HomePage> {
                                                   ),
                                                 ),
                                               ),
-                                              
                                               news.symbol != ''
-                                                  ? Container(
-                                                      margin:
-                                                          EdgeInsets.all(10.0),
-                                                      padding:
-                                                          EdgeInsets.all(6.0),
-                                                      decoration: BoxDecoration(
-                                                        gradient: LinearGradient(
-                                                            colors: [
-                                                              Color(0xFFFF5E00),
-                                                              Color(0xFFFF0000),
-                                                            ],
-                                                            begin: Alignment
-                                                                .topCenter,
-                                                            end: Alignment
-                                                                .bottomCenter),
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(20.0),
-                                                      ),
-                                                      child: Text(
-                                                        news.symbol,
-                                                        style: TextStyle(
-                                                            color: Colors.white,
-                                                            fontSize: 10),
-                                                      ),
-                                                    )
+                                                  ? news.symbol
+                                                              .split(",")
+                                                              .length <
+                                                          6
+                                                      ? Container(
+                                                          margin:
+                                                              EdgeInsets.all(
+                                                                  10.0),
+                                                          padding:
+                                                              EdgeInsets.all(
+                                                                  6.0),
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            gradient: LinearGradient(
+                                                                colors: [
+                                                                  Color(
+                                                                      0xFFFF5E00),
+                                                                  Color(
+                                                                      0xFFFF0000),
+                                                                ],
+                                                                begin: Alignment
+                                                                    .topCenter,
+                                                                end: Alignment
+                                                                    .bottomCenter),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        20.0),
+                                                          ),
+                                                          child: Text(
+                                                            news.symbol,
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontSize: 10),
+                                                          ),
+                                                        )
+                                                      : Container(
+                                                          margin:
+                                                              EdgeInsets.all(
+                                                                  10.0),
+                                                          padding:
+                                                              EdgeInsets.all(
+                                                                  6.0),
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            gradient: LinearGradient(
+                                                                colors: [
+                                                                  Color(
+                                                                      0xFFFF5E00),
+                                                                  Color(
+                                                                      0xFFFF0000),
+                                                                ],
+                                                                begin: Alignment
+                                                                    .topCenter,
+                                                                end: Alignment
+                                                                    .bottomCenter),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        20.0),
+                                                          ),
+                                                          child: Text(
+                                                            '${news.symbol.split(",").take(6).join(",")} and more',
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontSize: 10),
+                                                          ),
+                                                        )
                                                   : Container()
                                             ],
                                           ),
