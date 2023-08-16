@@ -1033,14 +1033,21 @@ def th_portfolio():
     portfolio = equity.get_portfolios()
 
     #(profit - cashBalance) / 100 = percentage of intialcashBalance
-    print(portfolio.get('portfolioList'))
-    print()
-    print(portfolio.get('totalPortfolio'))
+
+    
+
     cashBalance = account_info.get('cashBalance') 
+    percentageChange = (portfolio['totalPortfolio']['profit'] / cashBalance)*100
     print(account_info)
     cash = CurrencyRates().get_rate('THB', 'USD')
     balance = f"{cashBalance * cash:.2f}"
-    return balance
+    
+    result = {
+        'balance': balance,
+        'percentageChange': percentageChange,
+    }
+
+    return jsonify(result)
 
 @app.route('/place_order_th', methods=['POST'])
 def place_order_th():

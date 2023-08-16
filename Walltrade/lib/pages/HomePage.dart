@@ -72,8 +72,10 @@ class _HomePageState extends State<HomePage> {
         await http.post(url2, headers: headers2, body: jsonEncode(body2));
 
     if (response.statusCode == 200) {
+      var data2 = jsonDecode(response.body);
+      var th_cash = data2['balance'];
       setState(() {
-        TH_balance = double.parse(response.body);
+        TH_balance = double.parse(th_cash);
       });
     }
     totalBalance = _walletBalance + TH_balance;
