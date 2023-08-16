@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:Walltrade/variables/serverURL.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
@@ -38,7 +39,7 @@ class _NewsListPageState extends State<NewsListPage> {
   Future<void> fetchNewsData() async {
     final response = await http.get(
       Uri.parse(
-          'http://192.168.1.36:5000/news'), // Replace with the actual API endpoint
+          '${Constants.serverUrl}/news'), // Replace with the actual API endpoint
     );
 
     if (response.statusCode == 200) {
@@ -150,10 +151,16 @@ class _NewsListPageState extends State<NewsListPage> {
                                               BorderRadius.circular(30.0),
                                         ),
                                         child: Text(
-                                          newsItem['Symbols'],
+                                          newsItem['Symbols']
+                                                      .split(", ")
+                                                      .length >=
+                                                  4
+                                              ? '${newsItem['Symbols'].split(", ").take(3).join(", ")} and more'
+                                              : newsItem['Symbols'],
                                           style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 12),
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                          ),
                                         ),
                                       )
                                     : Container()
@@ -245,11 +252,17 @@ class NewsDetailPage extends StatelessWidget {
                             color: Color(0xFF212436),
                             borderRadius: BorderRadius.circular(30.0),
                           ),
-                          child: Text(
-                            newsItem.symbol,
-                            style: TextStyle(color: Colors.white, fontSize: 12),
-                          ),
-                        )
+                          child: newsItem.symbol.split(" ,").length > 5
+                              ? Text(
+                                  '${newsItem.symbol.split(", ").take(5).join(", ")} and more',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 12),
+                                )
+                              : Text(
+                                  newsItem.symbol,
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 12),
+                                ))
                       : Container()
                 ],
               ),

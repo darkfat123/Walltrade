@@ -77,7 +77,6 @@ class _HomePageState extends State<HomePage> {
       });
     }
     totalBalance = _walletBalance+TH_balance;
-    print(totalBalance);
   }
 
 
@@ -282,7 +281,7 @@ class _HomePageState extends State<HomePage> {
                           Container(
                             alignment: Alignment.topCenter,
                             child: Text(
-                              '\$ ${totalBalance}',
+                              '\$ ${totalBalance.toStringAsFixed(2)}',
                               style: TextStyle(
                                 fontSize: 40,
                                 letterSpacing: 1,
@@ -816,6 +815,7 @@ class _HomePageState extends State<HomePage> {
                                                   ),
                                                 ),
                                               ),
+                                              
                                               news.symbol != ''
                                                   ? Container(
                                                       margin:

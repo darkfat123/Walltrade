@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:Walltrade/variables/serverURL.dart';
 import 'package:http/http.dart' as http;
 
 class News {
@@ -20,7 +21,7 @@ class StaticValues {
 
   Future<List<News>> fetchNews() async {
     final response2 = await http.get(
-      Uri.parse('http://192.168.1.36:5000/news'),
+      Uri.parse('${Constants.serverUrl}/news'),
     );
     if (response2.statusCode == 200) {
       final parsedResponse = jsonDecode(response2.body);
