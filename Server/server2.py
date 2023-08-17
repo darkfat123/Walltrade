@@ -1033,18 +1033,16 @@ def th_portfolio():
     portfolio = equity.get_portfolios()
 
     #(profit - cashBalance) / 100 = percentage of intialcashBalance
-
-    
-
     cashBalance = account_info.get('cashBalance') 
     percentageChange = (portfolio['totalPortfolio']['profit'] / cashBalance)*100
-    print(account_info)
     cash = CurrencyRates().get_rate('THB', 'USD')
     balance = f"{cashBalance * cash:.2f}"
-    
+    balanceProfitChange = f"{portfolio['totalPortfolio']['profit']* cash:.2f}"
+    print(f"balanceProfitChange: {balanceProfitChange}")
     result = {
         'balance': balance,
         'percentageChange': percentageChange,
+        'balanceProfitChange' : balanceProfitChange
     }
 
     return jsonify(result)

@@ -116,10 +116,12 @@ class _NewsListPageState extends State<NewsListPage> {
                               height: 200.0,
                               width: double.infinity,
                               decoration: BoxDecoration(
-                                //let's add the height
                                 image: DecorationImage(
-                                    image: NetworkImage(newsItem['Image']),
-                                    fit: BoxFit.cover),
+                                  image: Image.network(
+                                    newsItem['Image'],
+                                  ).image,
+                                  fit: BoxFit.cover,
+                                ),
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                             ),
@@ -226,7 +228,17 @@ class NewsDetailPage extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(
                     10.0), // Adjust the border radius as needed
-                child: Image.network(newsItem.image),
+                child: Image.network(
+                  newsItem.image,
+                  errorBuilder: (BuildContext context, Object exception,
+                      StackTrace? stackTrace) {
+                    // สร้างวิตเจ็ตแสดงถ้าเกิดข้อผิดพลาดในการโหลดรูปภาพ
+                    return Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Text('ไม่สามารถโหลดรูปภาพได้'),
+                    );
+                  },
+                ),
               ),
               SizedBox(height: 16.0),
               Row(

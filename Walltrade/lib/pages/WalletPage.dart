@@ -6,6 +6,7 @@ import 'SettingsPage.dart';
 import 'HistoryAutoTrade.dart';
 import 'package:syncfusion_flutter_treemap/treemap.dart';
 import 'Treemap.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 
 class WalletPage extends StatefulWidget {
   final String username;
@@ -16,10 +17,16 @@ class WalletPage extends StatefulWidget {
 
 class _WalletPageState extends State<WalletPage> {
   final String username;
-  String _walletBalance = '';
-  String _balanceChange = '';
-  String _percentageChange = '';
+  double _walletBalance = 0;
   double checkBalanceChange = 0;
+  double TH_balance = 0;
+  double totalBalance = 0;
+  double TH_percentage = 0;
+  double TH_totalProfit = 0;
+  double totalPercentage = 0;
+  double totalProfit = 0;
+  double _balanceChange = 0;
+  double _percentageChange = 0;
   bool isTHStocksSelected = true;
   bool isUSStocksSelected = false;
   bool isWatchlistVisible = true;
@@ -73,12 +80,11 @@ class _WalletPageState extends State<WalletPage> {
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
         var walletBalance = data['wallet_balance'];
-        setState(
-          () {
-            _walletBalance =
-                double.tryParse(walletBalance)?.toStringAsFixed(2) ?? "Invalid";
-          },
-        );
+
+        setState(() {
+          _walletBalance = double.parse(double.parse(walletBalance)
+              .toStringAsFixed(2)); // แปลง String เป็น double
+        });
       } else {
         throw Exception(
             'Failed to retrieve wallet balance. Error: ${response.body}');
@@ -86,28 +92,70 @@ class _WalletPageState extends State<WalletPage> {
     } catch (e) {
       throw Exception('Error: $e');
     }
+
+    var url2 = Uri.parse('${Constants.serverUrl}/th_portfolio');
+    var headers2 = {'Content-Type': 'application/json'};
+    var body2 = {'username': username};
+    var response =
+        await http.post(url2, headers: headers2, body: jsonEncode(body2));
+
+    if (response.statusCode == 200) {
+      var data2 = jsonDecode(response.body);
+      var th_cash = data2['balance'];
+
+      setState(() {
+        TH_balance = double.parse(th_cash);
+      });
+    }
+    totalBalance = _walletBalance + TH_balance;
   }
 
   Future<void> getBalanceChange() async {
-    var url = Uri.parse('${Constants.serverUrl}/get_balance_change');
-    var headers = {'Content-Type': 'application/json'};
-    var body = jsonEncode({'username': username}); // Replace with your username
-
     try {
-      var response = await http.post(url, headers: headers, body: body);
+      // TH HTTP request
+      var url1 = Uri.parse('${Constants.serverUrl}/th_portfolio');
+      var headers1 = {'Content-Type': 'application/json'};
+      var body1 = {'username': username};
+      var response1 =
+          await http.post(url1, headers: headers1, body: jsonEncode(body1));
 
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
-        var balanceChange = data['balance_change'];
-        var percentageChange = data['percentage_change'];
+      if (response1.statusCode == 200) {
+        var data1 = jsonDecode(response1.body);
         setState(() {
-          _balanceChange = balanceChange.toStringAsFixed(2);
-          _percentageChange = percentageChange.toStringAsFixed(3);
-          checkBalanceChange = double.parse(_balanceChange);
+          TH_percentage = data1['percentageChange'];
+          TH_totalProfit = double.parse(data1['balanceProfitChange']);
+          print("TH totalProfit: $TH_totalProfit");
+          print("TH percentage: $TH_percentage");
         });
       } else {
         throw Exception(
-            'Failed to retrieve balance change. Error: ${response.body}');
+            'Failed to retrieve TH balance. Error: ${response1.body}');
+      }
+
+      // US HTTP request
+      var url2 = Uri.parse('${Constants.serverUrl}/get_balance_change');
+      var headers2 = {'Content-Type': 'application/json'};
+      var body2 = jsonEncode({'username': username});
+
+      var response2 = await http.post(url2, headers: headers2, body: body2);
+      if (response2.statusCode == 200) {
+        var data2 = jsonDecode(response2.body);
+        var balanceChange = data2['balance_change'];
+        var percentageChange = data2['percentage_change'];
+        setState(() {
+          _balanceChange = balanceChange;
+          print("US totalProfit: $_balanceChange");
+
+          _percentageChange = percentageChange;
+          print("US percentage: $_percentageChange");
+        });
+        totalProfit = TH_totalProfit + _balanceChange;
+        totalPercentage = TH_percentage + _percentageChange;
+        print("Total profit: $totalProfit");
+        print("Total percentage: $totalPercentage");
+      } else {
+        throw Exception(
+            'Failed to retrieve balance change. Error: ${response2.body}');
       }
     } catch (e) {
       throw Exception('Error: $e');
@@ -197,7 +245,7 @@ class _WalletPageState extends State<WalletPage> {
                       child: Padding(
                         padding: const EdgeInsets.all(8),
                         child: Text(
-                          "Wallet",
+                          "กระเป๋า",
                           style: TextStyle(
                               fontSize: 24, fontWeight: FontWeight.w600),
                         ),
@@ -213,7 +261,8 @@ class _WalletPageState extends State<WalletPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => NotifyActivity(username:username)),
+                                builder: (context) =>
+                                    NotifyActivity(username: username)),
                           );
                           // Handle settings button press here
                         },
@@ -284,7 +333,9 @@ class _WalletPageState extends State<WalletPage> {
                       ],
                     ),
                     Text(
-                      hideBalance ? "**** USD" : "$_walletBalance USD",
+                      hideBalance
+                          ? "**** USD"
+                          : "${totalBalance.toStringAsFixed(2)} USD",
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w600,
@@ -304,11 +355,11 @@ class _WalletPageState extends State<WalletPage> {
                           ),
                         ),
                         Text(
-                          _balanceChange.toString().startsWith("-")  ? " " : "+",
+                          totalProfit.toString().startsWith("-") ? " " : "+",
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 12,
-                            color: _balanceChange.toString().startsWith("-")
+                            color: totalProfit.toString().startsWith("-")
                                 ? Colors.red
                                 : Color(0xFF13B709),
                           ),
@@ -316,11 +367,11 @@ class _WalletPageState extends State<WalletPage> {
                         Text(
                           hideBalance
                               ? "**** USD (****)"
-                              : "$_balanceChange USD ($_percentageChange%)",
+                              : "${totalProfit.toStringAsFixed(2)} USD (${totalPercentage.toStringAsFixed(4)}%)",
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 12,
-                            color: _balanceChange.toString().startsWith("-")
+                            color: totalProfit.toString().startsWith("-")
                                 ? Colors.red
                                 : Color(0xFF13B709),
                           ),
@@ -340,8 +391,11 @@ class _WalletPageState extends State<WalletPage> {
                 child: Container(
                   height: 50,
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
+                    gradient: LinearGradient(colors: [
+                      Color(0xFF468B97),
+                      Color(0xFF1D5B79),
+                    ], begin: Alignment.topCenter, end: Alignment.bottomCenter),
+                    borderRadius: BorderRadius.circular(10),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.grey.withOpacity(0.5),
@@ -353,27 +407,202 @@ class _WalletPageState extends State<WalletPage> {
                     ],
                   ),
                   padding: EdgeInsets.all(14),
-                  margin: EdgeInsets.all(14),
+                  margin: EdgeInsets.symmetric(horizontal: 14),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "ดู Treemap Chart",
+                        "รายละเอียดทั้งหมดของพอร์ตลงทุน",
                         style: TextStyle(
-                            fontWeight: FontWeight.w700, fontSize: 14),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
                       ),
                       Icon(
                         Icons.arrow_right_alt_rounded,
+                        color: Colors.white,
                       ),
                     ],
                   ),
                 ),
               ),
+              SizedBox(
+                height: 16,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(left: 16, right: 6),
+                    width: MediaQuery.of(context).size.width * 0.5,
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Color(0xFF2A3547),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 5,
+                          offset: Offset(
+                              0, 3), // changes the position of the shadow
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        CircularPercentIndicator(
+                          radius: 50,
+                          lineWidth: 10.0,
+                          animation: true,
+                          animationDuration: 1000,
+                          percent: 0.81,
+                          center: new Text(
+                            "81%",
+                            style: TextStyle(color: Colors.white, fontSize: 16),
+                          ),
+                          progressColor: Color(0xFF068DA9),
+                        ),
+                        SizedBox(
+                          height: 8,
+                        ),
+                        Column(
+                          children: [
+                            Text(
+                              "เงินสด",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            Text(
+                              "546700",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Container(
+                          margin: EdgeInsets.only(right: 16),
+                          padding: EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Color(0xFF2A3547),
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 2,
+                                blurRadius: 5,
+                                offset: Offset(
+                                    0, 3), // changes the position of the shadow
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              CircularPercentIndicator(
+                                radius: 30,
+                                lineWidth: 10.0,
+                                animation: true,
+                                animationDuration: 1000,
+                                percent: 0.38,
+                                center: new Text(
+                                  "38%",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                progressColor: Colors.yellow,
+                              ),
+                              SizedBox(
+                                width: 8,
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    "มูลค่าหุ้นไทย",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  Text(
+                                    "295400",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 6,
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(right: 16),
+                          padding: EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Color(0xFF2A3547),
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 2,
+                                blurRadius: 5,
+                                offset: Offset(
+                                    0, 3), // changes the position of the shadow
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              CircularPercentIndicator(
+                                radius: 30,
+                                lineWidth: 10.0,
+                                animation: true,
+                                animationDuration: 1000,
+                                percent: 0.46,
+                                center: new Text(
+                                  "46%",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                progressColor: Colors.red,
+                              ),
+                              SizedBox(
+                                width: 8,
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    "มูลค่าหุ้นอเมริกา",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  Text(
+                                    "295400",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 16,
+              ),
               Container(
-                height: 300,
+                padding: EdgeInsets.symmetric(horizontal: 4,vertical: 16),
+                margin: EdgeInsets.symmetric(horizontal:16),
                 decoration: BoxDecoration(
-                  color: Color(0xFF2A3547),
-                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.grey.withOpacity(0.5),
@@ -384,98 +613,162 @@ class _WalletPageState extends State<WalletPage> {
                     ),
                   ],
                 ),
-                margin: EdgeInsets.all(16),
-                child: Padding(
-                  padding: EdgeInsets.all(20),
-                  child: positions.isEmpty // Check if positions list is empty
-                      ? Center(
-                          child: CircularProgressIndicator(
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
-                          ), // Show CircularProgressIndicator if data is loading
-                        )
-                      : SfTreemap(
-                          dataCount: _positDataList.length,
-                          colorMappers: [
-                            TreemapColorMapper.range(
-                              from: 0,
-                              to: 100,
-                              color: Colors.yellow,
-                            ),
-                            TreemapColorMapper.range(
-                              from: 100,
-                              to: 500,
-                              color: Colors.amber,
-                            ),
-                            TreemapColorMapper.range(
-                              from: 500,
-                              to: 800,
-                              color: Colors.orange.shade800,
-                            ),
-                            TreemapColorMapper.range(
-                              from: 800,
-                              to: double.infinity,
-                              color: Colors.red,
-                            ),
-                          ],
-                          weightValueMapper: (int index) {
-                            return _positDataList[index].marketValue;
-                          },
-                          levels: <TreemapLevel>[
-                            TreemapLevel(
-                              groupMapper: (int index) {
-                                return _positDataList[index].symbol;
-                              },
-                              labelBuilder:
-                                  (BuildContext context, TreemapTile tile) {
-                                // Function to calculate font size based on weight value
-                                double getFontSize(double weight) {
-                                  if (weight < 50) return 4;
-                                  if (weight < 500) return 10;
-                                  if (weight < 1000) return 12;
-                                  return 18;
-                                }
-
-                                double fontSize = getFontSize(tile.weight);
-
-                                return Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        tile.group,
-                                        style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: fontSize),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      Text(
-                                        '${tile.weight}',
-                                        style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: fontSize),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                              tooltipBuilder:
-                                  (BuildContext context, TreemapTile tile) {
-                                return Padding(
-                                  padding: const EdgeInsets.all(10),
-                                  child: Text(
-                                      '''Symbol: ${tile.group}\nมูลค่าปัจจุบัน : ${tile.weight} USD''',
-                                      style:
-                                          const TextStyle(color: Colors.black)),
-                                );
-                              },
+                child: Column(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => TreemapState()),
+                        );
+                      },
+                      child: Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: Offset(
+                                  0, 3), // changes the position of the shadow
                             ),
                           ],
                         ),
+                        padding: EdgeInsets.all(14),
+                        margin: EdgeInsets.symmetric(horizontal: 14),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "ดู Treemap Chart",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w700, fontSize: 14),
+                            ),
+                            Icon(
+                              Icons.arrow_right_alt_rounded,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Container(
+                      height: 300,
+                      decoration: BoxDecoration(
+                        color: Color(0xFF2A3547),
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: Offset(
+                                0, 3), // changes the position of the shadow
+                          ),
+                        ],
+                      ),
+                      margin: EdgeInsets.all(14),
+                      child: Padding(
+                        padding: EdgeInsets.all(10),
+                        child: positions
+                                .isEmpty // Check if positions list is empty
+                            ? Center(
+                                child: CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                                ), // Show CircularProgressIndicator if data is loading
+                              )
+                            : SfTreemap(
+                                dataCount: _positDataList.length,
+                                colorMappers: [
+                                  TreemapColorMapper.range(
+                                    from: 0,
+                                    to: 100,
+                                    color: Colors.yellow,
+                                  ),
+                                  TreemapColorMapper.range(
+                                    from: 100,
+                                    to: 500,
+                                    color: Colors.amber,
+                                  ),
+                                  TreemapColorMapper.range(
+                                    from: 500,
+                                    to: 800,
+                                    color: Colors.orange.shade800,
+                                  ),
+                                  TreemapColorMapper.range(
+                                    from: 800,
+                                    to: double.infinity,
+                                    color: Colors.red,
+                                  ),
+                                ],
+                                weightValueMapper: (int index) {
+                                  return _positDataList[index].marketValue;
+                                },
+                                levels: <TreemapLevel>[
+                                  TreemapLevel(
+                                    groupMapper: (int index) {
+                                      return _positDataList[index].symbol;
+                                    },
+                                    labelBuilder: (BuildContext context,
+                                        TreemapTile tile) {
+                                      // Function to calculate font size based on weight value
+                                      double getFontSize(double weight) {
+                                        if (weight < 50) return 4;
+                                        if (weight < 500) return 10;
+                                        if (weight < 1000) return 12;
+                                        return 18;
+                                      }
+
+                                      double fontSize =
+                                          getFontSize(tile.weight);
+
+                                      return Center(
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              tile.group,
+                                              style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: fontSize),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              textAlign: TextAlign.center,
+                                            ),
+                                            Text(
+                                              '${tile.weight}',
+                                              style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: fontSize),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                    tooltipBuilder: (BuildContext context,
+                                        TreemapTile tile) {
+                                      return Padding(
+                                        padding: const EdgeInsets.all(10),
+                                        child: Text(
+                                            '''Symbol: ${tile.group}\nมูลค่าปัจจุบัน : ${tile.weight} USD''',
+                                            style: const TextStyle(
+                                                color: Colors.black)),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
+              SizedBox(height: 10,),
               Text(
                 "สินทรัพย์ที่มีอยู่",
                 style: TextStyle(

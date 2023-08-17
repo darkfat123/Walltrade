@@ -25,8 +25,12 @@ class _HomePageState extends State<HomePage> {
   final String username;
   double _walletBalance = 0;
   double totalBalance = 0;
-  String _balanceChange = '';
-  String _percentageChange = '';
+  double totalProfit = 0;
+  double _balanceChange = 0;
+  double TH_percentage = 0;
+  double totalPercentage = 0;
+  double TH_totalProfit = 0;
+  double _percentageChange = 0;
   List<String> stockSymbols = [];
   double TH_balance = 0;
 
@@ -74,6 +78,7 @@ class _HomePageState extends State<HomePage> {
     if (response.statusCode == 200) {
       var data2 = jsonDecode(response.body);
       var th_cash = data2['balance'];
+
       setState(() {
         TH_balance = double.parse(th_cash);
       });
@@ -82,24 +87,51 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> getBalanceChange() async {
-    var url = Uri.parse('${Constants.serverUrl}/get_balance_change');
-    var headers = {'Content-Type': 'application/json'};
-    var body = jsonEncode({'username': username}); // Replace with your username
-
     try {
-      var response = await http.post(url, headers: headers, body: body);
+      // TH HTTP request
+      var url1 = Uri.parse('${Constants.serverUrl}/th_portfolio');
+      var headers1 = {'Content-Type': 'application/json'};
+      var body1 = {'username': username};
+      var response1 =
+          await http.post(url1, headers: headers1, body: jsonEncode(body1));
 
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
-        var balanceChange = data['balance_change'];
-        var percentageChange = data['percentage_change'];
+      if (response1.statusCode == 200) {
+        var data1 = jsonDecode(response1.body);
         setState(() {
-          _balanceChange = balanceChange.toStringAsFixed(2);
-          _percentageChange = percentageChange.toStringAsFixed(3);
+          TH_percentage = data1['percentageChange'];
+          TH_totalProfit = double.parse(data1['balanceProfitChange']);
+          print("TH totalProfit: $TH_totalProfit");
+          print("TH percentage: $TH_percentage");
         });
       } else {
         throw Exception(
-            'Failed to retrieve balance change. Error: ${response.body}');
+            'Failed to retrieve TH balance. Error: ${response1.body}');
+      }
+
+      // US HTTP request
+      var url2 = Uri.parse('${Constants.serverUrl}/get_balance_change');
+      var headers2 = {'Content-Type': 'application/json'};
+      var body2 = jsonEncode({'username': username});
+
+      var response2 = await http.post(url2, headers: headers2, body: body2);
+      if (response2.statusCode == 200) {
+        var data2 = jsonDecode(response2.body);
+        var balanceChange = data2['balance_change'];
+        var percentageChange = data2['percentage_change'];
+        setState(() {
+          _balanceChange = balanceChange;
+          print("US totalProfit: $_balanceChange");
+
+          _percentageChange = percentageChange;
+          print("US percentage: $_percentageChange");
+        });
+        totalProfit = TH_totalProfit + _balanceChange;
+        totalPercentage = TH_percentage + _percentageChange;
+        print("Total profit: $totalProfit");
+        print("Total percentage: $totalPercentage");
+      } else {
+        throw Exception(
+            'Failed to retrieve balance change. Error: ${response2.body}');
       }
     } catch (e) {
       throw Exception('Error: $e');
@@ -302,27 +334,25 @@ class _HomePageState extends State<HomePage> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(
-                                    _balanceChange.toString().startsWith("-")
+                                    totalProfit.toString().startsWith("-")
                                         ? Icons.arrow_downward
                                         : Icons.arrow_upward,
                                     size: 18,
-                                    color: _balanceChange
-                                            .toString()
-                                            .startsWith("-")
-                                        ? Color(0xFFFF002E)
-                                        : Color(0xFF00FFA3),
+                                    color:
+                                        totalProfit.toString().startsWith("-")
+                                            ? Color(0xFFFF002E)
+                                            : Color(0xFF00FFA3),
                                   ),
                                   SizedBox(width: 5),
                                   Text(
-                                    "$_balanceChange USD ($_percentageChange%)",
+                                    "${totalProfit.toStringAsFixed(2)} USD (${totalPercentage.toStringAsFixed(3)}%)",
                                     style: TextStyle(
                                       fontWeight: FontWeight.w700,
                                       fontSize: 12,
-                                      color: _balanceChange
-                                              .toString()
-                                              .startsWith("-")
-                                          ? Color(0xFFFF002E)
-                                          : Color(0xFF00FFA3),
+                                      color:
+                                          totalProfit.toString().startsWith("-")
+                                              ? Color(0xFFFF002E)
+                                              : Color(0xFF00FFA3),
                                     ),
                                   ),
                                 ],
@@ -777,6 +807,19 @@ class _HomePageState extends State<HomePage> {
                                                   fit: BoxFit.cover,
                                                   image:
                                                       NetworkImage(news.image),
+                                                  errorBuilder: (BuildContext
+                                                          context,
+                                                      Object exception,
+                                                      StackTrace? stackTrace) {
+                                                    // สร้างวิตเจ็ตแสดงถ้าเกิดข้อผิดพลาดในการโหลดรูปภาพ
+                                                    return Center(
+                                                      child: Text(
+                                                        'ไม่สามารถโหลดรูปภาพได้',
+                                                        style: TextStyle(
+                                                            fontSize: 22),
+                                                      ),
+                                                    );
+                                                  },
                                                   width: MediaQuery.of(context)
                                                       .size
                                                       .width,
