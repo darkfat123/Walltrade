@@ -27,6 +27,7 @@ class _WalletPageState extends State<WalletPage> {
   double TH_balance = 0;
   double totalBalance = 0;
   double US_cash = 0;
+  double TH_Fiat = 0;
   double TH_percentage = 0;
   double TH_totalProfit = 0;
   double totalPercentage = 0;
@@ -40,6 +41,7 @@ class _WalletPageState extends State<WalletPage> {
   bool isWatchlistVisible = true;
   List<dynamic> positions = [];
   List<PositData> _positDataList = [];
+  double chart = 0;
   _WalletPageState({required this.username});
 
   bool hideBalance = false;
@@ -135,9 +137,11 @@ class _WalletPageState extends State<WalletPage> {
     if (response.statusCode == 200) {
       var data2 = jsonDecode(response.body);
       var th_cash = data2['balance'];
+      var th_fiat = data2['lineAvailable'];
 
       setState(() {
         TH_balance = double.parse(th_cash);
+        TH_Fiat = double.parse(th_fiat);
       });
     }
     totalBalance = _walletBalance + TH_balance;
@@ -492,15 +496,11 @@ class _WalletPageState extends State<WalletPage> {
                       children: [
                         CircularPercentIndicator(
                           radius: 50,
-                          lineWidth: 10.0,
+                          lineWidth: 30.0,
                           backgroundColor: Colors.red,
                           animation: true,
                           animationDuration: 1000,
-                          percent: 0.81,
-                          center: new Text(
-                            "81%",
-                            style: TextStyle(color: Colors.white, fontSize: 16),
-                          ),
+                          percent: 0.3463,
                           progressColor: Color(0xFF068DA9),
                         ),
                         SizedBox(
@@ -540,7 +540,7 @@ class _WalletPageState extends State<WalletPage> {
                                   style: TextStyle(color: Colors.white),
                                 ),
                                 Text(
-                                  "546700",
+                                  TH_Fiat.toString(),
                                   style: TextStyle(color: Colors.white),
                                 ),
                               ],
