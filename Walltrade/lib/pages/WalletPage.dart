@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:Walltrade/model/walletChart.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -10,6 +11,7 @@ import 'package:syncfusion_flutter_treemap/treemap.dart';
 import 'Treemap.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:flutter_circle_chart/flutter_circle_chart.dart';
 
 class WalletPage extends StatefulWidget {
   final String username;
@@ -24,11 +26,13 @@ class _WalletPageState extends State<WalletPage> {
   double checkBalanceChange = 0;
   double TH_balance = 0;
   double totalBalance = 0;
+  double US_cash = 0;
   double TH_percentage = 0;
   double TH_totalProfit = 0;
   double totalPercentage = 0;
   double totalProfit = 0;
   String formattedProfit = '';
+  String formatted_usCash = '';
   double _balanceChange = 0;
   double _percentageChange = 0;
   bool isTHStocksSelected = true;
@@ -36,7 +40,6 @@ class _WalletPageState extends State<WalletPage> {
   bool isWatchlistVisible = true;
   List<dynamic> positions = [];
   List<PositData> _positDataList = [];
-  List<DataItem> dataset = [DataItem(0.2, "เงินสดไทย", Colors.red),DataItem(0.8,"เงินสดอเมริกา",Colors.yellow)];
   _WalletPageState({required this.username});
 
   bool hideBalance = false;
@@ -71,6 +74,32 @@ class _WalletPageState extends State<WalletPage> {
       }
     } else {
       print('Failed to fetch position data');
+    }
+  }
+
+  Future<void> getCash() async {
+    var url = Uri.parse('${Constants.serverUrl}/getCash');
+    var headers = {'Content-Type': 'application/x-www-form-urlencoded'};
+    var body = {'username': username};
+
+    try {
+      var response = await http.post(url, headers: headers, body: body);
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        var walletBalance = data['wallet_balance'];
+        setState(
+          () {
+            US_cash = double.parse(walletBalance);
+          },
+        );
+        formatted_usCash = NumberFormat('#,###.##', 'en_US').format(US_cash);
+        print("fiat: $formatted_usCash");
+      } else {
+        throw Exception(
+            'Failed to retrieve wallet balance. Error: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
     }
   }
 
@@ -146,7 +175,6 @@ class _WalletPageState extends State<WalletPage> {
         var data2 = jsonDecode(response2.body);
         var balanceChange = data2['balance_change'];
         var percentageChange = data2['percentage_change'];
-        var test = 1500000;
         setState(() {
           _balanceChange = balanceChange;
           print("US totalProfit: $_balanceChange");
@@ -172,21 +200,8 @@ class _WalletPageState extends State<WalletPage> {
     super.initState();
     getBalance();
     getBalanceChange();
+    getCash();
     fetchPositionData();
-  }
-
-  void selectTHStocks() {
-    setState(() {
-      isTHStocksSelected = true;
-      isUSStocksSelected = false;
-    });
-  }
-
-  void selectUSStocks() {
-    setState(() {
-      isTHStocksSelected = false;
-      isUSStocksSelected = true;
-    });
   }
 
   @override
@@ -350,11 +365,10 @@ class _WalletPageState extends State<WalletPage> {
                               color: Colors.white,
                             ),
                           ),
-                          
                           TextSpan(
                             text: hideBalance
                                 ? "\n\u2248 **** บาท"
-                                : "\u2248 ${NumberFormat('#,###.##', 'en_US').format(totalBalance*33)} บาท",
+                                : "\u2248 ${NumberFormat('#,###.##', 'en_US').format(totalBalance * 33)} บาท",
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
@@ -404,7 +418,6 @@ class _WalletPageState extends State<WalletPage> {
                   ],
                 ),
               ),
-
               GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -480,6 +493,7 @@ class _WalletPageState extends State<WalletPage> {
                         CircularPercentIndicator(
                           radius: 50,
                           lineWidth: 10.0,
+                          backgroundColor: Colors.red,
                           animation: true,
                           animationDuration: 1000,
                           percent: 0.81,
@@ -492,15 +506,44 @@ class _WalletPageState extends State<WalletPage> {
                         SizedBox(
                           height: 8,
                         ),
-                        Column(
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            Text(
-                              "เงินสด",
-                              style: TextStyle(color: Colors.white),
+                            Icon(
+                              Icons.circle,
+                              color: Colors.blue,
+                              size: 16,
                             ),
-                            Text(
-                              "546700",
-                              style: TextStyle(color: Colors.white),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "เงินสดอเมริกา",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                Text(
+                                  formatted_usCash,
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ],
+                            ),
+                            Icon(
+                              Icons.circle,
+                              color: Colors.red,
+                              size: 16,
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "เงินสดไทย",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                Text(
+                                  "546700",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ],
                             ),
                           ],
                         ),

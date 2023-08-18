@@ -71,7 +71,6 @@ class _TradePageOptionsState extends State<TradePageOptions>
 
     try {
       var response = await http.post(url, headers: headers, body: body);
-
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
         var walletBalance = data['wallet_balance'];
