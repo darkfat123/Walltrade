@@ -12,7 +12,6 @@ import '../model/news.dart';
 import '../variables/serverURL.dart';
 import 'package:intl/intl.dart';
 
-
 class HomePage extends StatefulWidget {
   final String username;
   HomePage({required this.username});
@@ -156,8 +155,8 @@ class _HomePageState extends State<HomePage> {
           var percentage = item['percentage'];
           setState(() {
             stockSymbols.add(symbol);
-            stockPrices[symbol] = price;
-            stockPercentage[symbol] = percentage;
+            stockPrices[symbol] = price.toDouble();
+            stockPercentage[symbol] = percentage.toDouble();
           });
         },
       );
@@ -399,7 +398,7 @@ class _HomePageState extends State<HomePage> {
                                   Text(
                                     'ซื้อขาย',
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 14,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
@@ -447,7 +446,7 @@ class _HomePageState extends State<HomePage> {
                                   Text(
                                     'คำสั่งเทรดอัตโนมัติ',
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 14,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
@@ -483,7 +482,7 @@ class _HomePageState extends State<HomePage> {
                                   Text(
                                     'คำถามที่พบบ่อย',
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 14,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
@@ -505,7 +504,7 @@ class _HomePageState extends State<HomePage> {
                                       "รายการเฝ้าดู",
                                       style: TextStyle(
                                           fontWeight: FontWeight.w600,
-                                          fontSize: 18),
+                                          fontSize: 16),
                                     ),
                                     SizedBox(
                                       width: 5,
@@ -534,7 +533,7 @@ class _HomePageState extends State<HomePage> {
                                       },
                                       child: Icon(
                                         Icons.info_outline,
-                                        size: 20,
+                                        size: 18,
                                       ),
                                     ),
                                   ],
@@ -631,7 +630,7 @@ class _HomePageState extends State<HomePage> {
                                     );
                                   },
                                   child: FaIcon(FontAwesomeIcons.trashAlt,
-                                      size: 18),
+                                      size: 16),
                                 ),
                               ],
                             ),
@@ -639,10 +638,7 @@ class _HomePageState extends State<HomePage> {
                           SizedBox(
                             height: 10,
                           ),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Color(0xFFECF8F9),
-                            ),
+                          Container(     
                             height: 110,
                             child: ans == '{error: Empty}'
                                 ? Center(
@@ -659,6 +655,9 @@ class _HomePageState extends State<HomePage> {
                                         child: CircularProgressIndicator(),
                                       )
                                     : Container(
+                                        decoration: BoxDecoration(
+                                          color: Color(0xFFECF8F9),
+                                        ),
                                         child: ListView.builder(
                                           scrollDirection: Axis.horizontal,
                                           itemCount: stockSymbols.length,
@@ -757,7 +756,7 @@ class _HomePageState extends State<HomePage> {
                                   "บทความและข่าวสาร",
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600,
-                                    fontSize: 18,
+                                    fontSize: 16,
                                   ),
                                 ),
                                 GestureDetector(
@@ -772,7 +771,7 @@ class _HomePageState extends State<HomePage> {
                                   child: Text(
                                     "เพิ่มเติม",
                                     style: TextStyle(
-                                      fontSize: 14,
+                                      fontSize: 12,
                                     ),
                                   ),
                                 ),
@@ -852,7 +851,7 @@ class _HomePageState extends State<HomePage> {
                                                   child: Text(
                                                     news.title,
                                                     style: TextStyle(
-                                                      fontSize: 15,
+                                                      fontSize: 14,
                                                       color: Colors.white,
                                                     ),
                                                   ),
@@ -893,7 +892,7 @@ class _HomePageState extends State<HomePage> {
                                                             style: TextStyle(
                                                                 color: Colors
                                                                     .white,
-                                                                fontSize: 10),
+                                                                fontSize: 10,fontWeight: FontWeight.w500),
                                                           ),
                                                         )
                                                       : Container(

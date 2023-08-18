@@ -526,12 +526,12 @@ class _WalletPageState extends State<WalletPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "เงินสดอเมริกา",
-                                  style: TextStyle(color: Colors.white),
+                                  "เงินอเมริกา",
+                                  style: TextStyle(color: Colors.white,fontSize: 12),
                                 ),
                                 Text(
                                   formatted_usCash,
-                                  style: TextStyle(color: Colors.white),
+                                  style: TextStyle(color: Colors.white,fontSize: 12),
                                 ),
                               ],
                             ),
@@ -544,12 +544,12 @@ class _WalletPageState extends State<WalletPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "เงินสดไทย",
-                                  style: TextStyle(color: Colors.white),
+                                  "เงินไทย",
+                                  style: TextStyle(color: Colors.white,fontSize: 12),
                                 ),
                                 Text(
                                   NumberFormat('#,###.#', 'en_US').format(TH_Fiat),
-                                  style: TextStyle(color: Colors.white),
+                                  style: TextStyle(color: Colors.white,fontSize: 12),
                                 ),
                               ],
                             ),
@@ -563,7 +563,7 @@ class _WalletPageState extends State<WalletPage> {
                       children: [
                         Container(
                           margin: EdgeInsets.only(right: 16),
-                          padding: EdgeInsets.all(12),
+                          padding: EdgeInsets.all(9),
                           decoration: BoxDecoration(
                             color: Color(0xFF2A3547),
                             borderRadius: BorderRadius.circular(10),
@@ -599,12 +599,12 @@ class _WalletPageState extends State<WalletPage> {
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Text(
-                                    "มูลค่าหุ้นไทย",
-                                    style: TextStyle(color: Colors.white),
+                                    "หุ้นไทย",
+                                    style: TextStyle(color: Colors.white,fontSize: 12),
                                   ),
                                   Text(
                                     NumberFormat('#,###.#', 'en_US').format(TH_marketValue),
-                                    style: TextStyle(color: Colors.white),
+                                    style: TextStyle(color: Colors.white,fontSize: 12),
                                   ),
                                 ],
                               ),
@@ -652,12 +652,12 @@ class _WalletPageState extends State<WalletPage> {
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Text(
-                                    "มูลค่าหุ้นอเมริกา",
-                                    style: TextStyle(color: Colors.white),
+                                    "หุ้นอเมริกา",
+                                    style: TextStyle(color: Colors.white,fontSize: 12),
                                   ),
                                   Text(
                                     NumberFormat('#,###.#', 'en_US').format(US_marketValue),
-                                    style: TextStyle(color: Colors.white),
+                                    style: TextStyle(color: Colors.white,fontSize: 12),
                                   ),
                                 ],
                               ),
