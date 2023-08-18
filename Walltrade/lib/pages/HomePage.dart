@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 import '../main.dart';
 import '../model/news.dart';
 import '../variables/serverURL.dart';
+import 'package:intl/intl.dart';
+
 
 class HomePage extends StatefulWidget {
   final String username;
@@ -311,7 +313,7 @@ class _HomePageState extends State<HomePage> {
                           Container(
                             alignment: Alignment.topCenter,
                             child: Text(
-                              '\$ ${totalBalance.toStringAsFixed(2)}',
+                              '\$${NumberFormat('#,##0.##', 'en_US').format(totalBalance)}',
                               style: TextStyle(
                                 fontSize: 40,
                                 letterSpacing: 1,

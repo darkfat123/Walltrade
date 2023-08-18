@@ -42,12 +42,13 @@ dependencies:
   flutter_spinkit: ^5.1.0
   font_awesome_flutter: ^10.4.0
   curved_labeled_navigation_bar: ^2.0.2
-  intl: ^0.17.0
+  intl: ^0.18.0
   flutter_octicons: ^0.3.0
   syncfusion_flutter_treemap: ^22.1.39
   fl_chart: ^0.63.0
   url_launcher: ^6.1.12
   percent_indicator: ^4.0.1
+  syncfusion_flutter_charts: ^22.2.9
   
 
 dev_dependencies:

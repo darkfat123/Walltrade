@@ -1,12 +1,15 @@
 import 'dart:convert';
+import 'package:Walltrade/model/walletChart.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import '../variables/serverURL.dart';
 import 'SettingsPage.dart';
 import 'HistoryAutoTrade.dart';
 import 'package:syncfusion_flutter_treemap/treemap.dart';
 import 'Treemap.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 class WalletPage extends StatefulWidget {
   final String username;
@@ -25,6 +28,7 @@ class _WalletPageState extends State<WalletPage> {
   double TH_totalProfit = 0;
   double totalPercentage = 0;
   double totalProfit = 0;
+  String formattedProfit = '';
   double _balanceChange = 0;
   double _percentageChange = 0;
   bool isTHStocksSelected = true;
@@ -32,6 +36,7 @@ class _WalletPageState extends State<WalletPage> {
   bool isWatchlistVisible = true;
   List<dynamic> positions = [];
   List<PositData> _positDataList = [];
+  List<DataItem> dataset = [DataItem(0.2, "เงินสดไทย", Colors.red),DataItem(0.8,"เงินสดอเมริกา",Colors.yellow)];
   _WalletPageState({required this.username});
 
   bool hideBalance = false;
@@ -98,7 +103,6 @@ class _WalletPageState extends State<WalletPage> {
     var body2 = {'username': username};
     var response =
         await http.post(url2, headers: headers2, body: jsonEncode(body2));
-
     if (response.statusCode == 200) {
       var data2 = jsonDecode(response.body);
       var th_cash = data2['balance'];
@@ -142,14 +146,15 @@ class _WalletPageState extends State<WalletPage> {
         var data2 = jsonDecode(response2.body);
         var balanceChange = data2['balance_change'];
         var percentageChange = data2['percentage_change'];
+        var test = 1500000;
         setState(() {
           _balanceChange = balanceChange;
           print("US totalProfit: $_balanceChange");
-
           _percentageChange = percentageChange;
           print("US percentage: $_percentageChange");
         });
         totalProfit = TH_totalProfit + _balanceChange;
+        formattedProfit = NumberFormat('#,###.##', 'en_US').format(totalProfit);
         totalPercentage = TH_percentage + _percentageChange;
         print("Total profit: $totalProfit");
         print("Total percentage: $totalPercentage");
@@ -292,7 +297,7 @@ class _WalletPageState extends State<WalletPage> {
                 margin: EdgeInsets.all(14),
                 padding: EdgeInsets.all(20),
                 width: double.infinity,
-                height: 150,
+                height: 160,
                 decoration: BoxDecoration(
                   color: Color(0xFF2A3547),
                   borderRadius: BorderRadius.circular(15),
@@ -332,17 +337,33 @@ class _WalletPageState extends State<WalletPage> {
                         ),
                       ],
                     ),
-                    Text(
-                      hideBalance
-                          ? "**** USD"
-                          : "${totalBalance.toStringAsFixed(2)} USD",
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: hideBalance
+                                ? "**** USD"
+                                : "${NumberFormat('#,###.##', 'en_US').format(totalBalance)} USD ",
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                          
+                          TextSpan(
+                            text: hideBalance
+                                ? "\n\u2248 **** บาท"
+                                : "\u2248 ${NumberFormat('#,###.##', 'en_US').format(totalBalance*33)} บาท",
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    SizedBox(height: 2),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
@@ -354,20 +375,22 @@ class _WalletPageState extends State<WalletPage> {
                             color: Colors.white,
                           ),
                         ),
-                        Text(
-                          totalProfit.toString().startsWith("-") ? " " : "+",
+                        /* Text(
+                          formattedProfit.startsWith("-")
+                              ? "$formattedProfit"
+                              : "+$formattedProfit",
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 12,
-                            color: totalProfit.toString().startsWith("-")
+                            color: formattedProfit.startsWith("-")
                                 ? Colors.red
                                 : Color(0xFF13B709),
                           ),
-                        ),
+                        ),*/
                         Text(
                           hideBalance
                               ? "**** USD (****)"
-                              : "${totalProfit.toStringAsFixed(2)} USD (${totalPercentage.toStringAsFixed(4)}%)",
+                              : "${formattedProfit.startsWith("-") ? "$formattedProfit" : "+$formattedProfit"} USD (${totalPercentage.toStringAsFixed(4)}%)",
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 12,
@@ -381,6 +404,7 @@ class _WalletPageState extends State<WalletPage> {
                   ],
                 ),
               ),
+
               GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -598,8 +622,8 @@ class _WalletPageState extends State<WalletPage> {
                 height: 16,
               ),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 4,vertical: 16),
-                margin: EdgeInsets.symmetric(horizontal:16),
+                padding: EdgeInsets.symmetric(horizontal: 4, vertical: 16),
+                margin: EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
@@ -768,7 +792,9 @@ class _WalletPageState extends State<WalletPage> {
                   ],
                 ),
               ),
-              SizedBox(height: 10,),
+              SizedBox(
+                height: 10,
+              ),
               Text(
                 "สินทรัพย์ที่มีอยู่",
                 style: TextStyle(
