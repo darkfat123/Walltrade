@@ -23,6 +23,7 @@ from bs4 import BeautifulSoup
 from forex_python.converter import CurrencyRates
 
 
+
 app = Flask(__name__)
 app.config['MYSQL_HOST'] = 'localhost'  # หรือ hostname ของเซิร์ฟเวอร์ MySQL
 app.config['MYSQL_USER'] = 'root'  # ชื่อผู้ใช้งานฐานข้อมูล
@@ -548,10 +549,9 @@ def get_positions():
     print(result)
     # Create the Alpaca REST API client
     api = REST(result[0], result[1], base_url='https://paper-api.alpaca.markets')
-    
     portfolio = api.list_positions()
     positions = []
-
+  
     for position in portfolio:
         position_data = {
             'symbol': position.symbol,
@@ -1039,13 +1039,15 @@ def th_portfolio():
     balance = f"{cashBalance * cash:.2f}"
     balanceProfitChange = f"{portfolio['totalPortfolio']['profit']* cash:.2f}"
     lineAvailable = f"{account_info.get('lineAvailable')* cash:.2f}"
-    print(account_info)
+    marketValue = f"{portfolio['totalPortfolio']['marketValue']* cash:.2f}"
+    print(f"marketValue: {marketValue}")
     print(f"balanceProfitChange: {balanceProfitChange}")
     result = {
         'balance': balance,
         'percentageChange': percentageChange,
         'balanceProfitChange' : balanceProfitChange,
-        'lineAvailable' : lineAvailable
+        'lineAvailable' : lineAvailable,
+        'marketValue' : marketValue
     }
 
     return jsonify(result)

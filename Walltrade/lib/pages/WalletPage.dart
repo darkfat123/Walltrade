@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:Walltrade/model/walletChart.dart';
+import 'package:Walltrade/pages/PortfolioDetail.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -35,7 +36,12 @@ class _WalletPageState extends State<WalletPage> {
   String formattedProfit = '';
   String formatted_usCash = '';
   double _balanceChange = 0;
+  double TH_marketValue = 0;
+  double US_marketValue = 0;
   double _percentageChange = 0;
+  double TH_chartMarketValue = 0;
+  double US_chartMarketValue = 0;
+  double totalFiat = 0;
   bool isTHStocksSelected = true;
   bool isUSStocksSelected = false;
   bool isWatchlistVisible = true;
@@ -66,7 +72,7 @@ class _WalletPageState extends State<WalletPage> {
         // Explicitly convert market_value and cost_basis to double
         double marketValue = double.parse(position['market_value']);
         double costBasis = double.parse(position['cost_basis']);
-
+        US_marketValue += marketValue;
         // เพิ่มข้อมูล PositData เข้าไปใน List ที่สร้างไว้
         _positDataList.add(PositData(
           position['symbol'],
@@ -95,7 +101,7 @@ class _WalletPageState extends State<WalletPage> {
           },
         );
         formatted_usCash = NumberFormat('#,###.##', 'en_US').format(US_cash);
-        print("fiat: $formatted_usCash");
+
       } else {
         throw Exception(
             'Failed to retrieve wallet balance. Error: ${response.body}');
@@ -138,12 +144,16 @@ class _WalletPageState extends State<WalletPage> {
       var data2 = jsonDecode(response.body);
       var th_cash = data2['balance'];
       var th_fiat = data2['lineAvailable'];
-
+      var th_marketValue = data2['marketValue'];
       setState(() {
         TH_balance = double.parse(th_cash);
         TH_Fiat = double.parse(th_fiat);
+        TH_marketValue = double.parse(th_marketValue);
       });
     }
+    TH_chartMarketValue = (TH_marketValue/TH_balance)*100;
+    US_chartMarketValue =(US_marketValue/US_cash)*100;
+    totalFiat =US_cash/TH_balance;
     totalBalance = _walletBalance + TH_balance;
   }
 
@@ -161,8 +171,7 @@ class _WalletPageState extends State<WalletPage> {
         setState(() {
           TH_percentage = data1['percentageChange'];
           TH_totalProfit = double.parse(data1['balanceProfitChange']);
-          print("TH totalProfit: $TH_totalProfit");
-          print("TH percentage: $TH_percentage");
+
         });
       } else {
         throw Exception(
@@ -181,15 +190,14 @@ class _WalletPageState extends State<WalletPage> {
         var percentageChange = data2['percentage_change'];
         setState(() {
           _balanceChange = balanceChange;
-          print("US totalProfit: $_balanceChange");
+
           _percentageChange = percentageChange;
-          print("US percentage: $_percentageChange");
+
         });
         totalProfit = TH_totalProfit + _balanceChange;
         formattedProfit = NumberFormat('#,###.##', 'en_US').format(totalProfit);
         totalPercentage = TH_percentage + _percentageChange;
-        print("Total profit: $totalProfit");
-        print("Total percentage: $totalPercentage");
+
       } else {
         throw Exception(
             'Failed to retrieve balance change. Error: ${response2.body}');
@@ -426,7 +434,7 @@ class _WalletPageState extends State<WalletPage> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => TreemapState()),
+                    MaterialPageRoute(builder: (context) => PortfolioDetailPage(username: username)),
                   );
                 },
                 child: Container(
@@ -500,7 +508,7 @@ class _WalletPageState extends State<WalletPage> {
                           backgroundColor: Colors.red,
                           animation: true,
                           animationDuration: 1000,
-                          percent: 0.3463,
+                          percent: totalFiat,
                           progressColor: Color(0xFF068DA9),
                         ),
                         SizedBox(
@@ -540,7 +548,7 @@ class _WalletPageState extends State<WalletPage> {
                                   style: TextStyle(color: Colors.white),
                                 ),
                                 Text(
-                                  TH_Fiat.toString(),
+                                  NumberFormat('#,###.#', 'en_US').format(TH_Fiat),
                                   style: TextStyle(color: Colors.white),
                                 ),
                               ],
@@ -577,9 +585,9 @@ class _WalletPageState extends State<WalletPage> {
                                 lineWidth: 10.0,
                                 animation: true,
                                 animationDuration: 1000,
-                                percent: 0.38,
+                                percent: TH_chartMarketValue/100,
                                 center: new Text(
-                                  "38%",
+                                  "${TH_chartMarketValue.toStringAsFixed(0)}%",
                                   style: TextStyle(color: Colors.white),
                                 ),
                                 progressColor: Colors.yellow,
@@ -595,7 +603,7 @@ class _WalletPageState extends State<WalletPage> {
                                     style: TextStyle(color: Colors.white),
                                   ),
                                   Text(
-                                    "295400",
+                                    NumberFormat('#,###.#', 'en_US').format(TH_marketValue),
                                     style: TextStyle(color: Colors.white),
                                   ),
                                 ],
@@ -630,9 +638,9 @@ class _WalletPageState extends State<WalletPage> {
                                 lineWidth: 10.0,
                                 animation: true,
                                 animationDuration: 1000,
-                                percent: 0.46,
+                                percent: US_chartMarketValue/100,
                                 center: new Text(
-                                  "46%",
+                                  "${US_chartMarketValue.toStringAsFixed(0)}%",
                                   style: TextStyle(color: Colors.white),
                                 ),
                                 progressColor: Colors.red,
@@ -648,7 +656,7 @@ class _WalletPageState extends State<WalletPage> {
                                     style: TextStyle(color: Colors.white),
                                   ),
                                   Text(
-                                    "295400",
+                                    NumberFormat('#,###.#', 'en_US').format(US_marketValue),
                                     style: TextStyle(color: Colors.white),
                                   ),
                                 ],
