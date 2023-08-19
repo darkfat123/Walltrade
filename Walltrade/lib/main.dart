@@ -6,6 +6,7 @@ import 'package:Walltrade/primary.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'pages/HomePage.dart';
+import 'pages/PortfolioDetail.dart';
 import 'pages/PredictPage.dart';
 
 import 'package:Walltrade/pages/SearchPage.dart';
@@ -26,7 +27,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: primary,
         fontFamily: "IBMPlexSansThai",
       ),
-      home: Home(username: "foczz123",initialIndex:4),
+      home: PortfolioDetailPage(username: 'foczz123',) //Home(username: "foczz123",initialIndex:4),
     );
   }
 }

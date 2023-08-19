@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class PortfolioDetailPage extends StatefulWidget {
   final String username;
@@ -30,6 +31,13 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
     super.dispose();
   }
 
+  bool hideBalance = false;
+  void toggleBalanceVisibility() {
+    setState(() {
+      hideBalance = !hideBalance;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -39,33 +47,73 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
         ),
         body: SingleChildScrollView(
           child: Container(
-            padding: EdgeInsets.all(16),
-            margin: EdgeInsets.all(16),
-            height: 200,
+            padding: EdgeInsets.all(8),
+            margin: EdgeInsets.all(8),
             child: Column(
               children: [
-                
-                Expanded(
-                  child: PageView(
-                    controller: pageController, // ใช้ PageController
-                    children: [
-                      Container(
-                        color: Colors.blue, // สีหน้า TH Wallet
-                        child: Center(
-                          child: Text(
-                            'TH Wallet', // ข้อความหน้า TH Wallet
-                            style: TextStyle(fontSize: 24, color: Colors.white),
-                          ),
-                        ),
+                Container(
+                  margin: EdgeInsets.all(14),
+                  padding: EdgeInsets.all(20),
+                  width: double.infinity,
+                  height: 160,
+                  decoration: BoxDecoration(
+                    color: Color(0xFF2A3547),
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset:
+                            Offset(0, 3), // changes the position of the shadow
                       ),
-                      Container(
-                        color: Colors.red, // สีหน้า US Wallet
-                        child: Center(
-                          child: Text(
-                            'US Wallet', // ข้อความหน้า US Wallet
-                            style: TextStyle(fontSize: 24, color: Colors.white),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "ยอดเงินคงเหลือ",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.white,
+                            ),
                           ),
-                        ),
+                          InkWell(
+                            onTap: toggleBalanceVisibility,
+                            child: Icon(
+                              hideBalance
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text(
+                            "กำไร/ขาดทุนสุทธิวันนี้: ",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            hideBalance ? "**** USD (****)" : "10 USD (5%)",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -81,4 +129,3 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
     );
   }
 }
-
