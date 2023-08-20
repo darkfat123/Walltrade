@@ -38,7 +38,7 @@ class _USTreemapState extends State<USTreemapState> {
       for (var position in positions) {
         // Explicitly convert market_value and cost_basis to double
         double marketValue = double.parse(position['market_value']);
-        double costBasis = double.parse(position['cost_basis']);
+        double costBasis = double.parse(position['avg_entry_price']);
 
         // เพิ่มข้อมูล PositData เข้าไปใน List ที่สร้างไว้
         _positDataList.add(PositData(
@@ -58,7 +58,7 @@ class _USTreemapState extends State<USTreemapState> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFF212436),
-        title: Text('Treemap Chart'),
+        title: Text('Treemap Chart หุ้นอเมริกา'),
       ),
       body: positions.isEmpty // Check if positions list is empty
           ? Center(
@@ -100,10 +100,10 @@ class _USTreemapState extends State<USTreemapState> {
                   labelBuilder: (BuildContext context, TreemapTile tile) {
                     // Function to calculate font size based on weight value
                     double getFontSize(double weight) {
-                      if (weight < 50) return 4;
+                      if (weight < 50) return 8;
                       if (weight < 100) return 12;
-                      if (weight < 1000) return 14;
-                      return 18;
+                      if (weight < 1000) return 16;
+                      return 20;
                     }
 
                     double fontSize = getFontSize(tile.weight);

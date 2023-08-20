@@ -33,8 +33,7 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
     getBalance();
     fetchPositionData();
     getCash();
-    US_totalChart =US_Fiat/US_marketValue;
-    print(US_totalChart);
+
     tabController = TabController(length: 2, vsync: this);
   }
 
@@ -54,7 +53,7 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
   double _walletBalance = 0;
   double TH_balance = 0;
   double TH_Fiat = 0;
-  double US_Fiat = 0;
+  double US_Fiat = 0.1;
   double TH_marketValue = 0;
   double US_marketValue = 0;
   double TH_chartMarketValue = 0;
@@ -115,17 +114,12 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
         TH_totalChart = TH_marketValue / TH_Fiat;
         TH_ListAssets = portfolioList;
       });
-      print(TH_ListAssets);
     }
 
-    print(TH_marketValue);
     TH_chartMarketValue = (TH_marketValue / TH_balance) * 100;
     US_chartMarketValue = (US_marketValue / US_cash) * 100;
     totalFiat = US_cash / TH_balance;
     totalBalance = _walletBalance + TH_balance;
-    print(TH_Fiat);
-
-    print(US_cash);
   }
 
   Future<void> getCash() async {
@@ -138,17 +132,45 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
         var walletBalance = data['wallet_balance'];
-        double US_profit = 0;
+
         setState(
           () {
             US_Fiat = double.parse(walletBalance);
-            US_profit = US_Fiat/US_cash;
           },
         );
-        print(US_profit);
       } else {
         throw Exception(
             'Failed to retrieve wallet balance. Error: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+  }
+
+  double _balanceChange = 0;
+  double _percentageChange = 0;
+  Future<void> getBalanceChange() async {
+    // US HTTP request
+    var url2 = Uri.parse('${Constants.serverUrl}/get_balance_change');
+    var headers2 = {'Content-Type': 'application/json'};
+    var body2 = jsonEncode({'username': username});
+
+    var response2 = await http.post(url2, headers: headers2, body: body2);
+    try {
+      if (response2.statusCode == 200) {
+        var data2 = jsonDecode(response2.body);
+        var balanceChange = data2['balance_change'];
+        var percentageChange = data2['percentage_change'];
+        setState(() {
+          _balanceChange = balanceChange;
+          print("US totalProfit: $_balanceChange");
+
+          _percentageChange = percentageChange;
+          print("US percentage: $_percentageChange");
+        });
+      } else {
+        throw Exception(
+            'Failed to retrieve balance change. Error: ${response2.body}');
       }
     } catch (e) {
       throw Exception('Error: $e');
@@ -171,14 +193,16 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
         // Explicitly convert market_value and cost_basis to double
         double marketValue = double.parse(position['market_value']);
         double costBasis = double.parse(position['avg_entry_price']);
+        double unrealized_pl = double.parse(position['unrealized_pl']);
+        double unrealized_plpc = double.parse(position['unrealized_plpc']);
         US_marketValue += marketValue;
         // เพิ่มข้อมูล PositData เข้าไปใน List ที่สร้างไว้
-        _positDataList.add(PositData(
-          position['symbol'],
-          marketValue,
-          costBasis,
-        ));
+        _positDataList.add(PositData(position['symbol'], marketValue, costBasis,
+            unrealized_pl, unrealized_plpc));
       }
+      print("US Fiat: $US_Fiat");
+      print("US Market: $US_marketValue");
+      US_totalChart = (US_marketValue / US_Fiat);
     } else {
       print('Failed to fetch position data');
     }
@@ -251,7 +275,9 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                           ],
                         ),
                         Text(
-                          "${NumberFormat('#,###.##', 'en_US').format(TH_balance)} USD ",
+                          hideBalance
+                              ? "**** USD (****)"
+                              : "${NumberFormat('#,###.##', 'en_US').format(TH_balance)} USD ",
                           style: TextStyle(
                             fontSize: 30,
                             fontWeight: FontWeight.w600,
@@ -342,7 +368,9 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                           ],
                         ),
                         Text(
-                          "${NumberFormat('#,###.##', 'en_US').format(US_cash)} USD ",
+                          hideBalance
+                              ? "**** USD (****)"
+                              : "${NumberFormat('#,###.##', 'en_US').format(US_cash)} USD ",
                           style: TextStyle(
                             fontSize: 30,
                             fontWeight: FontWeight.w600,
@@ -370,12 +398,12 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                               child: Text(
                                 hideBalance
                                     ? "**** USD (****)"
-                                    : "${NumberFormat('#,###.##', 'en_US').format(TH_ProfitChange).startsWith("-") ? "$TH_ProfitChange" : "+$TH_ProfitChange"} USD (${TH_percentageChange.toStringAsFixed(4)}%)",
+                                    : "${NumberFormat('#,###.##', 'en_US').format(_balanceChange).startsWith("-") ? "$_balanceChange" : "+$_balanceChange"} USD (${_percentageChange.toStringAsFixed(4)}%)",
                                 style: TextStyle(
                                   fontWeight: FontWeight.w700,
                                   fontSize: 12,
                                   color:
-                                      TH_ProfitChange.toString().startsWith("-")
+                                      _balanceChange.toString().startsWith("-")
                                           ? Colors.red
                                           : Color(0xFF13B709),
                                 ),
@@ -436,7 +464,7 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                               children: [
                                 CircularPercentIndicator(
                                   radius: 50,
-                                  lineWidth: 30.0,
+                                  lineWidth: 25.0,
                                   backgroundColor: Color(0xFF068DA9),
                                   animation: true,
                                   animationDuration: 1000,
@@ -444,7 +472,21 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                                   progressColor: Colors.red,
                                 ),
                                 SizedBox(
-                                  height: 20,
+                                  height: 10,
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    Text(
+                                        "${(100 - TH_totalChart * 100).toStringAsFixed(1)}%"),
+                                    Text("ต่อ"),
+                                    Text(
+                                        "${(TH_totalChart * 100).toStringAsFixed(1)}%"),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 10,
                                 ),
                                 Row(
                                   mainAxisAlignment:
@@ -486,9 +528,11 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                                                     fontSize: 14),
                                               ),
                                               Text(
-                                                NumberFormat(
-                                                        '#,###.##', 'en_US')
-                                                    .format(TH_Fiat),
+                                                hideBalance
+                                                    ? "****"
+                                                    : NumberFormat(
+                                                            '#,###.##', 'en_US')
+                                                        .format(TH_Fiat),
                                                 style: TextStyle(
                                                     color: Colors.black,
                                                     fontSize: 14),
@@ -533,7 +577,9 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                                                     color: Colors.black,
                                                     fontSize: 14),
                                               ),
-                                              Text(
+                                              Text(hideBalance
+                                                    ? "****"
+                                                    : 
                                                 NumberFormat('#,###.#', 'en_US')
                                                     .format(TH_marketValue),
                                                 style: TextStyle(
@@ -597,6 +643,7 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                               itemCount: TH_ListAssets.length,
                               itemBuilder: (context, index) {
                                 var item = TH_ListAssets[index];
+                                print((item['percentProfit'].runtimeType));
                                 return Container(
                                   margin: EdgeInsets.symmetric(
                                       vertical: 4, horizontal: 6),
@@ -630,7 +677,9 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                                               vertical: 2, horizontal: 10),
                                           child: Row(
                                             children: [
-                                              Text(
+                                              Text(hideBalance
+                                                    ? "****"
+                                                    : 
                                                 "${NumberFormat('#,###.#', 'en_US').format(item['profit'])}\u0E3F",
                                                 style: TextStyle(
                                                     color: NumberFormat(
@@ -679,13 +728,17 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                                           'ราคาเฉลี่ยต่อหน่วย: ${item['averagePrice']}',
                                           style: TextStyle(fontSize: 12),
                                         ),
-                                        Text(
+                                        Text(hideBalance
+                                                    ? "****"
+                                                    : 
                                           'มูลค่าทั้งหมด: ${NumberFormat('#,###.#', 'en_US').format(item['amount'])} บาท',
                                           style: TextStyle(fontSize: 12),
                                         ),
                                       ],
                                     ),
-                                    trailing: Text(
+                                    trailing: Text(hideBalance
+                                                    ? "****"
+                                                    : 
                                       'จำนวน: ${NumberFormat('#,###.#', 'en_US').format(item['actualVolume'])} หน่วย',
                                       style: TextStyle(fontSize: 14),
                                     ),
@@ -729,11 +782,25 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                                 backgroundColor: Color(0xFF068DA9),
                                 animation: true,
                                 animationDuration: 1000,
-                                percent: TH_totalChart,
+                                percent: US_totalChart,
                                 progressColor: Colors.red,
                               ),
                               SizedBox(
-                                height: 20,
+                                height: 10,
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  Text(
+                                      "${(100 - US_totalChart * 100).toStringAsFixed(1)}%"),
+                                  Text("ต่อ"),
+                                  Text(
+                                      "${(US_totalChart * 100).toStringAsFixed(1)}%"),
+                                ],
+                              ),
+                              SizedBox(
+                                height: 10,
                               ),
                               Row(
                                 mainAxisAlignment:
@@ -774,7 +841,9 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                                                   color: Colors.black,
                                                   fontSize: 14),
                                             ),
-                                            Text(
+                                            Text(hideBalance
+                                                    ? "****"
+                                                    : 
                                               NumberFormat('#,###.##', 'en_US')
                                                   .format(US_Fiat),
                                               style: TextStyle(
@@ -816,12 +885,14 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                                               CrossAxisAlignment.end,
                                           children: [
                                             Text(
-                                              "หุ้นไทย",
+                                              "หุ้นอเมริกา",
                                               style: TextStyle(
                                                   color: Colors.black,
                                                   fontSize: 14),
                                             ),
-                                            Text(
+                                            Text(hideBalance
+                                                    ? "****"
+                                                    : 
                                               NumberFormat('#,###.#', 'en_US')
                                                   .format(US_marketValue),
                                               style: TextStyle(
@@ -884,6 +955,7 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                             itemCount: positions.length,
                             itemBuilder: (context, index) {
                               var position = positions[index];
+
                               return Container(
                                 margin: EdgeInsets.symmetric(
                                     vertical: 4, horizontal: 6),
@@ -913,6 +985,65 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                                       SizedBox(
                                         width: 8,
                                       ),
+                                      Container(
+                                        padding: EdgeInsets.symmetric(
+                                            vertical: 2, horizontal: 10),
+                                        child: Row(
+                                          children: [
+                                            position['unrealized_pl']
+                                                    .toString()
+                                                    .startsWith('-')
+                                                ? Text(
+                                                  hideBalance
+                                                    ? "****"
+                                                    : 
+                                                    "\u0024${NumberFormat('#,###.#', 'en_US').format(double.parse(position['unrealized_pl']))}",
+                                                    style: TextStyle(
+                                                        color: position[
+                                                                    'unrealized_pl']
+                                                                .toString()
+                                                                .startsWith('-')
+                                                            ? Color(0xFFFF002E)
+                                                            : Color(0xFF0AFF96),
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.w700),
+                                                  )
+                                                : Text(
+                                                  hideBalance
+                                                    ? "****"
+                                                    : 
+                                                    "\u0024+${NumberFormat('#,###.#', 'en_US').format(double.parse(position['unrealized_pl']))}",
+                                                    style: TextStyle(
+                                                        color: position[
+                                                                    'unrealized_pl']
+                                                                .toString()
+                                                                .startsWith('-')
+                                                            ? Color(0xFFFF002E)
+                                                            : Color(0xFF0AFF96),
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.w700),
+                                                  ),
+                                            SizedBox(
+                                              width: 8,
+                                            ),
+                                            Text(
+                                              
+                                              "(${NumberFormat('#,###.##', 'en_US').format(double.parse(position['unrealized_plpc']))}%)",
+                                              style: TextStyle(
+                                                  color: position[
+                                                              'unrealized_plpc']
+                                                          .toString()
+                                                          .startsWith('-')
+                                                      ? Color(0xFFFF002E)
+                                                      : Color(0xFF0AFF96),
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w700),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     ],
                                   ),
                                   subtitle: Column(
@@ -923,19 +1054,25 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                                         height: 8,
                                       ),
                                       Text(
-                                        'ราคาเฉลี่ยต่อหน่วย: ${position['avg_entry_price']}',
+                                        'ราคาเฉลี่ยต่อหน่วย: ${NumberFormat('#,###.#', 'en_US').format(double.parse(position['avg_entry_price']))}',
                                         style: TextStyle(
                                             fontSize: 12, color: Colors.white),
                                       ),
                                       Text(
-                                        'มูลค่าทั้งหมด: ${position['market_value']} บาท',
+                                        hideBalance
+                                                    ? "****"
+                                                    : 
+                                        'มูลค่าทั้งหมด: ${NumberFormat('#,###.#', 'en_US').format(double.parse(position['market_value']))}',
                                         style: TextStyle(
                                             fontSize: 12, color: Colors.white),
                                       ),
                                     ],
                                   ),
                                   trailing: Text(
-                                    'จำนวน: ${position['quantity']} หน่วย',
+                                    hideBalance
+                                                    ? "****"
+                                                    : 
+                                    'จำนวน: ${NumberFormat('#,###.###', 'en_US').format(double.parse(position['quantity']))} หน่วย',
                                     style: TextStyle(
                                         fontSize: 14, color: Colors.white),
                                   ),
@@ -962,5 +1099,9 @@ class PositData {
   final double marketValue;
   final double costBasis;
 
-  PositData(this.symbol, this.marketValue, this.costBasis);
+  final double unrealized_pl;
+  final double unrealized_plpc;
+
+  PositData(this.symbol, this.marketValue, this.costBasis, this.unrealized_pl,
+      this.unrealized_plpc);
 }

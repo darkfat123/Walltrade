@@ -553,14 +553,16 @@ def get_positions():
 
     print(portfolio)
     positions = []
-    
     for position in portfolio:
         position_data = {
             'symbol': position.symbol,
             'market_value': "%.2f"%float(position.market_value),
             'avg_entry_price': "%.2f"%float(position.avg_entry_price),
-            'quantity': position.qty_available
+            'quantity': position.qty_available,
+            'unrealized_pl': position.unrealized_pl,
+            'unrealized_plpc': position.unrealized_plpc
         }
+        print(type(position.unrealized_pl))
         positions.append(position_data)
     
     return jsonify(positions)
