@@ -695,7 +695,7 @@ class _WalletPageState extends State<WalletPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => TreemapState()),
+                              builder: (context) => TreemapState(username: username,)),
                         );
                       },
                       child: Container(

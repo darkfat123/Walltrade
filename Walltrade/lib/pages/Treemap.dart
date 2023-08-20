@@ -4,15 +4,20 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_treemap/treemap.dart';
 
-
 class TreemapState extends StatefulWidget {
+  final String username;
+  TreemapState({required this.username});
   @override
-  _TreemapState createState() => _TreemapState();
+  _TreemapState createState() => _TreemapState(username:username);
 }
+
 
 class _TreemapState extends State<TreemapState> {
   List<PositData> _positDataList = [];
   List<dynamic> positions = [];
+  final String username;
+   _TreemapState({required this.username});
+  
 
   @override
   void initState() {
@@ -23,7 +28,7 @@ class _TreemapState extends State<TreemapState> {
   Future<void> fetchPositionData() async {
     var url = Uri.parse('${Constants.serverUrl}/position');
     var headers = {'Content-Type': 'application/json'};
-    var body = jsonEncode({'username': 'foczz123'});
+    var body = jsonEncode({'username': username});
     final response = await http.post(url, headers: headers, body: body);
 
     if (response.statusCode == 200) {

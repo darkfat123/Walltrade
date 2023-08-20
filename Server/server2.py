@@ -1040,17 +1040,31 @@ def th_portfolio():
     balanceProfitChange = f"{portfolio['totalPortfolio']['profit']* cash:.2f}"
     lineAvailable = f"{account_info.get('lineAvailable')* cash:.2f}"
     marketValue = f"{portfolio['totalPortfolio']['marketValue']* cash:.2f}"
-    print(f"marketValue: {marketValue}")
-    print(f"balanceProfitChange: {balanceProfitChange}")
+    print(portfolio['portfolioList'])
+
+    portfolio_list = []
+    for item in portfolio['portfolioList']:
+        symbol = item['symbol']
+        averagePrice = item['averagePrice']
+        amount = item['amount']
+        actualVolume = item['actualVolume']
+        profit = item['profit']
+        percentProfit = item['percentProfit']
+        portfolio_list.append({'symbol': symbol, 'averagePrice': averagePrice, 'amount': amount,'actualVolume': actualVolume,'profit':profit,'percentProfit':percentProfit})
+
+
     result = {
         'balance': balance,
         'percentageChange': percentageChange,
         'balanceProfitChange' : balanceProfitChange,
         'lineAvailable' : lineAvailable,
-        'marketValue' : marketValue
+        'marketValue' : marketValue,
+        'portfolioList': portfolio_list
     }
 
     return jsonify(result)
+
+
 
 @app.route('/place_order_th', methods=['POST'])
 def place_order_th():

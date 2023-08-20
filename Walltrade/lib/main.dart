@@ -12,6 +12,7 @@ import 'pages/PredictPage.dart';
 import 'package:Walltrade/pages/SearchPage.dart';
 import 'pages/WalletPage.dart';
 
+
 void main() {
   runApp(const MyApp());
 }
