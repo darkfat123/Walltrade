@@ -58,44 +58,53 @@ class _WalletPageState extends State<WalletPage> {
     });
   }
 
-  Future<void> fetchPositionData() async {
-    var url = Uri.parse('${Constants.serverUrl}/position');
-    var headers = {'Content-Type': 'application/json'};
-    var body = jsonEncode({'username': username});
-    final positDataList = <PositData>[];
-    final response = await http.post(url, headers: headers, body: body);
+    Future<void> fetchPositionData() async {
+    try {
+      final url = Uri.parse('${Constants.serverUrl}/position');
+      final headers = {'Content-Type': 'application/json'};
+      final body = jsonEncode({'username': username});
 
-    if (response.statusCode == 200) {
-      setState(() {
-        positions = json.decode(response.body);
-      });
+      final response = await http.post(url, headers: headers, body: body);
 
-      for (var position in positions) {
-        // Explicitly convert market_value and cost_basis to double
-        double marketValue = double.parse(position['market_value']);
+      if (response.statusCode == 200) {
+        final positions = json.decode(response.body) as List<dynamic>;
 
-        US_marketValue += marketValue;
-        // เพิ่มข้อมูล PositData เข้าไปใน List ที่สร้างไว้
-        positDataList.add(PositData(
-          position['symbol'],
-          marketValue,
-          "US",
-        ));
+        final positDataList = <PositData>[];
+
+        for (final position in positions) {
+          final marketValue = double.parse(position['market_value']);
+          positDataList.add(PositData(
+            position['symbol'],
+            marketValue,
+            "US", // You might want to use "US" or other logic here
+          ));
+        }
+
+        final url2 = Uri.parse('${Constants.serverUrl}/th_portfolio');
+        final body2 = {'username': username};
+
+        final response2 =
+            await http.post(url2, headers: headers, body: jsonEncode(body2));
+
+        if (response2.statusCode == 200) {
+          final data2 = jsonDecode(response2.body);
+          final portfolioList = data2['portfolioList'] as List<dynamic>;
+
+          for (final port in portfolioList) {
+            positDataList.add(PositData(
+              port['symbol'],
+              port['amount'] / 34,
+              "TH",
+            ));
+          }
+        }
+
+        setState(() {
+          _positDataList = positDataList;
+        });
       }
-      final url2 = Uri.parse('${Constants.serverUrl}/th_portfolio');
-      final body2 = {'username': username};
-
-
-
-      
-
-     
-
-      setState(() {
-        _positDataList = positDataList;
-      });
-    } else {
-      print('Failed to fetch position data');
+    } catch (error) {
+      print('An error occurred: $error');
     }
   }
 
