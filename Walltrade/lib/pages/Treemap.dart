@@ -2,22 +2,21 @@ import 'dart:convert';
 import 'package:Walltrade/variables/serverURL.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_treemap/treemap.dart';
 
 class TreemapState extends StatefulWidget {
   final String username;
   TreemapState({required this.username});
   @override
-  _TreemapState createState() => _TreemapState(username:username);
+  _TreemapState createState() => _TreemapState(username: username);
 }
-
 
 class _TreemapState extends State<TreemapState> {
   List<PositData> _positDataList = [];
   List<dynamic> positions = [];
   final String username;
-   _TreemapState({required this.username});
-  
+  _TreemapState({required this.username});
 
   @override
   void initState() {
@@ -26,30 +25,52 @@ class _TreemapState extends State<TreemapState> {
   }
 
   Future<void> fetchPositionData() async {
-    var url = Uri.parse('${Constants.serverUrl}/position');
-    var headers = {'Content-Type': 'application/json'};
-    var body = jsonEncode({'username': username});
-    final response = await http.post(url, headers: headers, body: body);
+    try {
+      final url = Uri.parse('${Constants.serverUrl}/position');
+      final headers = {'Content-Type': 'application/json'};
+      final body = jsonEncode({'username': username});
 
-    if (response.statusCode == 200) {
-      setState(() {
-        positions = json.decode(response.body);
-      });
-      for (var position in positions) {
-        // Explicitly convert market_value and cost_basis to double
-        double marketValue = double.parse(position['market_value']);
-        double costBasis = double.parse(position['cost_basis']);
+      final response = await http.post(url, headers: headers, body: body);
 
-        // เพิ่มข้อมูล PositData เข้าไปใน List ที่สร้างไว้
-        _positDataList.add(PositData(
-          position['symbol'],
-          marketValue,
-          costBasis,
-        ));
+      if (response.statusCode == 200) {
+        final positions = json.decode(response.body) as List<dynamic>;
+
+        final positDataList = <PositData>[];
+
+        for (final position in positions) {
+          final marketValue = double.parse(position['market_value']);
+          positDataList.add(PositData(
+            position['symbol'],
+            marketValue,
+            "US", // You might want to use "US" or other logic here
+          ));
+        }
+
+        final url2 = Uri.parse('${Constants.serverUrl}/th_portfolio');
+        final body2 = {'username': username};
+
+        final response2 =
+            await http.post(url2, headers: headers, body: jsonEncode(body2));
+
+        if (response2.statusCode == 200) {
+          final data2 = jsonDecode(response2.body);
+          final portfolioList = data2['portfolioList'] as List<dynamic>;
+
+          for (final port in portfolioList) {
+            positDataList.add(PositData(
+              port['symbol'],
+              port['amount'] / 34,
+              "TH",
+            ));
+          }
+        }
+
+        setState(() {
+          _positDataList = positDataList;
+        });
       }
-      print(_positDataList);
-    } else {
-      print('Failed to fetch position data');
+    } catch (error) {
+      print('An error occurred: $error');
     }
   }
 
@@ -60,7 +81,7 @@ class _TreemapState extends State<TreemapState> {
         backgroundColor: Color(0xFF212436),
         title: Text('Treemap Chart'),
       ),
-      body: positions.isEmpty // Check if positions list is empty
+      body: _positDataList.isEmpty // Check if positions list is empty
           ? Center(
               child:
                   CircularProgressIndicator(), // Show CircularProgressIndicator if data is loading
@@ -70,21 +91,28 @@ class _TreemapState extends State<TreemapState> {
               colorMappers: [
                 TreemapColorMapper.range(
                   from: 0,
-                  to: 100,
-                  color: Colors.yellow,
+                  to: 50,
+                  color: Colors.yellow.shade300,
                 ),
                 TreemapColorMapper.range(
-                  from: 100,
-                  to: 250,
+                    from: 50, to: 200, color: Colors.yellow),
+                TreemapColorMapper.range(
+                  from: 200,
+                  to: 500,
                   color: Colors.amber,
                 ),
                 TreemapColorMapper.range(
-                  from: 250,
-                  to: 350,
-                  color: Colors.orange.shade800,
+                  from: 500,
+                  to: 1000,
+                  color: Colors.orange,
                 ),
                 TreemapColorMapper.range(
-                  from: 350,
+                  from: 1000,
+                  to: 10000,
+                  color: Colors.orange.shade900,
+                ),
+                TreemapColorMapper.range(
+                  from: 10000,
                   to: double.infinity,
                   color: Colors.red,
                 ),
@@ -100,9 +128,12 @@ class _TreemapState extends State<TreemapState> {
                   labelBuilder: (BuildContext context, TreemapTile tile) {
                     // Function to calculate font size based on weight value
                     double getFontSize(double weight) {
-                      if (weight < 50) return 4;
-                      if (weight < 100) return 12;
-                      if (weight < 1000) return 14;
+                      if (weight < 50) return 2;
+                      if (weight < 100) return 4;
+                      if (weight < 500) return 8;
+                      if (weight < 1000) return 12;
+                      if (weight < 10000) return 14;
+                      if (weight < 50000) return 16;
                       return 18;
                     }
 
@@ -121,7 +152,7 @@ class _TreemapState extends State<TreemapState> {
                             textAlign: TextAlign.center,
                           ),
                           Text(
-                            '${tile.weight}',
+                            '${NumberFormat('#,###.#', 'en_US').format(tile.weight)}',
                             style: TextStyle(
                                 color: Colors.black, fontSize: fontSize),
                           ),
@@ -133,7 +164,7 @@ class _TreemapState extends State<TreemapState> {
                     return Padding(
                       padding: const EdgeInsets.all(10),
                       child: Text(
-                          '''Symbol: ${tile.group}\nมูลค่าปัจจุบัน : ${tile.weight} USD''',
+                          '''Symbol: ${tile.group}\nมูลค่าปัจจุบัน : ${NumberFormat('#,###.#', 'en_US').format(tile.weight)} USD''',
                           style: const TextStyle(color: Colors.black)),
                     );
                   },
@@ -144,17 +175,10 @@ class _TreemapState extends State<TreemapState> {
   }
 }
 
-class TreemapData {
-  final String country;
-  final double usersInMillions;
-
-  TreemapData(this.country, this.usersInMillions);
-}
-
 class PositData {
   final String symbol;
   final double marketValue;
-  final double costBasis;
+  final String region;
 
-  PositData(this.symbol, this.marketValue, this.costBasis);
+  PositData(this.symbol, this.marketValue, this.region);
 }

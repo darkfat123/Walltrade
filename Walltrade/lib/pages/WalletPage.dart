@@ -62,24 +62,38 @@ class _WalletPageState extends State<WalletPage> {
     var url = Uri.parse('${Constants.serverUrl}/position');
     var headers = {'Content-Type': 'application/json'};
     var body = jsonEncode({'username': username});
+    final positDataList = <PositData>[];
     final response = await http.post(url, headers: headers, body: body);
 
     if (response.statusCode == 200) {
       setState(() {
         positions = json.decode(response.body);
       });
+
       for (var position in positions) {
         // Explicitly convert market_value and cost_basis to double
         double marketValue = double.parse(position['market_value']);
-        double costBasis = double.parse(position['avg_entry_price']);
+
         US_marketValue += marketValue;
         // เพิ่มข้อมูล PositData เข้าไปใน List ที่สร้างไว้
-        _positDataList.add(PositData(
+        positDataList.add(PositData(
           position['symbol'],
           marketValue,
-          costBasis,
+          "US",
         ));
       }
+      final url2 = Uri.parse('${Constants.serverUrl}/th_portfolio');
+      final body2 = {'username': username};
+
+
+
+      
+
+     
+
+      setState(() {
+        _positDataList = positDataList;
+      });
     } else {
       print('Failed to fetch position data');
     }
@@ -803,10 +817,10 @@ class _WalletPageState extends State<WalletPage> {
                                         TreemapTile tile) {
                                       // Function to calculate font size based on weight value
                                       double getFontSize(double weight) {
-                                        if (weight < 50) return 4;
-                                        if (weight < 500) return 10;
-                                        if (weight < 1000) return 12;
-                                        return 18;
+                                        if (weight < 100) return 4;
+                                        if (weight < 1000) return 8;
+                                        if (weight < 10000) return 10;
+                                        return 14;
                                       }
 
                                       double fontSize =
@@ -827,7 +841,7 @@ class _WalletPageState extends State<WalletPage> {
                                               textAlign: TextAlign.center,
                                             ),
                                             Text(
-                                              '${tile.weight}',
+                                              '${NumberFormat('#,###.#', 'en_US').format(tile.weight)}',
                                               style: TextStyle(
                                                   color: Colors.black,
                                                   fontSize: fontSize),
@@ -841,7 +855,7 @@ class _WalletPageState extends State<WalletPage> {
                                       return Padding(
                                         padding: const EdgeInsets.all(10),
                                         child: Text(
-                                            '''Symbol: ${tile.group}\nมูลค่าปัจจุบัน : ${tile.weight} USD''',
+                                            '''Symbol: ${tile.group}\nมูลค่าปัจจุบัน : ${NumberFormat('#,###.#', 'en_US').format(tile.weight)} USD''',
                                             style: const TextStyle(
                                                 color: Colors.black)),
                                       );
@@ -865,7 +879,6 @@ class _WalletPageState extends State<WalletPage> {
 class PositData {
   final String symbol;
   final double marketValue;
-  final double costBasis;
-
-  PositData(this.symbol, this.marketValue, this.costBasis);
+  final String region;
+  PositData(this.symbol, this.marketValue, this.region);
 }
