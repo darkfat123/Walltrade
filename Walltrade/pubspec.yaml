@@ -79,7 +79,6 @@ flutter:
   assets:
     - assets/img/profile.png
     - assets/img/predict.png
-    - assets/img/wallpaper.jpg
     - assets/img/thaiflag.png
     - assets/img/usflag.png
 

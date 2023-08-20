@@ -550,17 +550,19 @@ def get_positions():
     # Create the Alpaca REST API client
     api = REST(result[0], result[1], base_url='https://paper-api.alpaca.markets')
     portfolio = api.list_positions()
+
+    print(portfolio)
     positions = []
-  
+    
     for position in portfolio:
         position_data = {
             'symbol': position.symbol,
             'market_value': "%.2f"%float(position.market_value),
-            'cost_basis': "%.2f"%float(position.cost_basis),
-            'quantity': position.qty
+            'avg_entry_price': "%.2f"%float(position.avg_entry_price),
+            'quantity': position.qty_available
         }
         positions.append(position_data)
-
+    
     return jsonify(positions)
 
 """@app.route('/streamPrice', methods=['POST'])
@@ -1040,7 +1042,6 @@ def th_portfolio():
     balanceProfitChange = f"{portfolio['totalPortfolio']['profit']* cash:.2f}"
     lineAvailable = f"{account_info.get('lineAvailable')* cash:.2f}"
     marketValue = f"{portfolio['totalPortfolio']['marketValue']* cash:.2f}"
-    print(portfolio['portfolioList'])
 
     portfolio_list = []
     for item in portfolio['portfolioList']:

@@ -143,10 +143,10 @@ class _ThaiTreemapState extends State<ThaiTreemapState> {
                   labelBuilder: (BuildContext context, TreemapTile tile) {
                     // Function to calculate font size based on weight value
                     double getFontSize(double weight) {
-                      if (weight < 50) return 6;
-                      if (weight < 100) return 12;
-                      if (weight < 1000) return 14;
-                      return 18;
+                      if (weight < 10000) return 12;
+                      if (weight < 100000) return 16;
+                      if (weight < 10000000) return 20;
+                      return 24;
                     }
 
                     double fontSize = getFontSize(tile.weight);
@@ -176,7 +176,7 @@ class _ThaiTreemapState extends State<ThaiTreemapState> {
                     return Padding(
                       padding: const EdgeInsets.all(10),
                       child: Text(
-                          '''Symbol: ${tile.group}\nมูลค่าปัจจุบัน : ${tile.weight} USD''',
+                          '''Symbol: ${tile.group}\nมูลค่า : ${tile.weight} บาท''',
                           style: const TextStyle(color: Colors.black)),
                     );
                   },

@@ -7,6 +7,8 @@ import 'package:intl/intl.dart';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
+import 'USTreemap.dart';
+
 class PortfolioDetailPage extends StatefulWidget {
   final String username;
   PortfolioDetailPage({required this.username});
@@ -29,6 +31,10 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
   void initState() {
     super.initState();
     getBalance();
+    fetchPositionData();
+    getCash();
+    US_totalChart =US_Fiat/US_marketValue;
+    print(US_totalChart);
     tabController = TabController(length: 2, vsync: this);
   }
 
@@ -48,6 +54,7 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
   double _walletBalance = 0;
   double TH_balance = 0;
   double TH_Fiat = 0;
+  double US_Fiat = 0;
   double TH_marketValue = 0;
   double US_marketValue = 0;
   double TH_chartMarketValue = 0;
@@ -57,6 +64,7 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
   double TH_percentageChange = 0;
   double totalbalance = 0;
   double US_cash = 0;
+  double US_totalChart = 0;
   double TH_totalChart = 0;
   double totalBalance = 0;
   List<dynamic> TH_ListAssets = [];
@@ -118,6 +126,62 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
     print(TH_Fiat);
 
     print(US_cash);
+  }
+
+  Future<void> getCash() async {
+    var url = Uri.parse('${Constants.serverUrl}/getCash');
+    var headers = {'Content-Type': 'application/x-www-form-urlencoded'};
+    var body = {'username': username};
+
+    try {
+      var response = await http.post(url, headers: headers, body: body);
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        var walletBalance = data['wallet_balance'];
+        double US_profit = 0;
+        setState(
+          () {
+            US_Fiat = double.parse(walletBalance);
+            US_profit = US_Fiat/US_cash;
+          },
+        );
+        print(US_profit);
+      } else {
+        throw Exception(
+            'Failed to retrieve wallet balance. Error: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+  }
+
+  List<dynamic> positions = [];
+  List<PositData> _positDataList = [];
+  Future<void> fetchPositionData() async {
+    var url = Uri.parse('${Constants.serverUrl}/position');
+    var headers = {'Content-Type': 'application/json'};
+    var body = jsonEncode({'username': username});
+    final response = await http.post(url, headers: headers, body: body);
+
+    if (response.statusCode == 200) {
+      setState(() {
+        positions = json.decode(response.body);
+      });
+      for (var position in positions) {
+        // Explicitly convert market_value and cost_basis to double
+        double marketValue = double.parse(position['market_value']);
+        double costBasis = double.parse(position['avg_entry_price']);
+        US_marketValue += marketValue;
+        // เพิ่มข้อมูล PositData เข้าไปใน List ที่สร้างไว้
+        _positDataList.add(PositData(
+          position['symbol'],
+          marketValue,
+          costBasis,
+        ));
+      }
+    } else {
+      print('Failed to fetch position data');
+    }
   }
 
   @override
@@ -232,11 +296,96 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                     ),
                   ),
                   Container(
-                      padding: EdgeInsets.all(12),
-                      margin: EdgeInsets.symmetric(vertical: 14, horizontal: 6),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          color: Colors.green)),
+                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                    margin: EdgeInsets.symmetric(vertical: 14, horizontal: 6),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 5,
+                          offset: Offset(
+                              0, 3), // changes the position of the shadow
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "มูลค่าคงเหลือหุ้นอเมริกา (US)",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.black,
+                              ),
+                            ),
+                            SizedBox(
+                              width: 20,
+                            ),
+                            InkWell(
+                              onTap: toggleBalanceVisibility,
+                              child: Icon(
+                                hideBalance
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: Colors.black,
+                                size: 30,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          "${NumberFormat('#,###.##', 'en_US').format(US_cash)} USD ",
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text(
+                              "กำไร/ขาดทุนสุทธิวันนี้: ",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w500,
+                                fontSize: 14,
+                                color: Colors.black,
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 3),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Color(0xFF2A3547),
+                              ),
+                              child: Text(
+                                hideBalance
+                                    ? "**** USD (****)"
+                                    : "${NumberFormat('#,###.##', 'en_US').format(TH_ProfitChange).startsWith("-") ? "$TH_ProfitChange" : "+$TH_ProfitChange"} USD (${TH_percentageChange.toStringAsFixed(4)}%)",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 12,
+                                  color:
+                                      TH_ProfitChange.toString().startsWith("-")
+                                          ? Colors.red
+                                          : Color(0xFF13B709),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -259,22 +408,23 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                 index: _currentIndex,
                 children: [
                   SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text(
-                            "ทรัพย์สินหุ้นไทย (TH Stock Assets)",
-                            style: TextStyle(
-                                fontWeight: FontWeight.w600, fontSize: 18),
+                    child: Container(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Text(
+                              "ทรัพย์สินหุ้นไทย (TH Stock Assets)",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w600, fontSize: 18),
+                            ),
                           ),
-                        ),
-                        SizedBox(
-                          height: 12,
-                        ),
-                        Center(
-                          child: Container(
+                          SizedBox(
+                            height: 12,
+                          ),
+                          Container(
                             margin: EdgeInsets.only(left: 16, right: 6),
                             width: MediaQuery.of(context).size.width * 0.5,
                             padding: EdgeInsets.all(10),
@@ -285,7 +435,7 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                             child: Column(
                               children: [
                                 CircularPercentIndicator(
-                                  radius: 60,
+                                  radius: 50,
                                   lineWidth: 30.0,
                                   backgroundColor: Color(0xFF068DA9),
                                   animation: true,
@@ -300,58 +450,392 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceAround,
                                   children: [
-                                    Icon(
-                                      Icons.circle,
-                                      color: Colors.blue,
-                                      size: 16,
+                                    Container(
+                                      padding: EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(10),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.grey.withOpacity(0.5),
+                                            spreadRadius: 2,
+                                            blurRadius: 5,
+                                            offset: Offset(0,
+                                                3), // changes the position of the shadow
+                                          ),
+                                        ],
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.circle,
+                                            color: Color(0xFF068DA9),
+                                            size: 16,
+                                          ),
+                                          SizedBox(
+                                            width: 12,
+                                          ),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.end,
+                                            children: [
+                                              Text(
+                                                "เงินสดไทย",
+                                                style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 14),
+                                              ),
+                                              Text(
+                                                NumberFormat(
+                                                        '#,###.##', 'en_US')
+                                                    .format(TH_Fiat),
+                                                style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 14),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "เงินสดไทย",
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 14),
-                                        ),
-                                        Text(
-                                          NumberFormat('#,###.##', 'en_US')
-                                              .format(TH_Fiat),
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 14),
-                                        ),
-                                      ],
-                                    ),
-                                    Icon(
-                                      Icons.circle,
-                                      color: Colors.red,
-                                      size: 16,
-                                    ),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "หุ้นไทย",
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 14),
-                                        ),
-                                        Text(
-                                          NumberFormat('#,###.#', 'en_US')
-                                              .format(TH_marketValue),
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 14),
-                                        ),
-                                      ],
+                                    Container(
+                                      padding: EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(10),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.grey.withOpacity(0.5),
+                                            spreadRadius: 2,
+                                            blurRadius: 5,
+                                            offset: Offset(0,
+                                                3), // changes the position of the shadow
+                                          ),
+                                        ],
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.circle,
+                                            color: Colors.red,
+                                            size: 16,
+                                          ),
+                                          SizedBox(
+                                            width: 12,
+                                          ),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.end,
+                                            children: [
+                                              Text(
+                                                "หุ้นไทย",
+                                                style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 14),
+                                              ),
+                                              Text(
+                                                NumberFormat('#,###.#', 'en_US')
+                                                    .format(TH_marketValue),
+                                                style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 14),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
                               ],
                             ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        ThaiTreemapState(username: username)),
+                              );
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(14),
+                              margin: EdgeInsets.symmetric(
+                                  vertical: 8, horizontal: 6),
+                              decoration: BoxDecoration(
+                                  color: Colors.red.shade900,
+                                  borderRadius: BorderRadius.circular(10)),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "ดู Treemap หุ้นไทย",
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 16),
+                                  ),
+                                  Icon(
+                                    Icons.arrow_right_alt_rounded,
+                                    color: Colors.white,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 4,
+                          ),
+                          Container(
+                            margin: EdgeInsets.symmetric(vertical: 12),
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              physics:
+                                  NeverScrollableScrollPhysics(), // ปิดการเลื่อน
+                              itemCount: TH_ListAssets.length,
+                              itemBuilder: (context, index) {
+                                var item = TH_ListAssets[index];
+                                return Container(
+                                  margin: EdgeInsets.symmetric(
+                                      vertical: 4, horizontal: 6),
+                                  padding: EdgeInsets.all(2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(20),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.5),
+                                        spreadRadius: 2,
+                                        blurRadius: 5,
+                                        offset: Offset(0,
+                                            3), // changes the position of the shadow
+                                      ),
+                                    ],
+                                  ),
+                                  child: ListTile(
+                                    title: Row(
+                                      children: [
+                                        Text(
+                                          item['symbol'],
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.w500),
+                                        ),
+                                        SizedBox(
+                                          width: 8,
+                                        ),
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                              vertical: 2, horizontal: 10),
+                                          child: Row(
+                                            children: [
+                                              Text(
+                                                "${NumberFormat('#,###.#', 'en_US').format(item['profit'])}\u0E3F",
+                                                style: TextStyle(
+                                                    color: NumberFormat(
+                                                                '#,###.##',
+                                                                'en_US')
+                                                            .format(
+                                                                item['profit'])
+                                                            .startsWith('-')
+                                                        ? Color(0xFFFF002E)
+                                                        : Color(0xFF0AFF96),
+                                                    fontSize: 12,
+                                                    fontWeight:
+                                                        FontWeight.w700),
+                                              ),
+                                              SizedBox(
+                                                width: 8,
+                                              ),
+                                              Text(
+                                                "(${NumberFormat('#,###.##', 'en_US').format(item['percentProfit'])}%)",
+                                                style: TextStyle(
+                                                    color: NumberFormat(
+                                                                '#,###.##',
+                                                                'en_US')
+                                                            .format(item[
+                                                                'percentProfit'])
+                                                            .startsWith('-')
+                                                        ? Color(0xFFFF002E)
+                                                        : Color(0xFF0AFF96),
+                                                    fontSize: 12,
+                                                    fontWeight:
+                                                        FontWeight.w700),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    subtitle: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        SizedBox(
+                                          height: 8,
+                                        ),
+                                        Text(
+                                          'ราคาเฉลี่ยต่อหน่วย: ${item['averagePrice']}',
+                                          style: TextStyle(fontSize: 12),
+                                        ),
+                                        Text(
+                                          'มูลค่าทั้งหมด: ${NumberFormat('#,###.#', 'en_US').format(item['amount'])} บาท',
+                                          style: TextStyle(fontSize: 12),
+                                        ),
+                                      ],
+                                    ),
+                                    trailing: Text(
+                                      'จำนวน: ${NumberFormat('#,###.#', 'en_US').format(item['actualVolume'])} หน่วย',
+                                      style: TextStyle(fontSize: 14),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(
+                            "ทรัพย์สินหุ้นอเมริกา (US Stock Assets)",
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600, fontSize: 18),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 12,
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(left: 16, right: 6),
+                          width: MediaQuery.of(context).size.width * 0.5,
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Column(
+                            children: [
+                              CircularPercentIndicator(
+                                radius: 50,
+                                lineWidth: 30.0,
+                                backgroundColor: Color(0xFF068DA9),
+                                animation: true,
+                                animationDuration: 1000,
+                                percent: TH_totalChart,
+                                progressColor: Colors.red,
+                              ),
+                              SizedBox(
+                                height: 20,
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(10),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.5),
+                                          spreadRadius: 2,
+                                          blurRadius: 5,
+                                          offset: Offset(0,
+                                              3), // changes the position of the shadow
+                                        ),
+                                      ],
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.circle,
+                                          color: Color(0xFF068DA9),
+                                          size: 16,
+                                        ),
+                                        SizedBox(
+                                          width: 12,
+                                        ),
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
+                                          children: [
+                                            Text(
+                                              "เงินสดอเมริกา",
+                                              style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 14),
+                                            ),
+                                            Text(
+                                              NumberFormat('#,###.##', 'en_US')
+                                                  .format(US_Fiat),
+                                              style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 14),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(10),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.5),
+                                          spreadRadius: 2,
+                                          blurRadius: 5,
+                                          offset: Offset(0,
+                                              3), // changes the position of the shadow
+                                        ),
+                                      ],
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.circle,
+                                          color: Colors.red,
+                                          size: 16,
+                                        ),
+                                        SizedBox(
+                                          width: 12,
+                                        ),
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
+                                          children: [
+                                            Text(
+                                              "หุ้นไทย",
+                                              style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 14),
+                                            ),
+                                            Text(
+                                              NumberFormat('#,###.#', 'en_US')
+                                                  .format(US_marketValue),
+                                              style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 14),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
                         GestureDetector(
@@ -359,7 +843,8 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => ThaiTreemapState(username:username)),
+                                  builder: (context) =>
+                                      USTreemapState(username: username)),
                             );
                           },
                           child: Container(
@@ -373,7 +858,7 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "ดู Treemap หุ้นไทย",
+                                  "ดู Treemap หุ้นอเมริกา",
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w500,
@@ -392,17 +877,19 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                         ),
                         Container(
                           margin: EdgeInsets.symmetric(vertical: 12),
-                          height: TH_ListAssets.length * 100,
                           child: ListView.builder(
-                            itemCount: TH_ListAssets.length,
+                            shrinkWrap: true,
+                            physics:
+                                NeverScrollableScrollPhysics(), // ปิดการเลื่อน
+                            itemCount: positions.length,
                             itemBuilder: (context, index) {
-                              var item = TH_ListAssets[index];
+                              var position = positions[index];
                               return Container(
                                 margin: EdgeInsets.symmetric(
                                     vertical: 4, horizontal: 6),
                                 padding: EdgeInsets.all(2),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: Color(0xFF2A3547),
                                   borderRadius: BorderRadius.circular(20),
                                   boxShadow: [
                                     BoxShadow(
@@ -418,51 +905,13 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                                   title: Row(
                                     children: [
                                       Text(
-                                        item['symbol'],
+                                        position['symbol'],
                                         style: TextStyle(
-                                            fontWeight: FontWeight.w500),
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.white),
                                       ),
                                       SizedBox(
                                         width: 8,
-                                      ),
-                                      Container(
-                                        padding: EdgeInsets.symmetric(
-                                            vertical: 2, horizontal: 10),
-                                        child: Row(
-                                          children: [
-                                            Text(
-                                              "${NumberFormat('#,###.#', 'en_US').format(item['profit'])}\u0E3F",
-                                              style: TextStyle(
-                                                  color: NumberFormat(
-                                                              '#,###.##',
-                                                              'en_US')
-                                                          .format(
-                                                              item['profit'])
-                                                          .startsWith('-')
-                                                      ? Color(0xFFFF002E)
-                                                      : Color(0xFF0AFF96),
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w700),
-                                            ),
-                                            SizedBox(
-                                              width: 8,
-                                            ),
-                                            Text(
-                                              "(${NumberFormat('#,###.##', 'en_US').format(item['percentProfit'])}%)",
-                                              style: TextStyle(
-                                                  color: NumberFormat(
-                                                              '#,###.##',
-                                                              'en_US')
-                                                          .format(item[
-                                                              'percentProfit'])
-                                                          .startsWith('-')
-                                                      ? Color(0xFFFF002E)
-                                                      : Color(0xFF0AFF96),
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w700),
-                                            ),
-                                          ],
-                                        ),
                                       ),
                                     ],
                                   ),
@@ -474,18 +923,21 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                                         height: 8,
                                       ),
                                       Text(
-                                        'ราคาเฉลี่ยต่อหน่วย: ${item['averagePrice']}',
-                                        style: TextStyle(fontSize: 12),
+                                        'ราคาเฉลี่ยต่อหน่วย: ${position['avg_entry_price']}',
+                                        style: TextStyle(
+                                            fontSize: 12, color: Colors.white),
                                       ),
                                       Text(
-                                        'มูลค่าทั้งหมด: ${NumberFormat('#,###.#', 'en_US').format(item['amount'])} บาท',
-                                        style: TextStyle(fontSize: 12),
+                                        'มูลค่าทั้งหมด: ${position['market_value']} บาท',
+                                        style: TextStyle(
+                                            fontSize: 12, color: Colors.white),
                                       ),
                                     ],
                                   ),
                                   trailing: Text(
-                                    'จำนวน: ${NumberFormat('#,###.#', 'en_US').format(item['actualVolume'])} หน่วย',
-                                    style: TextStyle(fontSize: 14),
+                                    'จำนวน: ${position['quantity']} หน่วย',
+                                    style: TextStyle(
+                                        fontSize: 14, color: Colors.white),
                                   ),
                                 ),
                               );
@@ -495,7 +947,6 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                       ],
                     ),
                   ),
-                  Text("เงินสดไทย ${TH_Fiat.toStringAsFixed(2)}"),
                 ],
               ),
             ),
@@ -504,4 +955,12 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
       ),
     );
   }
+}
+
+class PositData {
+  final String symbol;
+  final double marketValue;
+  final double costBasis;
+
+  PositData(this.symbol, this.marketValue, this.costBasis);
 }
