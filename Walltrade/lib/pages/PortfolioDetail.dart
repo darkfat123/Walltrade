@@ -21,6 +21,7 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
     with SingleTickerProviderStateMixin {
   final String username;
   late TabController tabController;
+  bool isLoading = true;
 
 // เพิ่มตัวแปร PageController
 
@@ -33,14 +34,6 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
     getBalance();
     fetchPositionData();
     getCash();
-
-    tabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    tabController.dispose();
-    super.dispose();
   }
 
   bool hideBalance = false;
@@ -113,6 +106,7 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
         TH_percentageChange = percentageProfitChange;
         TH_totalChart = TH_marketValue / TH_Fiat;
         TH_ListAssets = portfolioList;
+        isLoading = false;
       });
     }
 
@@ -214,694 +208,111 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
       appBar: AppBar(
         title: Text('พอร์ตลงทุน'),
       ),
-      body: Container(
-        color: Color(0xFFECF8F9),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: PageView(
-                controller: PageController(viewportFraction: 0.9),
-                onPageChanged: (index) {
-                  setState(() {
-                    _currentIndex = index;
-                  });
-                },
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : Container(
+              color: Color(0xFFECF8F9),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-                    margin: EdgeInsets.symmetric(vertical: 14, horizontal: 6),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Color(0xFF2A3547),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 2,
-                          blurRadius: 5,
-                          offset: Offset(
-                              0, 3), // changes the position of the shadow
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  Expanded(
+                    child: PageView(
+                      controller: PageController(viewportFraction: 0.9),
+                      onPageChanged: (index) {
+                        setState(() {
+                          _currentIndex = index;
+                        });
+                      },
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "มูลค่าคงเหลือหุ้นไทย (TH)",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.white,
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 24),
+                          margin:
+                              EdgeInsets.symmetric(vertical: 14, horizontal: 6),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: Color(0xFF2A3547),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 2,
+                                blurRadius: 5,
+                                offset: Offset(
+                                    0, 3), // changes the position of the shadow
                               ),
-                            ),
-                            SizedBox(
-                              width: 20,
-                            ),
-                            InkWell(
-                              onTap: toggleBalanceVisibility,
-                              child: Icon(
-                                hideBalance
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                                color: Colors.white,
-                                size: 30,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Text(
-                          hideBalance
-                              ? "**** USD (****)"
-                              : "${NumberFormat('#,###.##', 'en_US').format(TH_balance)} USD ",
-                          style: TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                            ],
                           ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Text(
-                              "กำไร/ขาดทุนสุทธิวันนี้: ",
-                              style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 14,
-                                color: Colors.white,
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 3),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: Color(0xFFECF8F9),
-                              ),
-                              child: Text(
-                                hideBalance
-                                    ? "**** USD (****)"
-                                    : "${NumberFormat('#,###.##', 'en_US').format(TH_ProfitChange).startsWith("-") ? "$TH_ProfitChange" : "+$TH_ProfitChange"} USD (${TH_percentageChange.toStringAsFixed(4)}%)",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 12,
-                                  color:
-                                      TH_ProfitChange.toString().startsWith("-")
-                                          ? Colors.red
-                                          : Color(0xFF13B709),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-                    margin: EdgeInsets.symmetric(vertical: 14, horizontal: 6),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 2,
-                          blurRadius: 5,
-                          offset: Offset(
-                              0, 3), // changes the position of the shadow
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "มูลค่าคงเหลือหุ้นอเมริกา (US)",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.black,
-                              ),
-                            ),
-                            SizedBox(
-                              width: 20,
-                            ),
-                            InkWell(
-                              onTap: toggleBalanceVisibility,
-                              child: Icon(
-                                hideBalance
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                                color: Colors.black,
-                                size: 30,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Text(
-                          hideBalance
-                              ? "**** USD (****)"
-                              : "${NumberFormat('#,###.##', 'en_US').format(US_cash)} USD ",
-                          style: TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black,
-                          ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Text(
-                              "กำไร/ขาดทุนสุทธิวันนี้: ",
-                              style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 14,
-                                color: Colors.black,
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 3),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: Color(0xFF2A3547),
-                              ),
-                              child: Text(
-                                hideBalance
-                                    ? "**** USD (****)"
-                                    : "${NumberFormat('#,###.##', 'en_US').format(_balanceChange).startsWith("-") ? "$_balanceChange" : "+$_balanceChange"} USD (${_percentageChange.toStringAsFixed(4)}%)",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 12,
-                                  color:
-                                      _balanceChange.toString().startsWith("-")
-                                          ? Colors.red
-                                          : Color(0xFF13B709),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            DotsIndicator(
-              dotsCount: 2,
-              position: _currentIndex,
-              decorator: DotsDecorator(
-                activeColor: Colors.red,
-                size: const Size.square(9.0),
-                activeSize: const Size(18.0, 9.0),
-                activeShape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5.0),
-                ),
-              ),
-            ),
-            Container(
-              height: 580,
-              padding: EdgeInsets.all(16),
-              child: IndexedStack(
-                index: _currentIndex,
-                children: [
-                  SingleChildScrollView(
-                    child: Container(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text(
-                              "ทรัพย์สินหุ้นไทย (TH Stock Assets)",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w600, fontSize: 18),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 12,
-                          ),
-                          Container(
-                            margin: EdgeInsets.only(left: 16, right: 6),
-                            width: MediaQuery.of(context).size.width * 0.5,
-                            padding: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Column(
-                              children: [
-                                CircularPercentIndicator(
-                                  radius: 50,
-                                  lineWidth: 25.0,
-                                  backgroundColor: Color(0xFF068DA9),
-                                  animation: true,
-                                  animationDuration: 1000,
-                                  percent: TH_totalChart,
-                                  progressColor: Colors.red,
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: [
-                                    Text(
-                                        "${(100 - TH_totalChart * 100).toStringAsFixed(1)}%"),
-                                    Text("ต่อ"),
-                                    Text(
-                                        "${(TH_totalChart * 100).toStringAsFixed(1)}%"),
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: [
-                                    Container(
-                                      padding: EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(10),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.grey.withOpacity(0.5),
-                                            spreadRadius: 2,
-                                            blurRadius: 5,
-                                            offset: Offset(0,
-                                                3), // changes the position of the shadow
-                                          ),
-                                        ],
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            Icons.circle,
-                                            color: Color(0xFF068DA9),
-                                            size: 16,
-                                          ),
-                                          SizedBox(
-                                            width: 12,
-                                          ),
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.end,
-                                            children: [
-                                              Text(
-                                                "เงินสดไทย",
-                                                style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 14),
-                                              ),
-                                              Text(
-                                                hideBalance
-                                                    ? "****"
-                                                    : NumberFormat(
-                                                            '#,###.##', 'en_US')
-                                                        .format(TH_Fiat),
-                                                style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 14),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Container(
-                                      padding: EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(10),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.grey.withOpacity(0.5),
-                                            spreadRadius: 2,
-                                            blurRadius: 5,
-                                            offset: Offset(0,
-                                                3), // changes the position of the shadow
-                                          ),
-                                        ],
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            Icons.circle,
-                                            color: Colors.red,
-                                            size: 16,
-                                          ),
-                                          SizedBox(
-                                            width: 12,
-                                          ),
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.end,
-                                            children: [
-                                              Text(
-                                                "หุ้นไทย",
-                                                style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 14),
-                                              ),
-                                              Text(hideBalance
-                                                    ? "****"
-                                                    : 
-                                                NumberFormat('#,###.#', 'en_US')
-                                                    .format(TH_marketValue),
-                                                style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 14),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        ThaiTreemapState(username: username)),
-                              );
-                            },
-                            child: Container(
-                              padding: EdgeInsets.all(14),
-                              margin: EdgeInsets.symmetric(
-                                  vertical: 8, horizontal: 6),
-                              decoration: BoxDecoration(
-                                  color: Colors.red.shade900,
-                                  borderRadius: BorderRadius.circular(10)),
-                              child: Row(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    "ดู Treemap หุ้นไทย",
+                                    "มูลค่าคงเหลือหุ้นไทย (TH)",
                                     style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 16),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                  Icon(
-                                    Icons.arrow_right_alt_rounded,
-                                    color: Colors.white,
+                                  SizedBox(
+                                    width: 20,
+                                  ),
+                                  InkWell(
+                                    onTap: toggleBalanceVisibility,
+                                    child: Icon(
+                                      hideBalance
+                                          ? Icons.visibility_off
+                                          : Icons.visibility,
+                                      color: Colors.white,
+                                      size: 30,
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 4,
-                          ),
-                          Container(
-                            margin: EdgeInsets.symmetric(vertical: 12),
-                            child: ListView.builder(
-                              shrinkWrap: true,
-                              physics:
-                                  NeverScrollableScrollPhysics(), // ปิดการเลื่อน
-                              itemCount: TH_ListAssets.length,
-                              itemBuilder: (context, index) {
-                                var item = TH_ListAssets[index];
-                                print((item['percentProfit'].runtimeType));
-                                return Container(
-                                  margin: EdgeInsets.symmetric(
-                                      vertical: 4, horizontal: 6),
-                                  padding: EdgeInsets.all(2),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(20),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.withOpacity(0.5),
-                                        spreadRadius: 2,
-                                        blurRadius: 5,
-                                        offset: Offset(0,
-                                            3), // changes the position of the shadow
+                              Text(
+                                hideBalance
+                                    ? "**** USD (****)"
+                                    : "${NumberFormat('#,###.##', 'en_US').format(TH_balance)} USD ",
+                                style: TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "กำไร/ขาดทุนสุทธิวันนี้: ",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 14,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 6, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      color: Color(0xFFECF8F9),
+                                    ),
+                                    child: Text(
+                                      hideBalance
+                                          ? "**** USD (****)"
+                                          : "${NumberFormat('#,###.##', 'en_US').format(TH_ProfitChange).startsWith("-") ? "$TH_ProfitChange" : "+$TH_ProfitChange"} USD (${TH_percentageChange.toStringAsFixed(4)}%)",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 12,
+                                        color: TH_ProfitChange.toString()
+                                                .startsWith("-")
+                                            ? Colors.red
+                                            : Color(0xFF13B709),
                                       ),
-                                    ],
-                                  ),
-                                  child: ListTile(
-                                    title: Row(
-                                      children: [
-                                        Text(
-                                          item['symbol'],
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.w500),
-                                        ),
-                                        SizedBox(
-                                          width: 8,
-                                        ),
-                                        Container(
-                                          padding: EdgeInsets.symmetric(
-                                              vertical: 2, horizontal: 10),
-                                          child: Row(
-                                            children: [
-                                              Text(hideBalance
-                                                    ? "****"
-                                                    : 
-                                                "${NumberFormat('#,###.#', 'en_US').format(item['profit'])}\u0E3F",
-                                                style: TextStyle(
-                                                    color: NumberFormat(
-                                                                '#,###.##',
-                                                                'en_US')
-                                                            .format(
-                                                                item['profit'])
-                                                            .startsWith('-')
-                                                        ? Color(0xFFFF002E)
-                                                        : Color(0xFF0AFF96),
-                                                    fontSize: 12,
-                                                    fontWeight:
-                                                        FontWeight.w700),
-                                              ),
-                                              SizedBox(
-                                                width: 8,
-                                              ),
-                                              Text(
-                                                "(${NumberFormat('#,###.##', 'en_US').format(item['percentProfit'])}%)",
-                                                style: TextStyle(
-                                                    color: NumberFormat(
-                                                                '#,###.##',
-                                                                'en_US')
-                                                            .format(item[
-                                                                'percentProfit'])
-                                                            .startsWith('-')
-                                                        ? Color(0xFFFF002E)
-                                                        : Color(0xFF0AFF96),
-                                                    fontSize: 12,
-                                                    fontWeight:
-                                                        FontWeight.w700),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    subtitle: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.stretch,
-                                      children: [
-                                        SizedBox(
-                                          height: 8,
-                                        ),
-                                        Text(
-                                          'ราคาเฉลี่ยต่อหน่วย: ${item['averagePrice']}',
-                                          style: TextStyle(fontSize: 12),
-                                        ),
-                                        Text(hideBalance
-                                                    ? "****"
-                                                    : 
-                                          'มูลค่าทั้งหมด: ${NumberFormat('#,###.#', 'en_US').format(item['amount'])} บาท',
-                                          style: TextStyle(fontSize: 12),
-                                        ),
-                                      ],
-                                    ),
-                                    trailing: Text(hideBalance
-                                                    ? "****"
-                                                    : 
-                                      'จำนวน: ${NumberFormat('#,###.#', 'en_US').format(item['actualVolume'])} หน่วย',
-                                      style: TextStyle(fontSize: 14),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text(
-                            "ทรัพย์สินหุ้นอเมริกา (US Stock Assets)",
-                            style: TextStyle(
-                                fontWeight: FontWeight.w600, fontSize: 18),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 12,
-                        ),
-                        Container(
-                          margin: EdgeInsets.only(left: 16, right: 6),
-                          width: MediaQuery.of(context).size.width * 0.5,
-                          padding: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Column(
-                            children: [
-                              CircularPercentIndicator(
-                                radius: 50,
-                                lineWidth: 30.0,
-                                backgroundColor: Color(0xFF068DA9),
-                                animation: true,
-                                animationDuration: 1000,
-                                percent: US_totalChart,
-                                progressColor: Colors.red,
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  Text(
-                                      "${(100 - US_totalChart * 100).toStringAsFixed(1)}%"),
-                                  Text("ต่อ"),
-                                  Text(
-                                      "${(US_totalChart * 100).toStringAsFixed(1)}%"),
-                                ],
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(10),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey.withOpacity(0.5),
-                                          spreadRadius: 2,
-                                          blurRadius: 5,
-                                          offset: Offset(0,
-                                              3), // changes the position of the shadow
-                                        ),
-                                      ],
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          Icons.circle,
-                                          color: Color(0xFF068DA9),
-                                          size: 16,
-                                        ),
-                                        SizedBox(
-                                          width: 12,
-                                        ),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.end,
-                                          children: [
-                                            Text(
-                                              "เงินสดอเมริกา",
-                                              style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontSize: 14),
-                                            ),
-                                            Text(hideBalance
-                                                    ? "****"
-                                                    : 
-                                              NumberFormat('#,###.##', 'en_US')
-                                                  .format(US_Fiat),
-                                              style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontSize: 14),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(10),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey.withOpacity(0.5),
-                                          spreadRadius: 2,
-                                          blurRadius: 5,
-                                          offset: Offset(0,
-                                              3), // changes the position of the shadow
-                                        ),
-                                      ],
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          Icons.circle,
-                                          color: Colors.red,
-                                          size: 16,
-                                        ),
-                                        SizedBox(
-                                          width: 12,
-                                        ),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.end,
-                                          children: [
-                                            Text(
-                                              "หุ้นอเมริกา",
-                                              style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontSize: 14),
-                                            ),
-                                            Text(hideBalance
-                                                    ? "****"
-                                                    : 
-                                              NumberFormat('#,###.#', 'en_US')
-                                                  .format(US_marketValue),
-                                              style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontSize: 14),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
                                     ),
                                   ),
                                 ],
@@ -909,114 +320,763 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                             ],
                           ),
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      USTreemapState(username: username)),
-                            );
-                          },
-                          child: Container(
-                            padding: EdgeInsets.all(14),
-                            margin: EdgeInsets.symmetric(
-                                vertical: 8, horizontal: 6),
-                            decoration: BoxDecoration(
-                                color: Colors.red.shade900,
-                                borderRadius: BorderRadius.circular(10)),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "ดู Treemap หุ้นอเมริกา",
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 16),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 24),
+                          margin:
+                              EdgeInsets.symmetric(vertical: 14, horizontal: 6),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 2,
+                                blurRadius: 5,
+                                offset: Offset(
+                                    0, 3), // changes the position of the shadow
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "มูลค่าคงเหลือหุ้นอเมริกา (US)",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 20,
+                                  ),
+                                  InkWell(
+                                    onTap: toggleBalanceVisibility,
+                                    child: Icon(
+                                      hideBalance
+                                          ? Icons.visibility_off
+                                          : Icons.visibility,
+                                      color: Colors.black,
+                                      size: 30,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Text(
+                                hideBalance
+                                    ? "**** USD (****)"
+                                    : "${NumberFormat('#,###.##', 'en_US').format(US_cash)} USD ",
+                                style: TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
                                 ),
-                                Icon(
-                                  Icons.arrow_right_alt_rounded,
-                                  color: Colors.white,
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "กำไร/ขาดทุนสุทธิวันนี้: ",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 14,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 6, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      color: Color(0xFF2A3547),
+                                    ),
+                                    child: Text(
+                                      hideBalance
+                                          ? "**** USD (****)"
+                                          : "${NumberFormat('#,###.##', 'en_US').format(_balanceChange).startsWith("-") ? "$_balanceChange" : "+$_balanceChange"} USD (${_percentageChange.toStringAsFixed(4)}%)",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 12,
+                                        color: _balanceChange
+                                                .toString()
+                                                .startsWith("-")
+                                            ? Colors.red
+                                            : Color(0xFF13B709),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  DotsIndicator(
+                    dotsCount: 2,
+                    position: _currentIndex,
+                    decorator: DotsDecorator(
+                      activeColor: Colors.red,
+                      size: const Size.square(9.0),
+                      activeSize: const Size(18.0, 9.0),
+                      activeShape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    height: 580,
+                    padding: EdgeInsets.all(16),
+                    child: IndexedStack(
+                      index: _currentIndex,
+                      children: [
+                        SingleChildScrollView(
+                          child: Container(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8.0),
+                                  child: Text(
+                                    "ทรัพย์สินหุ้นไทย (TH Stock Assets)",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 18),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 12,
+                                ),
+                                Container(
+                                  margin: EdgeInsets.only(left: 16, right: 6),
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.5,
+                                  padding: EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.transparent,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      CircularPercentIndicator(
+                                        radius: 50,
+                                        lineWidth: 25.0,
+                                        backgroundColor: Color(0xFF068DA9),
+                                        animation: true,
+                                        animationDuration: 1000,
+                                        percent: TH_totalChart,
+                                        progressColor: Colors.red,
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: [
+                                          Text(
+                                              "${(100 - TH_totalChart * 100).toStringAsFixed(1)}%"),
+                                          Text("ต่อ"),
+                                          Text(
+                                              "${(TH_totalChart * 100).toStringAsFixed(1)}%"),
+                                        ],
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: [
+                                          Container(
+                                            padding: EdgeInsets.all(12),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.grey
+                                                      .withOpacity(0.5),
+                                                  spreadRadius: 2,
+                                                  blurRadius: 5,
+                                                  offset: Offset(0,
+                                                      3), // changes the position of the shadow
+                                                ),
+                                              ],
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.circle,
+                                                  color: Color(0xFF068DA9),
+                                                  size: 16,
+                                                ),
+                                                SizedBox(
+                                                  width: 12,
+                                                ),
+                                                Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.end,
+                                                  children: [
+                                                    Text(
+                                                      "เงินสดไทย",
+                                                      style: TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: 14),
+                                                    ),
+                                                    Text(
+                                                      hideBalance
+                                                          ? "****"
+                                                          : NumberFormat(
+                                                                  '#,###.##',
+                                                                  'en_US')
+                                                              .format(TH_Fiat),
+                                                      style: TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: 14),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: EdgeInsets.all(12),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.grey
+                                                      .withOpacity(0.5),
+                                                  spreadRadius: 2,
+                                                  blurRadius: 5,
+                                                  offset: Offset(0,
+                                                      3), // changes the position of the shadow
+                                                ),
+                                              ],
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.circle,
+                                                  color: Colors.red,
+                                                  size: 16,
+                                                ),
+                                                SizedBox(
+                                                  width: 12,
+                                                ),
+                                                Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.end,
+                                                  children: [
+                                                    Text(
+                                                      "หุ้นไทย",
+                                                      style: TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: 14),
+                                                    ),
+                                                    Text(
+                                                      hideBalance
+                                                          ? "****"
+                                                          : NumberFormat(
+                                                                  '#,###.#',
+                                                                  'en_US')
+                                                              .format(
+                                                                  TH_marketValue),
+                                                      style: TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: 14),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              ThaiTreemapState(
+                                                  username: username)),
+                                    );
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.all(14),
+                                    margin: EdgeInsets.symmetric(
+                                        vertical: 8, horizontal: 6),
+                                    decoration: BoxDecoration(
+                                        color: Colors.red.shade900,
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          "ดู Treemap หุ้นไทย",
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 16),
+                                        ),
+                                        Icon(
+                                          Icons.arrow_right_alt_rounded,
+                                          color: Colors.white,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 4,
+                                ),
+                                Container(
+                                  margin: EdgeInsets.symmetric(vertical: 12),
+                                  child: ListView.builder(
+                                    shrinkWrap: true,
+                                    physics:
+                                        NeverScrollableScrollPhysics(), // ปิดการเลื่อน
+                                    itemCount: TH_ListAssets.length,
+                                    itemBuilder: (context, index) {
+                                      var item = TH_ListAssets[index];
+                                      print(
+                                          (item['percentProfit'].runtimeType));
+                                      return Container(
+                                        margin: EdgeInsets.symmetric(
+                                            vertical: 4, horizontal: 6),
+                                        padding: EdgeInsets.all(2),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  Colors.grey.withOpacity(0.5),
+                                              spreadRadius: 2,
+                                              blurRadius: 5,
+                                              offset: Offset(0,
+                                                  3), // changes the position of the shadow
+                                            ),
+                                          ],
+                                        ),
+                                        child: ListTile(
+                                          title: Row(
+                                            children: [
+                                              Text(
+                                                item['symbol'],
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.w500),
+                                              ),
+                                              SizedBox(
+                                                width: 8,
+                                              ),
+                                              Container(
+                                                padding: EdgeInsets.symmetric(
+                                                    vertical: 2,
+                                                    horizontal: 10),
+                                                child: Row(
+                                                  children: [
+                                                    Text(
+                                                      hideBalance
+                                                          ? "****"
+                                                          : "${NumberFormat('#,###.#', 'en_US').format(item['profit'])}\u0E3F",
+                                                      style: TextStyle(
+                                                          color: NumberFormat(
+                                                                      '#,###.##',
+                                                                      'en_US')
+                                                                  .format(item[
+                                                                      'profit'])
+                                                                  .startsWith(
+                                                                      '-')
+                                                              ? Color(
+                                                                  0xFFFF002E)
+                                                              : Color(
+                                                                  0xFF0AFF96),
+                                                          fontSize: 12,
+                                                          fontWeight:
+                                                              FontWeight.w700),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 8,
+                                                    ),
+                                                    Text(
+                                                      "(${NumberFormat('#,###.##', 'en_US').format(item['percentProfit'])}%)",
+                                                      style: TextStyle(
+                                                          color: NumberFormat(
+                                                                      '#,###.##',
+                                                                      'en_US')
+                                                                  .format(item[
+                                                                      'percentProfit'])
+                                                                  .startsWith(
+                                                                      '-')
+                                                              ? Color(
+                                                                  0xFFFF002E)
+                                                              : Color(
+                                                                  0xFF0AFF96),
+                                                          fontSize: 12,
+                                                          fontWeight:
+                                                              FontWeight.w700),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          subtitle: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.stretch,
+                                            children: [
+                                              SizedBox(
+                                                height: 8,
+                                              ),
+                                              Text(
+                                                'ราคาเฉลี่ยต่อหน่วย: ${item['averagePrice']}',
+                                                style: TextStyle(fontSize: 12),
+                                              ),
+                                              Text(
+                                                hideBalance
+                                                    ? "****"
+                                                    : 'มูลค่าทั้งหมด: ${NumberFormat('#,###.#', 'en_US').format(item['amount'])} บาท',
+                                                style: TextStyle(fontSize: 12),
+                                              ),
+                                            ],
+                                          ),
+                                          trailing: Text(
+                                            hideBalance
+                                                ? "****"
+                                                : 'จำนวน: ${NumberFormat('#,###.#', 'en_US').format(item['actualVolume'])} หน่วย',
+                                            style: TextStyle(fontSize: 14),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
                                 ),
                               ],
                             ),
                           ),
                         ),
-                        SizedBox(
-                          height: 4,
-                        ),
-                        Container(
-                          margin: EdgeInsets.symmetric(vertical: 12),
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            physics:
-                                NeverScrollableScrollPhysics(), // ปิดการเลื่อน
-                            itemCount: positions.length,
-                            itemBuilder: (context, index) {
-                              var position = positions[index];
-
-                              return Container(
-                                margin: EdgeInsets.symmetric(
-                                    vertical: 4, horizontal: 6),
-                                padding: EdgeInsets.all(2),
+                        SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: Text(
+                                  "ทรัพย์สินหุ้นอเมริกา (US Stock Assets)",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 18),
+                                ),
+                              ),
+                              SizedBox(
+                                height: 12,
+                              ),
+                              Container(
+                                margin: EdgeInsets.only(left: 16, right: 6),
+                                width: MediaQuery.of(context).size.width * 0.5,
+                                padding: EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  color: Color(0xFF2A3547),
-                                  borderRadius: BorderRadius.circular(20),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.5),
-                                      spreadRadius: 2,
-                                      blurRadius: 5,
-                                      offset: Offset(0,
-                                          3), // changes the position of the shadow
+                                  color: Colors.transparent,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Column(
+                                  children: [
+                                    CircularPercentIndicator(
+                                      radius: 50,
+                                      lineWidth: 30.0,
+                                      backgroundColor: Color(0xFF068DA9),
+                                      animation: true,
+                                      animationDuration: 1000,
+                                      percent: US_totalChart,
+                                      progressColor: Colors.red,
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: [
+                                        Text(
+                                            "${(100 - US_totalChart * 100).toStringAsFixed(1)}%"),
+                                        Text("ต่อ"),
+                                        Text(
+                                            "${(US_totalChart * 100).toStringAsFixed(1)}%"),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: [
+                                        Container(
+                                          padding: EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.grey
+                                                    .withOpacity(0.5),
+                                                spreadRadius: 2,
+                                                blurRadius: 5,
+                                                offset: Offset(0,
+                                                    3), // changes the position of the shadow
+                                              ),
+                                            ],
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.circle,
+                                                color: Color(0xFF068DA9),
+                                                size: 16,
+                                              ),
+                                              SizedBox(
+                                                width: 12,
+                                              ),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.end,
+                                                children: [
+                                                  Text(
+                                                    "เงินสดอเมริกา",
+                                                    style: TextStyle(
+                                                        color: Colors.black,
+                                                        fontSize: 14),
+                                                  ),
+                                                  Text(
+                                                    hideBalance
+                                                        ? "****"
+                                                        : NumberFormat(
+                                                                '#,###.##',
+                                                                'en_US')
+                                                            .format(US_Fiat),
+                                                    style: TextStyle(
+                                                        color: Colors.black,
+                                                        fontSize: 14),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.grey
+                                                    .withOpacity(0.5),
+                                                spreadRadius: 2,
+                                                blurRadius: 5,
+                                                offset: Offset(0,
+                                                    3), // changes the position of the shadow
+                                              ),
+                                            ],
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.circle,
+                                                color: Colors.red,
+                                                size: 16,
+                                              ),
+                                              SizedBox(
+                                                width: 12,
+                                              ),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.end,
+                                                children: [
+                                                  Text(
+                                                    "หุ้นอเมริกา",
+                                                    style: TextStyle(
+                                                        color: Colors.black,
+                                                        fontSize: 14),
+                                                  ),
+                                                  Text(
+                                                    hideBalance
+                                                        ? "****"
+                                                        : NumberFormat(
+                                                                '#,###.#',
+                                                                'en_US')
+                                                            .format(
+                                                                US_marketValue),
+                                                    style: TextStyle(
+                                                        color: Colors.black,
+                                                        fontSize: 14),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
-                                child: ListTile(
-                                  title: Row(
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            USTreemapState(username: username)),
+                                  );
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.all(14),
+                                  margin: EdgeInsets.symmetric(
+                                      vertical: 8, horizontal: 6),
+                                  decoration: BoxDecoration(
+                                      color: Colors.red.shade900,
+                                      borderRadius: BorderRadius.circular(10)),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        position['symbol'],
+                                        "ดู Treemap หุ้นอเมริกา",
                                         style: TextStyle(
+                                            color: Colors.white,
                                             fontWeight: FontWeight.w500,
-                                            color: Colors.white),
+                                            fontSize: 16),
                                       ),
-                                      SizedBox(
-                                        width: 8,
+                                      Icon(
+                                        Icons.arrow_right_alt_rounded,
+                                        color: Colors.white,
                                       ),
-                                      Container(
-                                        padding: EdgeInsets.symmetric(
-                                            vertical: 2, horizontal: 10),
-                                        child: Row(
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                height: 4,
+                              ),
+                              Container(
+                                margin: EdgeInsets.symmetric(vertical: 12),
+                                child: ListView.builder(
+                                  shrinkWrap: true,
+                                  physics:
+                                      NeverScrollableScrollPhysics(), // ปิดการเลื่อน
+                                  itemCount: positions.length,
+                                  itemBuilder: (context, index) {
+                                    var position = positions[index];
+
+                                    return Container(
+                                      margin: EdgeInsets.symmetric(
+                                          vertical: 4, horizontal: 6),
+                                      padding: EdgeInsets.all(2),
+                                      decoration: BoxDecoration(
+                                        color: Color(0xFF2A3547),
+                                        borderRadius: BorderRadius.circular(20),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.grey.withOpacity(0.5),
+                                            spreadRadius: 2,
+                                            blurRadius: 5,
+                                            offset: Offset(0,
+                                                3), // changes the position of the shadow
+                                          ),
+                                        ],
+                                      ),
+                                      child: ListTile(
+                                        title: Row(
                                           children: [
-                                            position['unrealized_pl']
-                                                    .toString()
-                                                    .startsWith('-')
-                                                ? Text(
-                                                  hideBalance
-                                                    ? "****"
-                                                    : 
-                                                    "\u0024${NumberFormat('#,###.#', 'en_US').format(double.parse(position['unrealized_pl']))}",
+                                            Text(
+                                              position['symbol'],
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w500,
+                                                  color: Colors.white),
+                                            ),
+                                            SizedBox(
+                                              width: 8,
+                                            ),
+                                            Container(
+                                              padding: EdgeInsets.symmetric(
+                                                  vertical: 2, horizontal: 10),
+                                              child: Row(
+                                                children: [
+                                                  position['unrealized_pl']
+                                                          .toString()
+                                                          .startsWith('-')
+                                                      ? Text(
+                                                          hideBalance
+                                                              ? "****"
+                                                              : "\u0024${NumberFormat('#,###.#', 'en_US').format(double.parse(position['unrealized_pl']))}",
+                                                          style: TextStyle(
+                                                              color: position[
+                                                                          'unrealized_pl']
+                                                                      .toString()
+                                                                      .startsWith(
+                                                                          '-')
+                                                                  ? Color(
+                                                                      0xFFFF002E)
+                                                                  : Color(
+                                                                      0xFF0AFF96),
+                                                              fontSize: 12,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w700),
+                                                        )
+                                                      : Text(
+                                                          hideBalance
+                                                              ? "****"
+                                                              : "\u0024+${NumberFormat('#,###.#', 'en_US').format(double.parse(position['unrealized_pl']))}",
+                                                          style: TextStyle(
+                                                              color: position[
+                                                                          'unrealized_pl']
+                                                                      .toString()
+                                                                      .startsWith(
+                                                                          '-')
+                                                                  ? Color(
+                                                                      0xFFFF002E)
+                                                                  : Color(
+                                                                      0xFF0AFF96),
+                                                              fontSize: 12,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w700),
+                                                        ),
+                                                  SizedBox(
+                                                    width: 8,
+                                                  ),
+                                                  Text(
+                                                    "(${NumberFormat('#,###.##', 'en_US').format(double.parse(position['unrealized_plpc']))}%)",
                                                     style: TextStyle(
                                                         color: position[
-                                                                    'unrealized_pl']
-                                                                .toString()
-                                                                .startsWith('-')
-                                                            ? Color(0xFFFF002E)
-                                                            : Color(0xFF0AFF96),
-                                                        fontSize: 12,
-                                                        fontWeight:
-                                                            FontWeight.w700),
-                                                  )
-                                                : Text(
-                                                  hideBalance
-                                                    ? "****"
-                                                    : 
-                                                    "\u0024+${NumberFormat('#,###.#', 'en_US').format(double.parse(position['unrealized_pl']))}",
-                                                    style: TextStyle(
-                                                        color: position[
-                                                                    'unrealized_pl']
+                                                                    'unrealized_plpc']
                                                                 .toString()
                                                                 .startsWith('-')
                                                             ? Color(0xFFFF002E)
@@ -1025,60 +1085,48 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                                                         fontWeight:
                                                             FontWeight.w700),
                                                   ),
-                                            SizedBox(
-                                              width: 8,
-                                            ),
-                                            Text(
-                                              
-                                              "(${NumberFormat('#,###.##', 'en_US').format(double.parse(position['unrealized_plpc']))}%)",
-                                              style: TextStyle(
-                                                  color: position[
-                                                              'unrealized_plpc']
-                                                          .toString()
-                                                          .startsWith('-')
-                                                      ? Color(0xFFFF002E)
-                                                      : Color(0xFF0AFF96),
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w700),
+                                                ],
+                                              ),
                                             ),
                                           ],
                                         ),
+                                        subtitle: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.stretch,
+                                          children: [
+                                            SizedBox(
+                                              height: 8,
+                                            ),
+                                            Text(
+                                              'ราคาเฉลี่ยต่อหน่วย: ${NumberFormat('#,###.#', 'en_US').format(double.parse(position['avg_entry_price']))}',
+                                              style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: Colors.white),
+                                            ),
+                                            Text(
+                                              hideBalance
+                                                  ? "****"
+                                                  : 'มูลค่าทั้งหมด: ${NumberFormat('#,###.#', 'en_US').format(double.parse(position['market_value']))}',
+                                              style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: Colors.white),
+                                            ),
+                                          ],
+                                        ),
+                                        trailing: Text(
+                                          hideBalance
+                                              ? "****"
+                                              : 'จำนวน: ${NumberFormat('#,###.###', 'en_US').format(double.parse(position['quantity']))} หน่วย',
+                                          style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.white),
+                                        ),
                                       ),
-                                    ],
-                                  ),
-                                  subtitle: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      SizedBox(
-                                        height: 8,
-                                      ),
-                                      Text(
-                                        'ราคาเฉลี่ยต่อหน่วย: ${NumberFormat('#,###.#', 'en_US').format(double.parse(position['avg_entry_price']))}',
-                                        style: TextStyle(
-                                            fontSize: 12, color: Colors.white),
-                                      ),
-                                      Text(
-                                        hideBalance
-                                                    ? "****"
-                                                    : 
-                                        'มูลค่าทั้งหมด: ${NumberFormat('#,###.#', 'en_US').format(double.parse(position['market_value']))}',
-                                        style: TextStyle(
-                                            fontSize: 12, color: Colors.white),
-                                      ),
-                                    ],
-                                  ),
-                                  trailing: Text(
-                                    hideBalance
-                                                    ? "****"
-                                                    : 
-                                    'จำนวน: ${NumberFormat('#,###.###', 'en_US').format(double.parse(position['quantity']))} หน่วย',
-                                    style: TextStyle(
-                                        fontSize: 14, color: Colors.white),
-                                  ),
+                                    );
+                                  },
                                 ),
-                              );
-                            },
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -1087,9 +1135,6 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                 ],
               ),
             ),
-          ],
-        ),
-      ),
     );
   }
 }

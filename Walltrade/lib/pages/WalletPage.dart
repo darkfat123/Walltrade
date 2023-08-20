@@ -71,7 +71,7 @@ class _WalletPageState extends State<WalletPage> {
       for (var position in positions) {
         // Explicitly convert market_value and cost_basis to double
         double marketValue = double.parse(position['market_value']);
-        double costBasis = double.parse(position['cost_basis']);
+        double costBasis = double.parse(position['avg_entry_price']);
         US_marketValue += marketValue;
         // เพิ่มข้อมูล PositData เข้าไปใน List ที่สร้างไว้
         _positDataList.add(PositData(
@@ -101,7 +101,6 @@ class _WalletPageState extends State<WalletPage> {
           },
         );
         formatted_usCash = NumberFormat('#,###.##', 'en_US').format(US_cash);
-
       } else {
         throw Exception(
             'Failed to retrieve wallet balance. Error: ${response.body}');
@@ -151,9 +150,9 @@ class _WalletPageState extends State<WalletPage> {
         TH_marketValue = double.parse(th_marketValue);
       });
     }
-    TH_chartMarketValue = (TH_marketValue/TH_balance)*100;
-    US_chartMarketValue =(US_marketValue/US_cash)*100;
-    totalFiat =US_cash/TH_balance;
+    TH_chartMarketValue = (TH_marketValue / TH_balance) * 100;
+    US_chartMarketValue = (US_marketValue / US_cash) * 100;
+    totalFiat = US_cash / TH_balance;
     totalBalance = _walletBalance + TH_balance;
   }
 
@@ -171,7 +170,6 @@ class _WalletPageState extends State<WalletPage> {
         setState(() {
           TH_percentage = data1['percentageChange'];
           TH_totalProfit = double.parse(data1['balanceProfitChange']);
-
         });
       } else {
         throw Exception(
@@ -192,12 +190,10 @@ class _WalletPageState extends State<WalletPage> {
           _balanceChange = balanceChange;
 
           _percentageChange = percentageChange;
-
         });
         totalProfit = TH_totalProfit + _balanceChange;
         formattedProfit = NumberFormat('#,###.##', 'en_US').format(totalProfit);
         totalPercentage = TH_percentage + _percentageChange;
-
       } else {
         throw Exception(
             'Failed to retrieve balance change. Error: ${response2.body}');
@@ -434,7 +430,9 @@ class _WalletPageState extends State<WalletPage> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => PortfolioDetailPage(username: username)),
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            PortfolioDetailPage(username: username)),
                   );
                 },
                 child: Container(
@@ -527,11 +525,13 @@ class _WalletPageState extends State<WalletPage> {
                               children: [
                                 Text(
                                   "เงินอเมริกา",
-                                  style: TextStyle(color: Colors.white,fontSize: 12),
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 12),
                                 ),
                                 Text(
                                   formatted_usCash,
-                                  style: TextStyle(color: Colors.white,fontSize: 12),
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 12),
                                 ),
                               ],
                             ),
@@ -545,11 +545,14 @@ class _WalletPageState extends State<WalletPage> {
                               children: [
                                 Text(
                                   "เงินไทย",
-                                  style: TextStyle(color: Colors.white,fontSize: 12),
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 12),
                                 ),
                                 Text(
-                                  NumberFormat('#,###.#', 'en_US').format(TH_Fiat),
-                                  style: TextStyle(color: Colors.white,fontSize: 12),
+                                  NumberFormat('#,###.#', 'en_US')
+                                      .format(TH_Fiat),
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 12),
                                 ),
                               ],
                             ),
@@ -585,7 +588,7 @@ class _WalletPageState extends State<WalletPage> {
                                 lineWidth: 10.0,
                                 animation: true,
                                 animationDuration: 1000,
-                                percent: TH_chartMarketValue/100,
+                                percent: TH_chartMarketValue / 100,
                                 center: new Text(
                                   "${TH_chartMarketValue.toStringAsFixed(0)}%",
                                   style: TextStyle(color: Colors.white),
@@ -600,11 +603,14 @@ class _WalletPageState extends State<WalletPage> {
                                 children: [
                                   Text(
                                     "หุ้นไทย",
-                                    style: TextStyle(color: Colors.white,fontSize: 12),
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 12),
                                   ),
                                   Text(
-                                    NumberFormat('#,###.#', 'en_US').format(TH_marketValue),
-                                    style: TextStyle(color: Colors.white,fontSize: 12),
+                                    NumberFormat('#,###.#', 'en_US')
+                                        .format(TH_marketValue),
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 12),
                                   ),
                                 ],
                               ),
@@ -638,7 +644,7 @@ class _WalletPageState extends State<WalletPage> {
                                 lineWidth: 10.0,
                                 animation: true,
                                 animationDuration: 1000,
-                                percent: US_chartMarketValue/100,
+                                percent: US_chartMarketValue / 100,
                                 center: new Text(
                                   "${US_chartMarketValue.toStringAsFixed(0)}%",
                                   style: TextStyle(color: Colors.white),
@@ -653,11 +659,14 @@ class _WalletPageState extends State<WalletPage> {
                                 children: [
                                   Text(
                                     "หุ้นอเมริกา",
-                                    style: TextStyle(color: Colors.white,fontSize: 12),
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 12),
                                   ),
                                   Text(
-                                    NumberFormat('#,###.#', 'en_US').format(US_marketValue),
-                                    style: TextStyle(color: Colors.white,fontSize: 12),
+                                    NumberFormat('#,###.#', 'en_US')
+                                        .format(US_marketValue),
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 12),
                                   ),
                                 ],
                               ),
@@ -695,7 +704,9 @@ class _WalletPageState extends State<WalletPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => TreemapState(username: username,)),
+                              builder: (context) => TreemapState(
+                                    username: username,
+                                  )),
                         );
                       },
                       child: Container(
@@ -841,64 +852,6 @@ class _WalletPageState extends State<WalletPage> {
                       ),
                     ),
                   ],
-                ),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Text(
-                "สินทรัพย์ที่มีอยู่",
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.all(14),
-                padding: EdgeInsets.all(20),
-                width: double.infinity,
-                height: positions.length *
-                    103.5, // ความสูงขึ้นอยู่กับจำนวนรายการใน ListView
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 2,
-                      blurRadius: 5,
-                      offset:
-                          Offset(0, 3), // changes the position of the shadow
-                    ),
-                  ],
-                ),
-                child: ListView.builder(
-                  itemCount: positions.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    final position = positions[index];
-                    return Container(
-                      margin: EdgeInsets.symmetric(vertical: 5.0),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8.0),
-                        color: Color(0xFFECF8F9),
-                      ),
-                      child: ListTile(
-                        title: Text(
-                          position['symbol'],
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('มูลค่าปัจจุบัน: ${position['market_value']}'),
-                            Text('ต้นทุน: ${position['cost_basis']}'),
-                          ],
-                        ),
-                        trailing:
-                            Text('จำนวนหุ้น: ${position['quantity']} หน่วย'),
-                      ),
-                    );
-                  },
                 ),
               ),
             ],
