@@ -23,7 +23,7 @@ class WalletPage extends StatefulWidget {
 
 class _WalletPageState extends State<WalletPage> {
   final String username;
-  bool isLoading = true;
+  bool isLoading = false;
   double _walletBalance = 0;
   double checkBalanceChange = 0;
   double TH_balance = 0;
@@ -105,7 +105,6 @@ class _WalletPageState extends State<WalletPage> {
           _positDataList = positDataList;
           isLoading = false;
         });
-        print(_positDataList);
       }
     } catch (error) {
       print('An error occurred: $error');
@@ -137,65 +136,25 @@ class _WalletPageState extends State<WalletPage> {
     }
   }
 
-  Future<void> getBalance() async {
-    var url = Uri.parse('${Constants.serverUrl}/getBalance');
-    var headers = {'Content-Type': 'application/x-www-form-urlencoded'};
-    var body = {'username': username};
-
+  Future<void> getBalances() async {
     try {
-      var response = await http.post(url, headers: headers, body: body);
+      var commonUrl = Uri.parse('${Constants.serverUrl}/th_portfolio');
+      var headers = {'Content-Type': 'application/json'};
+      var body = {'username': username};
 
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
-        var walletBalance = data['wallet_balance'];
-
-        setState(() {
-          _walletBalance = double.parse(double.parse(walletBalance)
-              .toStringAsFixed(2)); // แปลง String เป็น double
-        });
-      } else {
-        throw Exception(
-            'Failed to retrieve wallet balance. Error: ${response.body}');
-      }
-    } catch (e) {
-      throw Exception('Error: $e');
-    }
-
-    var url2 = Uri.parse('${Constants.serverUrl}/th_portfolio');
-    var headers2 = {'Content-Type': 'application/json'};
-    var body2 = {'username': username};
-    var response =
-        await http.post(url2, headers: headers2, body: jsonEncode(body2));
-    if (response.statusCode == 200) {
-      var data2 = jsonDecode(response.body);
-      var th_cash = data2['balance'];
-      var th_fiat = data2['lineAvailable'];
-      var th_marketValue = data2['marketValue'];
-      setState(() {
-        TH_balance = double.parse(th_cash);
-        TH_Fiat = double.parse(th_fiat);
-        TH_marketValue = double.parse(th_marketValue);
-      });
-    }
-    TH_chartMarketValue =
-        TH_marketValue <= 0 ? 0 : (TH_marketValue / TH_Fiat) * 100;
-    US_chartMarketValue = (US_marketValue / US_cash);
-    print("US_chartMarketValue: $US_chartMarketValue");
-    print("US_marketValue: $US_marketValue");
-    print("US_cash: $US_cash");
-    totalFiat = US_cash / TH_Fiat;
-
-    totalBalance = _walletBalance + TH_balance;
-  }
-
-  Future<void> getBalanceChange() async {
-    try {
-      // TH HTTP request
-      var url1 = Uri.parse('${Constants.serverUrl}/th_portfolio');
-      var headers1 = {'Content-Type': 'application/json'};
-      var body1 = {'username': username};
       var response1 =
-          await http.post(url1, headers: headers1, body: jsonEncode(body1));
+          await http.post(commonUrl, headers: headers, body: jsonEncode(body));
+      var response2 = await http.post(
+          Uri.parse('${Constants.serverUrl}/get_balance_change'),
+          headers: headers,
+          body: jsonEncode({'username': username}));
+      var response3 = await http.post(
+          Uri.parse('${Constants.serverUrl}/getBalance'),
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          body: {'username': username});
+
+      var response4 =
+          await http.post(commonUrl, headers: headers, body: jsonEncode(body));
 
       if (response1.statusCode == 200) {
         var data1 = jsonDecode(response1.body);
@@ -208,19 +167,12 @@ class _WalletPageState extends State<WalletPage> {
             'Failed to retrieve TH balance. Error: ${response1.body}');
       }
 
-      // US HTTP request
-      var url2 = Uri.parse('${Constants.serverUrl}/get_balance_change');
-      var headers2 = {'Content-Type': 'application/json'};
-      var body2 = jsonEncode({'username': username});
-
-      var response2 = await http.post(url2, headers: headers2, body: body2);
       if (response2.statusCode == 200) {
         var data2 = jsonDecode(response2.body);
         var balanceChange = data2['balance_change'];
         var percentageChange = data2['percentage_change'];
         setState(() {
           _balanceChange = balanceChange;
-
           _percentageChange = percentageChange;
         });
         totalProfit = TH_totalProfit + _balanceChange;
@@ -230,6 +182,42 @@ class _WalletPageState extends State<WalletPage> {
         throw Exception(
             'Failed to retrieve balance change. Error: ${response2.body}');
       }
+
+      if (response3.statusCode == 200) {
+        var data3 = jsonDecode(response3.body);
+        var walletBalance = data3['wallet_balance'];
+
+        setState(() {
+          _walletBalance =
+              double.parse(double.parse(walletBalance).toStringAsFixed(2));
+          US_cash = _walletBalance;
+        });
+      } else {
+        throw Exception(
+            'Failed to retrieve wallet balance. Error: ${response3.body}');
+      }
+
+      if (response4.statusCode == 200) {
+        var data4 = jsonDecode(response4.body);
+        var th_cash = data4['balance'];
+        var th_fiat = data4['lineAvailable'];
+        var th_marketValue = data4['marketValue'];
+        setState(() {
+          TH_balance = double.parse(th_cash);
+          TH_Fiat = double.parse(th_fiat);
+          TH_marketValue = double.parse(th_marketValue);
+        });
+      } else {
+        throw Exception(
+            'Failed to retrieve TH portfolio. Error: ${response4.body}');
+      }
+
+      TH_chartMarketValue =
+          TH_marketValue <= 0 ? 0 : (TH_marketValue / TH_Fiat) * 100;
+      US_chartMarketValue =
+          US_marketValue <= 0 ? 0 : (US_marketValue / US_cash) * 100;
+      totalFiat = US_cash / TH_Fiat;
+      totalBalance = _walletBalance + TH_balance;
     } catch (e) {
       throw Exception('Error: $e');
     }
@@ -238,8 +226,8 @@ class _WalletPageState extends State<WalletPage> {
   @override
   void initState() {
     super.initState();
-    getBalance();
-    getBalanceChange();
+    getBalances();
+
     getCash();
     fetchPositionData();
   }
@@ -429,18 +417,6 @@ class _WalletPageState extends State<WalletPage> {
                             color: Colors.white,
                           ),
                         ),
-                        /* Text(
-                          formattedProfit.startsWith("-")
-                              ? "$formattedProfit"
-                              : "+$formattedProfit",
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 12,
-                            color: formattedProfit.startsWith("-")
-                                ? Colors.red
-                                : Color(0xFF13B709),
-                          ),
-                        ),*/
                         Text(
                           hideBalance
                               ? "**** USD (****)"
@@ -675,7 +651,7 @@ class _WalletPageState extends State<WalletPage> {
                                 lineWidth: 10.0,
                                 animation: true,
                                 animationDuration: 1000,
-                                percent: US_chartMarketValue,
+                                percent: US_chartMarketValue / 100,
                                 center: new Text(
                                   "${US_chartMarketValue.toStringAsFixed(0)}%",
                                   style: TextStyle(color: Colors.white),
@@ -820,88 +796,79 @@ class _WalletPageState extends State<WalletPage> {
   }
 
   Widget _buildTreemap() {
-    try {
-      return SfTreemap(
-        dataCount: _positDataList.length,
-        colorMappers: [
-          TreemapColorMapper.range(
-            from: 0,
-            to: 100,
-            color: Colors.yellow,
-          ),
-          TreemapColorMapper.range(
-            from: 100,
-            to: 500,
-            color: Colors.amber,
-          ),
-          TreemapColorMapper.range(
-            from: 500,
-            to: 800,
-            color: Colors.orange.shade800,
-          ),
-          TreemapColorMapper.range(
-            from: 800,
-            to: double.infinity,
-            color: Colors.red,
-          ),
-        ],
-        weightValueMapper: (int index) {
-          return _positDataList[index].marketValue;
-        },
-        levels: <TreemapLevel>[
-          TreemapLevel(
-            groupMapper: (int index) {
-              return _positDataList[index].symbol;
-            },
-            labelBuilder: (BuildContext context, TreemapTile tile) {
-              // Function to calculate font size based on weight value
-              double getFontSize(double weight) {
-                if (weight < 100) return 4;
-                if (weight < 1000) return 8;
-                if (weight < 10000) return 10;
-                return 14;
-              }
-
-              double fontSize = getFontSize(tile.weight);
-
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      tile.group,
-                      style: TextStyle(color: Colors.black, fontSize: fontSize),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                    ),
-                    Text(
-                      '${NumberFormat('#,###.#', 'en_US').format(tile.weight)}',
-                      style: TextStyle(color: Colors.black, fontSize: fontSize),
-                    ),
-                  ],
-                ),
-              );
-            },
-            tooltipBuilder: (BuildContext context, TreemapTile tile) {
-              return Padding(
-                padding: const EdgeInsets.all(10),
-                child: Text(
-                    '''Symbol: ${tile.group}\nมูลค่าปัจจุบัน : ${NumberFormat('#,###.#', 'en_US').format(tile.weight)} USD''',
-                    style: const TextStyle(color: Colors.black)),
-              );
-            },
-          ),
-        ],
-      );
-    } catch (e) {
-      return Center(
-        child: Text(
-          "มีข้อผิดพลาดโปรดลองใหม่ภายหลัง",
-          style: TextStyle(color: Colors.white, fontSize: 16),
+    return SfTreemap(
+      dataCount: _positDataList.length,
+      colorMappers: [
+        TreemapColorMapper.range(
+          from: 0,
+          to: 100,
+          color: Colors.yellow,
         ),
-      );
-    }
+        TreemapColorMapper.range(
+          from: 100,
+          to: 500,
+          color: Colors.amber,
+        ),
+        TreemapColorMapper.range(
+          from: 500,
+          to: 800,
+          color: Colors.orange.shade800,
+        ),
+        TreemapColorMapper.range(
+          from: 800,
+          to: double.infinity,
+          color: Colors.red,
+        ),
+      ],
+      weightValueMapper: (int index) {
+        return _positDataList[index].marketValue;
+      },
+      levels: <TreemapLevel>[
+        TreemapLevel(
+          groupMapper: (int index) {
+            return _positDataList[index].symbol;
+          },
+          labelBuilder: (BuildContext context, TreemapTile tile) {
+            // Function to calculate font size based on weight value
+            double getFontSize(double weight) {
+              if (weight < 100) return 4;
+              if (weight < 1000) return 8;
+              if (weight < 10000) return 10;
+              return 14;
+            }
+
+            double fontSize = getFontSize(tile.weight);
+
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    tile.group,
+                    style: TextStyle(color: Colors.black, fontSize: fontSize),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                  ),
+                  Text(
+                    '${NumberFormat('#,###.#', 'en_US').format(tile.weight)}',
+                    style: TextStyle(color: Colors.black, fontSize: fontSize),
+                  ),
+                ],
+              ),
+            );
+          },
+          tooltipBuilder: (BuildContext context, TreemapTile tile) {
+            return Padding(
+              padding: const EdgeInsets.all(10),
+              child: Text(
+                  '''Symbol: ${tile.group}\nมูลค่าปัจจุบัน : ${NumberFormat('#,###.#', 'en_US').format(tile.weight)} USD''',
+                  style: const TextStyle(color: Colors.black)),
+            );
+          },
+        ),
+      ],
+    );
   }
 }
 
