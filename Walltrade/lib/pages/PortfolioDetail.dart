@@ -46,7 +46,7 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
   double _walletBalance = 0;
   double TH_balance = 0;
   double TH_Fiat = 0;
-  double US_Fiat = 0.1;
+  double US_Fiat = 0;
   double TH_marketValue = 0;
   double US_marketValue = 0;
   double TH_chartMarketValue = 0;
@@ -104,10 +104,15 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
         TH_marketValue = double.parse(th_marketValue);
         TH_ProfitChange = double.parse(balanceProfitChange);
         TH_percentageChange = percentageProfitChange;
-        TH_totalChart = TH_marketValue / TH_Fiat;
+
+        TH_totalChart =
+            TH_marketValue <= 0 ? 0 : TH_marketValue / TH_Fiat;
         TH_ListAssets = portfolioList;
         isLoading = false;
       });
+      print("TH_marketValue: $TH_marketValue");
+      print("TH_Fiat: $TH_Fiat");
+      print("TH_totalChart: $TH_totalChart");
     }
 
     TH_chartMarketValue = (TH_marketValue / TH_balance) * 100;
@@ -197,6 +202,7 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
       print("US Fiat: $US_Fiat");
       print("US Market: $US_marketValue");
       US_totalChart = (US_marketValue / US_Fiat);
+      print("US totalChart: $US_totalChart");
     } else {
       print('Failed to fetch position data');
     }
@@ -469,7 +475,7 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                                     children: [
                                       CircularPercentIndicator(
                                         radius: 50,
-                                        lineWidth: 25.0,
+                                        lineWidth: 30.0,
                                         backgroundColor: Color(0xFF068DA9),
                                         animation: true,
                                         animationDuration: 1000,

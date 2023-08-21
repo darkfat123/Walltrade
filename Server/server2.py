@@ -1016,57 +1016,63 @@ def news():
     
 @app.route('/th_portfolio', methods=['POST'])
 def th_portfolio():
-    username = request.json.get('username')
+    try:
+        username = request.json.get('username')
 
-    conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
-    query = f"SELECT th_api_key, th_secret_key FROM users_info WHERE username = '{username}'"
-    cursor = conn.cursor()
-    cursor.execute(query)
-    result = cursor.fetchone()
+        conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
+        query = f"SELECT th_api_key, th_secret_key FROM users_info WHERE username = '{username}'"
+        cursor = conn.cursor()
+        cursor.execute(query)
+        result = cursor.fetchone()
 
-    investor = Investor(
-                app_id=result[0],                                 
-                app_secret=result[1], 
-                broker_id="SANDBOX",
-                app_code="SANDBOX",
-                is_auto_queue = False)
+        app_id, app_secret = result
 
-    equity = investor.Equity(account_no=f"{username}-E")
+        investor = Investor(
+            app_id=app_id,
+            app_secret=app_secret,
+            broker_id="SANDBOX",
+            app_code="SANDBOX",
+            is_auto_queue=False
+        )
 
-    account_info = equity.get_account_info()
-    portfolio = equity.get_portfolios()
+        equity = investor.Equity(account_no=f"{username}-E")
 
-    #(profit - cashBalance) / 100 = percentage of intialcashBalance
-    cashBalance = account_info.get('cashBalance')
-    percentageChange = (portfolio['totalPortfolio']['profit'] / cashBalance)*100
-    cash = CurrencyRates().get_rate('THB', 'USD')
-    balance = f"{cashBalance * cash:.2f}"
-    balanceProfitChange = f"{portfolio['totalPortfolio']['profit']* cash:.2f}"
-    lineAvailable = f"{account_info.get('lineAvailable')* cash:.2f}"
-    marketValue = f"{portfolio['totalPortfolio']['marketValue']* cash:.2f}"
+        account_info = equity.get_account_info()
+        portfolio = equity.get_portfolios()
 
-    portfolio_list = []
-    for item in portfolio['portfolioList']:
-        symbol = item['symbol']
-        averagePrice = item['averagePrice']
-        amount = item['amount']
-        actualVolume = item['actualVolume']
-        profit = item['profit']
-        percentProfit = item['percentProfit']
-        portfolio_list.append({'symbol': symbol, 'averagePrice': averagePrice, 'amount': amount,'actualVolume': actualVolume,'profit':profit,'percentProfit':percentProfit})
+        cashBalance = account_info.get('cashBalance')
+        portfolio_profit = portfolio['totalPortfolio']['profit']
+        percentageChange = (portfolio_profit / cashBalance) * 100
 
+        cash = CurrencyRates().get_rate('THB', 'USD')
+        balance = f"{cashBalance * cash:.2f}"
+        balanceProfitChange = f"{portfolio_profit * cash:.2f}"
+        lineAvailable = f"{account_info.get('lineAvailable') * cash:.2f}"
+        marketValue = f"{portfolio['totalPortfolio']['marketValue'] * cash:.2f}"
+        print(balance)
+        portfolio_list = []
+        for item in portfolio['portfolioList']:
+            portfolio_list.append({
+                'symbol': item['symbol'],
+                'averagePrice': item['averagePrice'],
+                'amount': item['amount'],
+                'actualVolume': item['actualVolume'],
+                'profit': item['profit'],
+                'percentProfit': item['percentProfit']
+            })
 
-    result = {
-        'balance': balance,
-        'percentageChange': percentageChange,
-        'balanceProfitChange' : balanceProfitChange,
-        'lineAvailable' : lineAvailable,
-        'marketValue' : marketValue,
-        'portfolioList': portfolio_list
-    }
+        result = {
+            'balance': balance,
+            'percentageChange': percentageChange,
+            'balanceProfitChange': balanceProfitChange,
+            'lineAvailable': lineAvailable,
+            'marketValue': marketValue,
+            'portfolioList': portfolio_list
+        }
 
-    return jsonify(result)
-
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': 'มีข้อผิดพลาดโปรดลองใหม่ภายหลัง'})
 
 
 @app.route('/place_order_th', methods=['POST'])

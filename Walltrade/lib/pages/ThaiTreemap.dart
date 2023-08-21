@@ -14,6 +14,7 @@ class ThaiTreemapState extends StatefulWidget {
 class _ThaiTreemapState extends State<ThaiTreemapState> {
   final String username;
   List<dynamic> positions = [];
+  bool isLoading = true;
   _ThaiTreemapState({required this.username});
   @override
   void initState() {
@@ -68,22 +69,12 @@ class _ThaiTreemapState extends State<ThaiTreemapState> {
         await http.post(url2, headers: headers2, body: jsonEncode(body2));
     if (response.statusCode == 200) {
       var data2 = jsonDecode(response.body);
-      var th_cash = data2['balance'];
-      var th_fiat = data2['lineAvailable'];
-      var th_marketValue = data2['marketValue'];
-      var balanceProfitChange = data2['balanceProfitChange'];
-      var percentageProfitChange = data2['percentageChange'];
+
       var portfolioList = data2['portfolioList'];
       setState(() {
-        TH_balance = double.parse(th_cash);
-        TH_Fiat = double.parse(th_fiat);
-        TH_marketValue = double.parse(th_marketValue);
-        TH_ProfitChange = double.parse(balanceProfitChange);
-        TH_percentageChange = percentageProfitChange;
-        TH_totalChart = TH_marketValue / TH_Fiat;
         TH_ListAssets = portfolioList;
+        isLoading = false;
       });
-      print(TH_ListAssets);
     }
 
     print(TH_marketValue);
@@ -103,86 +94,93 @@ class _ThaiTreemapState extends State<ThaiTreemapState> {
         backgroundColor: Color(0xFF212436),
         title: Text('Treemap Chart หุ้นไทย'),
       ),
-      body: TH_ListAssets.isEmpty // Check if positions list is empty
+      body: isLoading // Check if positions list is empty
           ? Center(
               child:
                   CircularProgressIndicator(), // Show CircularProgressIndicator if data is loading
             )
-          : SfTreemap(
-              dataCount: TH_ListAssets.length,
-              colorMappers: [
-                TreemapColorMapper.range(
-                  from: 0,
-                  to: 10000,
-                  color: Colors.yellow,
-                ),
-                TreemapColorMapper.range(
-                  from: 10000,
-                  to: 50000,
-                  color: Colors.amber,
-                ),
-                TreemapColorMapper.range(
-                  from: 50000,
-                  to: 100000,
-                  color: Colors.orange.shade800,
-                ),
-                TreemapColorMapper.range(
-                  from: 100000,
-                  to: double.infinity,
-                  color: Colors.red,
-                ),
-              ],
-              weightValueMapper: (int index) {
-                return TH_ListAssets[index]['amount'];
-              },
-              levels: <TreemapLevel>[
-                TreemapLevel(
-                  groupMapper: (int index) {
-                    return TH_ListAssets[index]['symbol'];
+          : TH_ListAssets.isEmpty
+              ? Center(
+                  child: Text(
+                    "ไม่มีหุ้นไทย โปรดซื้อหุ้นเพื่อแสดงผล",
+                    style: TextStyle(fontSize: 16),
+                  ),
+                )
+              : SfTreemap(
+                  dataCount: TH_ListAssets.length,
+                  colorMappers: [
+                    TreemapColorMapper.range(
+                      from: 0,
+                      to: 10000,
+                      color: Colors.yellow,
+                    ),
+                    TreemapColorMapper.range(
+                      from: 10000,
+                      to: 50000,
+                      color: Colors.amber,
+                    ),
+                    TreemapColorMapper.range(
+                      from: 50000,
+                      to: 100000,
+                      color: Colors.orange.shade800,
+                    ),
+                    TreemapColorMapper.range(
+                      from: 100000,
+                      to: double.infinity,
+                      color: Colors.red,
+                    ),
+                  ],
+                  weightValueMapper: (int index) {
+                    return TH_ListAssets[index]['amount'];
                   },
-                  labelBuilder: (BuildContext context, TreemapTile tile) {
-                    // Function to calculate font size based on weight value
-                    double getFontSize(double weight) {
-                      if (weight < 10000) return 12;
-                      if (weight < 100000) return 16;
-                      if (weight < 10000000) return 20;
-                      return 24;
-                    }
+                  levels: <TreemapLevel>[
+                    TreemapLevel(
+                      groupMapper: (int index) {
+                        return TH_ListAssets[index]['symbol'];
+                      },
+                      labelBuilder: (BuildContext context, TreemapTile tile) {
+                        // Function to calculate font size based on weight value
+                        double getFontSize(double weight) {
+                          if (weight < 10000) return 12;
+                          if (weight < 100000) return 16;
+                          if (weight < 10000000) return 20;
+                          return 24;
+                        }
 
-                    double fontSize = getFontSize(tile.weight);
+                        double fontSize = getFontSize(tile.weight);
 
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            tile.group,
-                            style: TextStyle(
-                                color: Colors.black, fontSize: fontSize),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                tile.group,
+                                style: TextStyle(
+                                    color: Colors.black, fontSize: fontSize),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                              ),
+                              Text(
+                                '${tile.weight}',
+                                style: TextStyle(
+                                    color: Colors.black, fontSize: fontSize),
+                              ),
+                            ],
                           ),
-                          Text(
-                            '${tile.weight}',
-                            style: TextStyle(
-                                color: Colors.black, fontSize: fontSize),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                  tooltipBuilder: (BuildContext context, TreemapTile tile) {
-                    return Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Text(
-                          '''Symbol: ${tile.group}\nมูลค่า : ${tile.weight} บาท''',
-                          style: const TextStyle(color: Colors.black)),
-                    );
-                  },
+                        );
+                      },
+                      tooltipBuilder: (BuildContext context, TreemapTile tile) {
+                        return Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Text(
+                              '''Symbol: ${tile.group}\nมูลค่า : ${tile.weight} บาท''',
+                              style: const TextStyle(color: Colors.black)),
+                        );
+                      },
+                    ),
+                  ],
                 ),
-              ],
-            ),
     );
   }
 }

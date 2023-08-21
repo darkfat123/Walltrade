@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
-import 'package:Walltrade/model/walletChart.dart';
+
 import 'package:Walltrade/pages/PortfolioDetail.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -23,6 +23,7 @@ class WalletPage extends StatefulWidget {
 
 class _WalletPageState extends State<WalletPage> {
   final String username;
+  bool isLoading = true;
   double _walletBalance = 0;
   double checkBalanceChange = 0;
   double TH_balance = 0;
@@ -58,7 +59,7 @@ class _WalletPageState extends State<WalletPage> {
     });
   }
 
-    Future<void> fetchPositionData() async {
+  Future<void> fetchPositionData() async {
     try {
       final url = Uri.parse('${Constants.serverUrl}/position');
       final headers = {'Content-Type': 'application/json'};
@@ -73,6 +74,7 @@ class _WalletPageState extends State<WalletPage> {
 
         for (final position in positions) {
           final marketValue = double.parse(position['market_value']);
+          US_marketValue += marketValue;
           positDataList.add(PositData(
             position['symbol'],
             marketValue,
@@ -101,7 +103,9 @@ class _WalletPageState extends State<WalletPage> {
 
         setState(() {
           _positDataList = positDataList;
+          isLoading = false;
         });
+        print(_positDataList);
       }
     } catch (error) {
       print('An error occurred: $error');
@@ -173,9 +177,14 @@ class _WalletPageState extends State<WalletPage> {
         TH_marketValue = double.parse(th_marketValue);
       });
     }
-    TH_chartMarketValue = (TH_marketValue / TH_balance) * 100;
-    US_chartMarketValue = (US_marketValue / US_cash) * 100;
-    totalFiat = US_cash / TH_balance;
+    TH_chartMarketValue =
+        TH_marketValue <= 0 ? 0 : (TH_marketValue / TH_Fiat) * 100;
+    US_chartMarketValue = (US_marketValue / US_cash);
+    print("US_chartMarketValue: $US_chartMarketValue");
+    print("US_marketValue: $US_marketValue");
+    print("US_cash: $US_cash");
+    totalFiat = US_cash / TH_Fiat;
+
     totalBalance = _walletBalance + TH_balance;
   }
 
@@ -630,8 +639,7 @@ class _WalletPageState extends State<WalletPage> {
                                         color: Colors.white, fontSize: 12),
                                   ),
                                   Text(
-                                    NumberFormat('#,###.#', 'en_US')
-                                        .format(TH_marketValue),
+                                    "\u0E3F${NumberFormat('#,###.#', 'en_US').format(TH_marketValue)}",
                                     style: TextStyle(
                                         color: Colors.white, fontSize: 12),
                                   ),
@@ -667,7 +675,7 @@ class _WalletPageState extends State<WalletPage> {
                                 lineWidth: 10.0,
                                 animation: true,
                                 animationDuration: 1000,
-                                percent: US_chartMarketValue / 100,
+                                percent: US_chartMarketValue,
                                 center: new Text(
                                   "${US_chartMarketValue.toStringAsFixed(0)}%",
                                   style: TextStyle(color: Colors.white),
@@ -782,96 +790,23 @@ class _WalletPageState extends State<WalletPage> {
                       margin: EdgeInsets.all(14),
                       child: Padding(
                         padding: EdgeInsets.all(10),
-                        child: positions
-                                .isEmpty // Check if positions list is empty
+                        child: isLoading
                             ? Center(
                                 child: CircularProgressIndicator(
                                   valueColor: AlwaysStoppedAnimation<Color>(
                                       Colors.white),
                                 ), // Show CircularProgressIndicator if data is loading
                               )
-                            : SfTreemap(
-                                dataCount: _positDataList.length,
-                                colorMappers: [
-                                  TreemapColorMapper.range(
-                                    from: 0,
-                                    to: 100,
-                                    color: Colors.yellow,
-                                  ),
-                                  TreemapColorMapper.range(
-                                    from: 100,
-                                    to: 500,
-                                    color: Colors.amber,
-                                  ),
-                                  TreemapColorMapper.range(
-                                    from: 500,
-                                    to: 800,
-                                    color: Colors.orange.shade800,
-                                  ),
-                                  TreemapColorMapper.range(
-                                    from: 800,
-                                    to: double.infinity,
-                                    color: Colors.red,
-                                  ),
-                                ],
-                                weightValueMapper: (int index) {
-                                  return _positDataList[index].marketValue;
-                                },
-                                levels: <TreemapLevel>[
-                                  TreemapLevel(
-                                    groupMapper: (int index) {
-                                      return _positDataList[index].symbol;
-                                    },
-                                    labelBuilder: (BuildContext context,
-                                        TreemapTile tile) {
-                                      // Function to calculate font size based on weight value
-                                      double getFontSize(double weight) {
-                                        if (weight < 100) return 4;
-                                        if (weight < 1000) return 8;
-                                        if (weight < 10000) return 10;
-                                        return 14;
-                                      }
-
-                                      double fontSize =
-                                          getFontSize(tile.weight);
-
-                                      return Center(
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              tile.group,
-                                              style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontSize: fontSize),
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                              textAlign: TextAlign.center,
-                                            ),
-                                            Text(
-                                              '${NumberFormat('#,###.#', 'en_US').format(tile.weight)}',
-                                              style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontSize: fontSize),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                    tooltipBuilder: (BuildContext context,
-                                        TreemapTile tile) {
-                                      return Padding(
-                                        padding: const EdgeInsets.all(10),
-                                        child: Text(
-                                            '''Symbol: ${tile.group}\nมูลค่าปัจจุบัน : ${NumberFormat('#,###.#', 'en_US').format(tile.weight)} USD''',
-                                            style: const TextStyle(
-                                                color: Colors.black)),
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
+                            : _positDataList
+                                    .isEmpty // Check if positions list is empty
+                                ? Center(
+                                    child: Text(
+                                    "ไม่มีหุ้นที่ถืออยู่",
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 16),
+                                  ) // Show CircularProgressIndicator if data is loading
+                                    )
+                                : _buildTreemap(),
                       ),
                     ),
                   ],
@@ -882,6 +817,91 @@ class _WalletPageState extends State<WalletPage> {
         ),
       ),
     );
+  }
+
+  Widget _buildTreemap() {
+    try {
+      return SfTreemap(
+        dataCount: _positDataList.length,
+        colorMappers: [
+          TreemapColorMapper.range(
+            from: 0,
+            to: 100,
+            color: Colors.yellow,
+          ),
+          TreemapColorMapper.range(
+            from: 100,
+            to: 500,
+            color: Colors.amber,
+          ),
+          TreemapColorMapper.range(
+            from: 500,
+            to: 800,
+            color: Colors.orange.shade800,
+          ),
+          TreemapColorMapper.range(
+            from: 800,
+            to: double.infinity,
+            color: Colors.red,
+          ),
+        ],
+        weightValueMapper: (int index) {
+          return _positDataList[index].marketValue;
+        },
+        levels: <TreemapLevel>[
+          TreemapLevel(
+            groupMapper: (int index) {
+              return _positDataList[index].symbol;
+            },
+            labelBuilder: (BuildContext context, TreemapTile tile) {
+              // Function to calculate font size based on weight value
+              double getFontSize(double weight) {
+                if (weight < 100) return 4;
+                if (weight < 1000) return 8;
+                if (weight < 10000) return 10;
+                return 14;
+              }
+
+              double fontSize = getFontSize(tile.weight);
+
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      tile.group,
+                      style: TextStyle(color: Colors.black, fontSize: fontSize),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
+                    Text(
+                      '${NumberFormat('#,###.#', 'en_US').format(tile.weight)}',
+                      style: TextStyle(color: Colors.black, fontSize: fontSize),
+                    ),
+                  ],
+                ),
+              );
+            },
+            tooltipBuilder: (BuildContext context, TreemapTile tile) {
+              return Padding(
+                padding: const EdgeInsets.all(10),
+                child: Text(
+                    '''Symbol: ${tile.group}\nมูลค่าปัจจุบัน : ${NumberFormat('#,###.#', 'en_US').format(tile.weight)} USD''',
+                    style: const TextStyle(color: Colors.black)),
+              );
+            },
+          ),
+        ],
+      );
+    } catch (e) {
+      return Center(
+        child: Text(
+          "มีข้อผิดพลาดโปรดลองใหม่ภายหลัง",
+          style: TextStyle(color: Colors.white, fontSize: 16),
+        ),
+      );
+    }
   }
 }
 
