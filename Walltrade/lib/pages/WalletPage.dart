@@ -625,7 +625,7 @@ class _WalletPageState extends State<WalletPage> {
                           ),
                         ),
                         SizedBox(
-                          height: 6,
+                          height: 4,
                         ),
                         Container(
                           margin: EdgeInsets.only(right: 16),

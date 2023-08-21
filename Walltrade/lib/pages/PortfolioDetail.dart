@@ -105,8 +105,7 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
         TH_ProfitChange = double.parse(balanceProfitChange);
         TH_percentageChange = percentageProfitChange;
 
-        TH_totalChart =
-            TH_marketValue <= 0 ? 0 : TH_marketValue / TH_Fiat;
+        TH_totalChart = TH_marketValue <= 0 ? 0 : TH_marketValue / TH_Fiat;
         TH_ListAssets = portfolioList;
         isLoading = false;
       });
@@ -630,9 +629,18 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                                     margin: EdgeInsets.symmetric(
                                         vertical: 8, horizontal: 6),
                                     decoration: BoxDecoration(
-                                        color: Colors.red.shade900,
-                                        borderRadius:
-                                            BorderRadius.circular(10)),
+                                      color: Colors.red.shade900,
+                                      borderRadius: BorderRadius.circular(10),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.5),
+                                          spreadRadius: 2,
+                                          blurRadius: 5,
+                                          offset: Offset(0,
+                                              3), // changes the position of the shadow
+                                        ),
+                                      ],
+                                    ),
                                     child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
@@ -966,8 +974,18 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                                   margin: EdgeInsets.symmetric(
                                       vertical: 8, horizontal: 6),
                                   decoration: BoxDecoration(
-                                      color: Colors.red.shade900,
-                                      borderRadius: BorderRadius.circular(10)),
+                                    color: Colors.red.shade900,
+                                    borderRadius: BorderRadius.circular(10),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.5),
+                                        spreadRadius: 2,
+                                        blurRadius: 5,
+                                        offset: Offset(0,
+                                            3), // changes the position of the shadow
+                                      ),
+                                    ],
+                                  ),
                                   child: Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
