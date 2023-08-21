@@ -204,7 +204,7 @@ class NewsDetailPage extends StatelessWidget {
         backgroundColor: Color(0xFF212436),
         title: Text(
           newsItem.title,
-          style: TextStyle(fontSize: 16),
+          style: TextStyle(fontSize: 14),
         ),
       ),
       body: SingleChildScrollView(
