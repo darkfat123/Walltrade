@@ -42,6 +42,7 @@ class _WalletPageState extends State<WalletPage> {
   double _percentageChange = 0;
   double TH_chartMarketValue = 0;
   double US_chartMarketValue = 0;
+  double USDtoTHB = 1;
   double totalFiat = 0;
   bool isTHStocksSelected = true;
   bool isUSStocksSelected = false;
@@ -158,9 +159,11 @@ class _WalletPageState extends State<WalletPage> {
 
       if (response1.statusCode == 200) {
         var data1 = jsonDecode(response1.body);
+
         setState(() {
           TH_percentage = data1['percentageChange'];
           TH_totalProfit = double.parse(data1['balanceProfitChange']);
+          USDtoTHB = data1['USDtoTHB'];
         });
       } else {
         throw Exception(
@@ -171,6 +174,7 @@ class _WalletPageState extends State<WalletPage> {
         var data2 = jsonDecode(response2.body);
         var balanceChange = data2['balance_change'];
         var percentageChange = data2['percentage_change'];
+
         setState(() {
           _balanceChange = balanceChange;
           _percentageChange = percentageChange;
@@ -396,7 +400,7 @@ class _WalletPageState extends State<WalletPage> {
                           TextSpan(
                             text: hideBalance
                                 ? "\n\u2248 **** บาท"
-                                : "\u2248 ${NumberFormat('#,###.##', 'en_US').format(totalBalance * 33)} บาท",
+                                : "\u2248 ${NumberFormat('#,###.##', 'en_US').format(totalBalance * 34)} บาท",
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
@@ -537,7 +541,7 @@ class _WalletPageState extends State<WalletPage> {
                                       color: Colors.white, fontSize: 12),
                                 ),
                                 Text(
-                                  formatted_usCash,
+                                  "\u0024$formatted_usCash",
                                   style: TextStyle(
                                       color: Colors.white, fontSize: 12),
                                 ),
@@ -557,8 +561,7 @@ class _WalletPageState extends State<WalletPage> {
                                       color: Colors.white, fontSize: 12),
                                 ),
                                 Text(
-                                  NumberFormat('#,###.#', 'en_US')
-                                      .format(TH_Fiat),
+                                  "\u0024${NumberFormat('#,###.#', 'en_US').format(TH_Fiat)}",
                                   style: TextStyle(
                                       color: Colors.white, fontSize: 12),
                                 ),
@@ -615,7 +618,7 @@ class _WalletPageState extends State<WalletPage> {
                                         color: Colors.white, fontSize: 12),
                                   ),
                                   Text(
-                                    "\u0E3F${NumberFormat('#,###.#', 'en_US').format(TH_marketValue)}",
+                                    "\u0E3F${NumberFormat('#,###.#', 'en_US').format(TH_marketValue * USDtoTHB)}",
                                     style: TextStyle(
                                         color: Colors.white, fontSize: 12),
                                   ),
@@ -670,8 +673,7 @@ class _WalletPageState extends State<WalletPage> {
                                         color: Colors.white, fontSize: 12),
                                   ),
                                   Text(
-                                    NumberFormat('#,###.#', 'en_US')
-                                        .format(US_marketValue),
+                                    "\u0024${NumberFormat('#,###.#', 'en_US').format(US_marketValue)}",
                                     style: TextStyle(
                                         color: Colors.white, fontSize: 12),
                                   ),
@@ -831,8 +833,8 @@ class _WalletPageState extends State<WalletPage> {
           labelBuilder: (BuildContext context, TreemapTile tile) {
             // Function to calculate font size based on weight value
             double getFontSize(double weight) {
-              if (weight < 100) return 4;
-              if (weight < 1000) return 8;
+              if (weight < 100) return 2;
+              if (weight < 1000) return 6;
               if (weight < 10000) return 10;
               return 14;
             }

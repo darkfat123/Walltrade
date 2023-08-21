@@ -1045,6 +1045,8 @@ def th_portfolio():
     percentageChange = (portfolio_profit / cashBalance) * 100
         
     cash = CurrencyRates().get_rate('THB', 'USD')
+    USDtoTHB = CurrencyRates().get_rate('USD', 'THB')
+    print(type(USDtoTHB))
     balance = f"{cashBalance * cash:.2f}"
     balanceProfitChange = f"{portfolio_profit * cash:.2f}"
     lineAvailable = f"{account_info.get('lineAvailable') * cash:.2f}"
@@ -1058,16 +1060,17 @@ def th_portfolio():
             'amount': item['amount'],
             'actualVolume': item['actualVolume'],
             'profit': item['profit'],
-            'percentProfit': item['percentProfit']
+            'percentProfit': item['percentProfit'],
         })
-
+    
     result = {
         'balance': balance,
         'percentageChange': percentageChange,
         'balanceProfitChange': balanceProfitChange,
         'lineAvailable': lineAvailable,
         'marketValue': marketValue,
-        'portfolioList': portfolio_list
+        'portfolioList': portfolio_list,
+        'USDtoTHB' : USDtoTHB
     }
 
     return jsonify(result)
