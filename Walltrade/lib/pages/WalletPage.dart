@@ -834,7 +834,7 @@ class _WalletPageState extends State<WalletPage> {
             // Function to calculate font size based on weight value
             double getFontSize(double weight) {
               if (weight < 100) return 2;
-              if (weight < 1000) return 6;
+              if (weight < 1000) return 4;
               if (weight < 10000) return 10;
               return 14;
             }
