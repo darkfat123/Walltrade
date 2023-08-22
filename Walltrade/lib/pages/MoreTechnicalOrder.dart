@@ -26,7 +26,6 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
     return isSelected == true ? Color(0xFF1D5B79) : Color(0xFF2A3547);
   }
 
-
   void toggleContainer(String menu) {
     setState(() {
       if (selectedMenus.contains(menu)) {
@@ -565,128 +564,161 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              GestureDetector(
-                onTap: () => toggleContainer("RSI"),
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  margin: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: getMenuColor("RSI"),
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset:
-                            Offset(0, 3), // changes the position of the shadow
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    "RSI",
-                    style: TextStyle(fontWeight: FontWeight.w600,color:Colors.white),
+          SizedBox(
+            height: 10,
+          ),
+          Center(
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+              child: Text(
+                "โปรดเลือกเทคนิคที่ต้องการใช้",
+                style: TextStyle(color: Colors.amber.shade800),
+              ),
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 4),
+            margin: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Color(0xFFEEE2DE),
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 2,
+                  blurRadius: 5,
+                  offset: Offset(0, 3), // changes the position of the shadow
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                GestureDetector(
+                  onTap: () => toggleContainer("RSI"),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    margin: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: getMenuColor("RSI"),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 5,
+                          offset: Offset(
+                              0, 3), // changes the position of the shadow
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      "RSI",
+                      style: TextStyle(
+                          fontWeight: FontWeight.w600, color: Colors.white),
+                    ),
                   ),
                 ),
-              ),
-              GestureDetector(
-                onTap: () => toggleContainer("STO"),
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  margin: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: getMenuColor("STO"),
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset:
-                            Offset(0, 3), // changes the position of the shadow
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    "STO",
-                    style: TextStyle(fontWeight: FontWeight.w600,color:Colors.white),
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: () => toggleContainer("MACD"),
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  margin: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: getMenuColor("MACD"),
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset:
-                            Offset(0, 3), // changes the position of the shadow
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    "MACD",
-                    style: TextStyle(fontWeight: FontWeight.w600,color:Colors.white),
+                GestureDetector(
+                  onTap: () => toggleContainer("STO"),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    margin: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: getMenuColor("STO"),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 5,
+                          offset: Offset(
+                              0, 3), // changes the position of the shadow
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      "STO",
+                      style: TextStyle(
+                          fontWeight: FontWeight.w600, color: Colors.white),
+                    ),
                   ),
                 ),
-              ),
-              GestureDetector(
-                onTap: () => toggleContainer("EMA"),
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  margin: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: getMenuColor("EMA"),
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset:
-                            Offset(0, 3), // changes the position of the shadow
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    "EMA",
-                    style: TextStyle(fontWeight: FontWeight.w600,color:Colors.white),
+                GestureDetector(
+                  onTap: () => toggleContainer("MACD"),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    margin: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: getMenuColor("MACD"),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 5,
+                          offset: Offset(
+                              0, 3), // changes the position of the shadow
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      "MACD",
+                      style: TextStyle(
+                          fontWeight: FontWeight.w600, color: Colors.white),
+                    ),
                   ),
                 ),
-              ),
-            ],
+                GestureDetector(
+                  onTap: () => toggleContainer("EMA"),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    margin: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: getMenuColor("EMA"),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 5,
+                          offset: Offset(
+                              0, 3), // changes the position of the shadow
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      "EMA",
+                      style: TextStyle(
+                          fontWeight: FontWeight.w600, color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           selectedMenus.isNotEmpty
               ? Center(
                   child: Container(
                     padding: EdgeInsets.all(16),
-                    margin: EdgeInsets.all(16),
+                    margin: EdgeInsets.symmetric(vertical:10,horizontal: 16),
                     decoration: BoxDecoration(
-                        color: Colors.grey,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset:
-                            Offset(0, 3), // changes the position of the shadow
-                      ),
-                    ],),
+                      color: Colors.grey,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 5,
+                          offset: Offset(
+                              0, 3), // changes the position of the shadow
+                        ),
+                      ],
+                    ),
                     child: Column(
                       children: [
                         Text(
-                            "เทคนิคที่ต้องการใช้: ${selectedMenus.join(', ')}"),
+                            "เทคนิคที่ต้องการใช้: ${selectedMenus.join(', ')}",style: TextStyle(),),
                         TimeframeDropdown(
                           selectedInterval: selectedInterval,
                           onChanged: (String? newValue) {
@@ -695,6 +727,23 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                             });
                           },
                         ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Text('สัญลักษณ์หุ้น'),
+                            SizedBox(width: 5),
+                            Expanded(
+                              child: TextField(
+                                decoration: InputDecoration(
+                                  labelText: 'เช่น META,AAPL,PTT,SCB' ,
+                                  labelStyle: TextStyle(fontSize: 14),
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10,),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
