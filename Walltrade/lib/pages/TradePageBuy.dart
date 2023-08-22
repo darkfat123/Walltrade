@@ -78,7 +78,6 @@ class _TradePageBuyState extends State<TradePageBuy> {
     if (response.statusCode == 200) {
       print(body);
       setState(() {
-        
         result = response.body;
       });
     } else {
@@ -107,7 +106,6 @@ class _TradePageBuyState extends State<TradePageBuy> {
     if (response.statusCode == 200) {
       print(body);
       setState(() {
-        
         result = response.body;
       });
     } else {
@@ -116,7 +114,6 @@ class _TradePageBuyState extends State<TradePageBuy> {
       });
     }
   }
-
 
   Future<void> getBalance() async {
     var url = Uri.parse('${Constants.serverUrl}/getBalance');
