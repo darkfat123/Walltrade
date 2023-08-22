@@ -199,7 +199,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ? Container(
                   padding: EdgeInsets.all(10),
                   color: Colors.grey[200],
-                  child: Text("ผู้ใช้กดเมนู: ${selectedMenus.join(', ')}"),
+                  child: Text("เลือกเทคนิค: ${selectedMenus.join(', ')}"),
                 )
               : SizedBox(),
           Expanded(
