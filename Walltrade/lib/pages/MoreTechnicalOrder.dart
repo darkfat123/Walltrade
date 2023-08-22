@@ -23,7 +23,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
 
   Color getMenuColor(String menu) {
     final bool? isSelected = menuSelectionStatus[menu];
-    return isSelected == true ? Color(0xFFE55807) : Color(0xFF7E1717);
+    return isSelected == true ? Color(0xFF1D5B79) : Color(0xFF2A3547);
   }
 
 
@@ -669,11 +669,20 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
           selectedMenus.isNotEmpty
               ? Center(
                   child: Container(
-                    padding: EdgeInsets.all(10),
+                    padding: EdgeInsets.all(16),
                     margin: EdgeInsets.all(16),
                     decoration: BoxDecoration(
                         color: Colors.grey,
-                        borderRadius: BorderRadius.circular(10)),
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset:
+                            Offset(0, 3), // changes the position of the shadow
+                      ),
+                    ],),
                     child: Column(
                       children: [
                         Text(
