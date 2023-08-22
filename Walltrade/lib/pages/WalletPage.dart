@@ -231,7 +231,6 @@ class _WalletPageState extends State<WalletPage> {
   void initState() {
     super.initState();
     getBalances();
-
     getCash();
     fetchPositionData();
   }

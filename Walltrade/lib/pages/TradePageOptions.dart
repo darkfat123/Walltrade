@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'package:Walltrade/pages/MoreTechinalOrder.dart';
 import 'package:Walltrade/pages/TradePageSell.dart';
+import 'package:Walltrade/pages/MoreTechnicalOrder.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:http/http.dart' as http;
 import 'package:Walltrade/pages/TradePageBuy.dart';

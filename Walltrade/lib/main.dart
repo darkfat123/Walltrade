@@ -1,3 +1,4 @@
+import 'package:Walltrade/pages/MoreTechnicalOrder.dart';
 import 'package:Walltrade/pages/TradePageOptions.dart';
 import 'package:Walltrade/pages/login_page.dart';
 import 'package:Walltrade/pages/HistoryAutoTrade.dart';
@@ -28,7 +29,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: primary,
         fontFamily: "IBMPlexSansThai",
       ),
-      home: Home(username: "foczz123",initialIndex:0),
+      home: Home(username: "foczz123",initialIndex:2),
     );
   }
 }

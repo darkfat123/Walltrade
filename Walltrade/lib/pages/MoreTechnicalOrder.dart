@@ -1,24 +1,16 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
+class MoreTechnicalOrder extends StatefulWidget {
+  final String username;
+  MoreTechnicalOrder({required this.username});
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: MyHomePage(),
-    );
-  }
+  _MoreTechnicalOrderState createState() =>
+      _MoreTechnicalOrderState(username: username);
 }
 
-class MyHomePage extends StatefulWidget {
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
+class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
+  final String username;
+  _MoreTechnicalOrderState({required this.username});
   List<Widget> containers = [];
   Set<String> selectedMenus = {};
   String selectedInterval = '1 hour';
@@ -31,8 +23,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Color getMenuColor(String menu) {
     final bool? isSelected = menuSelectionStatus[menu];
-    return isSelected == true ? Colors.green : Colors.grey;
+    return isSelected == true ? Color(0xFFE55807) : Color(0xFF7E1717);
   }
+
 
   void toggleContainer(String menu) {
     setState(() {
@@ -542,6 +535,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFECF8F9),
       appBar: AppBar(
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -594,6 +588,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   child: Text(
                     "RSI",
+                    style: TextStyle(fontWeight: FontWeight.w600,color:Colors.white),
                   ),
                 ),
               ),
@@ -617,6 +612,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   child: Text(
                     "STO",
+                    style: TextStyle(fontWeight: FontWeight.w600,color:Colors.white),
                   ),
                 ),
               ),
@@ -640,6 +636,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   child: Text(
                     "MACD",
+                    style: TextStyle(fontWeight: FontWeight.w600,color:Colors.white),
                   ),
                 ),
               ),
@@ -663,6 +660,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   child: Text(
                     "EMA",
+                    style: TextStyle(fontWeight: FontWeight.w600,color:Colors.white),
                   ),
                 ),
               ),
