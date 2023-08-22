@@ -42,28 +42,89 @@ class _MyHomePageState extends State<MyHomePage> {
         menuSelectionStatus[menu] = false;
       } else {
         selectedMenus.add(menu);
-        containers.add(
-          Container(
-            key: ValueKey(menu),
-            width: 100,
-            height: 100,
-            color: Colors.blue, // ใช้เมธอด getMenuColor เพื่อเลือกสีเมนู
-            margin: EdgeInsets.all(10),
-            child: Center(
-              child: Text(
-                menu,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
+        menu == 'RSI'
+            ? containers.add(
+                Container(
+                  key: ValueKey(menu),
+                  width: 100,
+                  height: 100,
+                  color: Colors.blue, // ใช้เมธอด getMenuColor เพื่อเลือกสีเมนู
+                  margin: EdgeInsets.all(10),
+                  child: Center(
+                    child: Text(
+                      menu,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ),
-        );
+              )
+            : menu == 'STO'
+                ? containers.add(
+                    Container(
+                      key: ValueKey(menu),
+                      width: 100,
+                      height: 100,
+                      color:
+                          Colors.red, // ใช้เมธอด getMenuColor เพื่อเลือกสีเมนู
+                      margin: EdgeInsets.all(10),
+                      child: Center(
+                        child: Text(
+                          "$menu stoeiei",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                : menu == 'MACD'
+                    ? containers.add(
+                        Container(
+                          key: ValueKey(menu),
+                          width: 100,
+                          height: 100,
+                          color: Colors
+                              .pink, // ใช้เมธอด getMenuColor เพื่อเลือกสีเมนู
+                          margin: EdgeInsets.all(10),
+                          child: Center(
+                            child: Text(
+                              "$menu macdeiei",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    : containers.add(
+                        Container(
+                          key: ValueKey(menu),
+                          width: 100,
+                          height: 100,
+                          color: Colors
+                              .blueGrey, // ใช้เมธอด getMenuColor เพื่อเลือกสีเมนู
+                          margin: EdgeInsets.all(10),
+                          child: Center(
+                            child: Text(
+                              "$menu EMAeiei",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
         menuSelectionStatus[menu] = true;
       }
     });
-    print("$menu : ${menuSelectionStatus[menu]}");
+
+    print("${menuSelectionStatus}");
   }
 
   @override
