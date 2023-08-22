@@ -21,6 +21,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   List<Widget> containers = [];
   Set<String> selectedMenus = {};
+  String selectedInterval = '1 hour';
   Map<String, bool> menuSelectionStatus = {
     'RSI': false,
     'STO': false,
@@ -46,18 +47,159 @@ class _MyHomePageState extends State<MyHomePage> {
             ? containers.add(
                 Container(
                   key: ValueKey(menu),
-                  width: 100,
-                  height: 100,
-                  color: Colors.blue, // ใช้เมธอด getMenuColor เพื่อเลือกสีเมนู
-                  margin: EdgeInsets.all(10),
-                  child: Center(
-                    child: Text(
-                      menu,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
+                  padding: EdgeInsets.all(12),
+                  margin: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset:
+                            Offset(0, 3), // changes the position of the shadow
                       ),
-                    ),
+                    ],
+                  ), // ใช้เมธอด getMenuColor เพื่อเลือกสีเมนู
+                  child: Column(
+                    children: [
+                      Container(
+                        padding:
+                            EdgeInsets.symmetric(vertical: 18),
+                        margin:
+                            EdgeInsets.symmetric(horizontal: 18),
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: Offset(
+                                  0, 3), // changes the position of the shadow
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'RSI (Relative Strength Index)',
+                              style: TextStyle(fontWeight: FontWeight.w600),
+                            )
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      TimeframeDropdown(
+                        selectedInterval: selectedInterval,
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            selectedInterval = newValue!;
+                          });
+                        },
+                      ),
+                      SizedBox(height: 10),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Text('ระบุค่า RSI ที่ต้องการซื้อ'),
+                            SizedBox(width: 5),
+                            Expanded(
+                              child: TextField(
+                                decoration: InputDecoration(
+                                  labelText: '0-100',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                Icons.info,
+                                size: 24,
+                              ),
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      title: Text('More Info'),
+                                      content: Text(
+                                          'Additional information about timeframes.'),
+                                      actions: [
+                                        TextButton(
+                                          child: Text('OK'),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Text('จำนวน'),
+                            SizedBox(width: 5),
+                            Expanded(
+                              child: TextField(
+                                decoration: InputDecoration(
+                                  labelText: 'จำนวน',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                Icons.info,
+                                size: 24,
+                              ),
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      title: Text('More Info'),
+                                      content: Text(
+                                          'Additional information about timeframes.'),
+                                      actions: [
+                                        TextButton(
+                                          child: Text('OK'),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      ElevatedButton(
+                        onPressed: () {},
+                        child: Text('ยืนยัน'),
+                      ),
+                    ],
                   ),
                 ),
               )
@@ -65,11 +207,22 @@ class _MyHomePageState extends State<MyHomePage> {
                 ? containers.add(
                     Container(
                       key: ValueKey(menu),
-                      width: 100,
-                      height: 100,
-                      color:
-                          Colors.red, // ใช้เมธอด getMenuColor เพื่อเลือกสีเมนู
-                      margin: EdgeInsets.all(10),
+                      padding: EdgeInsets.all(12),
+                      margin: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: Offset(
+                                0, 3), // changes the position of the shadow
+                          ),
+                        ],
+                      ), // ใช้เมธอด getMenuColor เพื่อเลือกสีเมนู
+
                       child: Center(
                         child: Text(
                           "$menu stoeiei",
@@ -85,11 +238,11 @@ class _MyHomePageState extends State<MyHomePage> {
                     ? containers.add(
                         Container(
                           key: ValueKey(menu),
-                          width: 100,
-                          height: 100,
+                          padding: EdgeInsets.all(12),
+                          margin: EdgeInsets.all(12),
                           color: Colors
                               .pink, // ใช้เมธอด getMenuColor เพื่อเลือกสีเมนู
-                          margin: EdgeInsets.all(10),
+
                           child: Center(
                             child: Text(
                               "$menu macdeiei",
@@ -104,11 +257,11 @@ class _MyHomePageState extends State<MyHomePage> {
                     : containers.add(
                         Container(
                           key: ValueKey(menu),
-                          width: 100,
-                          height: 100,
+                          padding: EdgeInsets.all(12),
+                          margin: EdgeInsets.all(12),
                           color: Colors
                               .blueGrey, // ใช้เมธอด getMenuColor เพื่อเลือกสีเมนู
-                          margin: EdgeInsets.all(10),
+
                           child: Center(
                             child: Text(
                               "$menu EMAeiei",
@@ -134,7 +287,7 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text("สร้างคำสั่งแบบหลายเทคนิค"),
+            Text("สร้างคำสั่งซื้อแบบหลายเทคนิค"),
             Row(
               children: [
                 IconButton(
@@ -270,6 +423,79 @@ class _MyHomePageState extends State<MyHomePage> {
                 return containers[index];
               },
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class TimeframeDropdown extends StatelessWidget {
+  final String selectedInterval;
+  final Function(String?) onChanged;
+
+  const TimeframeDropdown({
+    required this.selectedInterval,
+    required this.onChanged,
+  });
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Text('โปรดเลือก Timeframe'),
+          DropdownButton<String>(
+            value: selectedInterval,
+            onChanged: onChanged,
+            items: [
+              DropdownMenuItem(
+                value: '1 hour',
+                child: Text('1 hour'),
+              ),
+              DropdownMenuItem(
+                value: '4 hours',
+                child: Text('4 hours'),
+              ),
+              DropdownMenuItem(
+                value: '1 day',
+                child: Text('1 day'),
+              ),
+              DropdownMenuItem(
+                value: '1 week',
+                child: Text('1 week'),
+              ),
+              DropdownMenuItem(
+                value: '1 month',
+                child: Text('1 month'),
+              ),
+            ],
+          ),
+          IconButton(
+            icon: Icon(
+              Icons.info,
+              size: 24,
+            ),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text('More Info'),
+                    content: Text('Additional information about timeframes.'),
+                    actions: [
+                      TextButton(
+                        child: Text('OK'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
           ),
         ],
       ),
