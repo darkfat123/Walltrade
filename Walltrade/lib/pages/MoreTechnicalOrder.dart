@@ -60,7 +60,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                         padding: EdgeInsets.symmetric(vertical: 18),
                         margin: EdgeInsets.symmetric(horizontal: 18),
                         decoration: BoxDecoration(
-                          color: Colors.blue,
+                          color: Color(0xFF2A3547),
                           borderRadius: BorderRadius.circular(10),
                           boxShadow: [
                             BoxShadow(
@@ -77,7 +77,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                           children: [
                             Text(
                               'RSI (Relative Strength Index)',
-                              style: TextStyle(fontWeight: FontWeight.w600),
+                              style: TextStyle(fontWeight: FontWeight.w600,color: Colors.white),
                             )
                           ],
                         ),
@@ -162,7 +162,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                             padding: EdgeInsets.symmetric(vertical: 18),
                             margin: EdgeInsets.symmetric(horizontal: 18),
                             decoration: BoxDecoration(
-                              color: Colors.blue,
+                              color: Color(0xFF2A3547),
                               borderRadius: BorderRadius.circular(10),
                               boxShadow: [
                                 BoxShadow(
@@ -179,7 +179,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                               children: [
                                 Text(
                                   'STO (Stochastic Oscillator)',
-                                  style: TextStyle(fontWeight: FontWeight.w600),
+                                  style: TextStyle(fontWeight: FontWeight.w600,color: Colors.white),
                                 )
                               ],
                             ),
@@ -308,7 +308,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                                   padding: EdgeInsets.symmetric(vertical: 18),
                                   margin: EdgeInsets.symmetric(horizontal: 18),
                                   decoration: BoxDecoration(
-                                    color: Colors.blue,
+                                    color: Color(0xFF2A3547),
                                     borderRadius: BorderRadius.circular(10),
                                     boxShadow: [
                                       BoxShadow(
@@ -326,7 +326,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                                       Text(
                                         'MACD (Moving Average Convergence Divergence)',
                                         style: TextStyle(
-                                            fontWeight: FontWeight.w600),
+                                            fontWeight: FontWeight.w600,color: Colors.white),
                                       )
                                     ],
                                   ),
@@ -452,7 +452,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                                   padding: EdgeInsets.symmetric(vertical: 18),
                                   margin: EdgeInsets.symmetric(horizontal: 18),
                                   decoration: BoxDecoration(
-                                    color: Colors.blue,
+                                    color: Color(0xFF2A3547),
                                     borderRadius: BorderRadius.circular(10),
                                     boxShadow: [
                                       BoxShadow(
@@ -470,7 +470,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                                       Text(
                                         'EMA (Exponential Moving Average)',
                                         style: TextStyle(
-                                            fontWeight: FontWeight.w600),
+                                            fontWeight: FontWeight.w600,color: Colors.white),
                                       )
                                     ],
                                   ),

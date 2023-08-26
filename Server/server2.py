@@ -605,7 +605,7 @@ async def connect_to_alpaca():
 def autotradeRSI():
     username = request.json.get('username')
     lowerRSI = float(request.json.get('lowerRSI'))
-    symbol = "BTCUSD"
+    symbol = request.json.get('symbol')
     qty = float(request.json.get('qty')) #"0.0002"
     side = request.json.get('side')
     type = "market"
@@ -626,7 +626,7 @@ def autotradeRSI():
     data = (username, symbol, techniques, qty, side)
     print(symbol,qty,side,type,time_in_force)
     handler = TA_Handler(
-        symbol="BTCUSD",
+        symbol=symbol,
         screener="Crypto",
         exchange="Binance",
         interval="1m"
@@ -645,12 +645,7 @@ def autotradeRSI():
                 type=type,
                 time_in_force=time_in_force           
             )
-                delete_query = f"DELETE FROM auto_order WHERE username = '{username}' AND symbol = '{symbol}'  AND techniques = '{techniques}' AND quantity = {qty} AND side = '{side}'"
-                print(delete_query)
-                cursor.execute(delete_query)
-                conn.commit()
-                cursor.close()
-                conn.close()
+               
                 return jsonify('autotrade success')
             except Exception as e:
                 return jsonify(f'error: {str(e)}')
@@ -659,10 +654,10 @@ def autotradeRSI():
 @app.route('/autotradeMACD', methods=['POST'])
 def autotradeMACD():
     username = request.json.get('username')
-    symbol = "BTCUSD"
+    symbol = request.json.get('symbol')
     qty = float(request.json.get('qty')) #"0.0002"
     zone = float(request.json.get('zone')) #"0.00"
-    cross = request.json.get('cross_macd') #True/False
+    cross = bool(request.json.get('cross_macd')) #True/False
     side = request.json.get('side')
     type = "market"
     time_in_force = "gtc"
@@ -680,11 +675,11 @@ def autotradeMACD():
     print(result)
     # Create the Alpaca REST API client
     api = REST(result[0], result[1], base_url='https://paper-api.alpaca.markets')
-    print(symbol,qty,side,type,time_in_force,zone,cross)
+    print(symbol,qty,side,type,time_in_force,zone,cross) 
 
     
     handler = TA_Handler(
-        symbol="BTCUSD",
+        symbol=symbol,
         screener="Crypto",
         exchange="Binance",
         interval="1m"
@@ -781,7 +776,7 @@ def autotradeMACD():
 @app.route('/autotradeSTO', methods=['POST'])
 def autotradeSTO():
     username = request.json.get('username')
-    symbol = "BTCUSD"
+    symbol = request.json.get('symbol')
     qty = float(request.json.get('qty')) #"0.0002"
     zone_sto = float(request.json.get('zone')) #"0.00"
     cross_sto_up = float(request.json.get('cross_sto')) #True/False
@@ -864,7 +859,7 @@ def autotradeSTO():
                     break
                 time.sleep(5)
             
-''' else: #sell
+    else: #sell
         if cross_sto_down!='':
             while True:
                 sto_k = handler.get_analysis().indicators["Stoch.K"]
@@ -914,7 +909,7 @@ def autotradeSTO():
                     except Exception as e:
                         print(f'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ: {str(e)}')
                     break
-                time.sleep(5)'''
+                time.sleep(5)
 
 @app.route('/getStockPriceUS', methods=['POST'])
 def getStockPriceUS():

@@ -832,9 +832,10 @@ class _WalletPageState extends State<WalletPage> {
           labelBuilder: (BuildContext context, TreemapTile tile) {
             // Function to calculate font size based on weight value
             double getFontSize(double weight) {
-              if (weight < 100) return 2;
-              if (weight < 1000) return 4;
-              if (weight < 10000) return 10;
+              if (weight < 100) return 4;
+              if (weight < 1000) return 8;
+              if (weight < 5000) return 10;
+              if (weight < 10000) return 12;
               return 14;
             }
 
