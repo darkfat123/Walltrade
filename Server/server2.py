@@ -485,7 +485,7 @@ def getAutoOrders():
     username = request.json.get('username')
     conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
     cursor = conn.cursor()
-    query = f"SELECT * FROM auto_order WHERE username = '{username}'"
+    query = f"SELECT * FROM auto_order WHERE username = '{username}' AND status = 'pending'"
     cursor.execute(query)
     result = cursor.fetchall()
     conn.close()
