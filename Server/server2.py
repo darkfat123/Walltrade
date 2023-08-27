@@ -907,6 +907,7 @@ def autotradeSTO():
                         print(f'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ: {str(e)}')
                     break
                 time.sleep(5)
+    return jsonify('autotrade success')
 
 @app.route('/autotradeEMA', methods=['POST'])
 def autotradeEMA():

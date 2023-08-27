@@ -458,6 +458,7 @@ class _TradePageBuyState extends State<TradePageBuy> {
                       SizedBox(width: 5),
                       Expanded(
                         child: TextField(
+                          controller: qtyController,
                           decoration: InputDecoration(
                             labelText: 'จำนวน',
                             border: OutlineInputBorder(),
