@@ -485,7 +485,7 @@ def getAutoOrders():
     username = request.json.get('username')
     conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
     cursor = conn.cursor()
-    query = f"SELECT * FROM auto_order WHERE username = '{username}' AND status = 'pending'"
+    query = f"SELECT * FROM auto_order WHERE username = '{username}'"
     cursor.execute(query)
     result = cursor.fetchall()
     conn.close()
@@ -785,9 +785,6 @@ def autotradeSTO():
     time_in_force = "gtc"
 
 
-    last_macd = 0
-    last_signal = 0
-
     conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
     query = f"SELECT api_key, secret_key FROM users_info WHERE username = '{username}'"
     cursor = conn.cursor()
@@ -797,7 +794,7 @@ def autotradeSTO():
     print(result)
     # Create the Alpaca REST API client
     api = REST(result[0], result[1], base_url='https://paper-api.alpaca.markets')
-    print(symbol,qty,side,type,time_in_force,zone,cross_sto)
+    print(symbol,qty,side,type,time_in_force,zone_sto,cross_sto_up)
 
     
     handler = TA_Handler(
@@ -875,7 +872,7 @@ def autotradeSTO():
                         api.submit_order(
                         symbol=symbol,
                         qty=qty,
-                        side='buy',
+                        side='sell',
                         type='market',
                         time_in_force='gtc'        
                     )
@@ -910,6 +907,76 @@ def autotradeSTO():
                         print(f'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ: {str(e)}')
                     break
                 time.sleep(5)
+
+@app.route('/autotradeEMA', methods=['POST'])
+def autotradeEMA():
+    username = request.json.get('username')
+    symbol = request.json.get('symbol')
+    qty = float(request.json.get('qty')) #"0.0002"
+    day = request.json.get('day') #"0.0002"
+    #priceEMA = float(request.json.get('zone')) #"0.00"
+    side = request.json.get('side')
+    type = "market"
+    time_in_force = "gtc"
+
+    conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
+    query = f"SELECT api_key, secret_key FROM users_info WHERE username = '{username}'"
+    cursor = conn.cursor()
+    cursor.execute(query)
+    result = cursor.fetchone()
+
+    print(result)
+    # Create the Alpaca REST API client
+    api = REST(result[0], result[1], base_url='https://paper-api.alpaca.markets')
+    print(symbol,qty,side,type,time_in_force)#,priceEMA
+
+    handler = TA_Handler(
+        symbol="BTCUSD",
+        screener="Crypto",
+        exchange="Binance",
+        interval="1m"
+    )
+    if side == 'buy':
+        while True:
+            ema = handler.get_analysis().indicators[f"EMA{day}"]
+            close = handler.get_analysis().indicators["close"]
+            if close <= ema and last_close > last_ema:
+                try:
+                    api.submit_order(
+                    symbol=symbol,
+                    qty=qty,
+                    side='buy',
+                    type='market',
+                    time_in_force='gtc'        
+                )
+                    print('คำสั่งซื้อถูกส่งไปยัง Alpaca API แล้ว')           
+                except Exception as e:
+                    print(f'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ: {str(e)}')
+                break
+            last_ema = ema
+            last_close = close
+            time.sleep(5)
+    else:
+         while True:
+            ema = handler.get_analysis().indicators[f"EMA{day}"]
+            close = handler.get_analysis().indicators["close"]
+            if close >= ema and last_close < last_ema:
+                try:
+                    api.submit_order(
+                    symbol=symbol,
+                    qty=qty,
+                    side='sell',
+                    type='market',
+                    time_in_force='gtc'        
+                )
+                    print('คำสั่งขายถูกส่งไปยัง Alpaca API แล้ว')
+                except Exception as e:
+                    print(f'เกิดข้อผิดพลาดในการส่งคำสั่งขาย: {str(e)}')
+                break
+            last_ema = ema
+            last_close = close
+            time.sleep(5)
+    return jsonify('autotrade success')
 
 @app.route('/getStockPriceUS', methods=['POST'])
 def getStockPriceUS():

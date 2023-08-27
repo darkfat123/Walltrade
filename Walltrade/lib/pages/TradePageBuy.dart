@@ -17,6 +17,7 @@ class _TradePageBuyState extends State<TradePageBuy> {
   TextEditingController zoneMACDController = TextEditingController();
   TextEditingController crossupSTOController = TextEditingController();
   TextEditingController zoneSTOController = TextEditingController();
+  TextEditingController dayController = TextEditingController();
   final String username;
   final TextEditingController _searchController = TextEditingController();
   bool macd_crossupIsChecked = false;
@@ -88,7 +89,7 @@ class _TradePageBuyState extends State<TradePageBuy> {
   }
 
   Future<void> placeOrderSTO(String qty, String side) async {
-    final url = Uri.parse('${Constants.serverUrl}/autotradeMACD');
+    final url = Uri.parse('${Constants.serverUrl}/autotradeSTO');
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode(
       {
@@ -97,7 +98,34 @@ class _TradePageBuyState extends State<TradePageBuy> {
         'qty': double.parse(qty),
         'side': side,
         'cross_sto': crossupSTOController.text,
-        'zone': double.parse(zoneSTOController.text)
+        'zone': zoneSTOController.text
+      },
+    );
+
+    final response = await http.post(url, headers: headers, body: body);
+
+    if (response.statusCode == 200) {
+      print(body);
+      setState(() {
+        result = response.body;
+      });
+    } else {
+      setState(() {
+        result = 'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ';
+      });
+    }
+  }
+
+    Future<void> placeOrderEMA(String qty, String side) async {
+    final url = Uri.parse('${Constants.serverUrl}/autotradeEMA');
+    final headers = {'Content-Type': 'application/json'};
+    final body = jsonEncode(
+      {
+        'username': widget.username,
+        'symbol': "BTCUSD",
+        'qty': double.parse(qty),
+        'side': side,
+        'day': dayController.text,
       },
     );
 
@@ -386,7 +414,7 @@ class _TradePageBuyState extends State<TradePageBuy> {
                         child: TextField(
                           controller: crossupSTOController,
                           decoration: InputDecoration(
-                            labelText: 'ค่าที่ซื้อเมื่อต่ำกว่า',
+                            labelText: '0-100',
                             border: OutlineInputBorder(),
                           ),
                         ),
@@ -408,6 +436,7 @@ class _TradePageBuyState extends State<TradePageBuy> {
                                   TextButton(
                                     child: Text('OK'),
                                     onPressed: () {
+                                      
                                       Navigator.of(context).pop();
                                     },
                                   ),
@@ -479,6 +508,7 @@ class _TradePageBuyState extends State<TradePageBuy> {
                             TextButton(
                               child: Text('OK'),
                               onPressed: () {
+                                placeOrderSTO(qtyController.text, 'buy');
                                 Navigator.of(context).pop();
                               },
                             ),
@@ -725,6 +755,7 @@ class _TradePageBuyState extends State<TradePageBuy> {
                       SizedBox(width: 5),
                       Expanded(
                         child: TextField(
+                          controller: dayController,
                           decoration: InputDecoration(
                             labelText: 'จำนวนวันที่ต้องการใช้',
                             border: OutlineInputBorder(),
@@ -769,6 +800,7 @@ class _TradePageBuyState extends State<TradePageBuy> {
                       SizedBox(width: 5),
                       Expanded(
                         child: TextField(
+                          controller: qtyController,
                           decoration: InputDecoration(
                             labelText: 'จำนวน',
                             border: OutlineInputBorder(),
@@ -819,6 +851,7 @@ class _TradePageBuyState extends State<TradePageBuy> {
                             TextButton(
                               child: Text('OK'),
                               onPressed: () {
+                                placeOrderEMA(qtyController.text, "buy");
                                 Navigator.of(context).pop();
                               },
                             ),

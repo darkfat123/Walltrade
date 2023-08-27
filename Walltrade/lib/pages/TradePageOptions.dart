@@ -37,13 +37,19 @@ class _TradePageOptionsState extends State<TradePageOptions>
 
   Future<void> getAutoOrders() async {
     final url = '${Constants.serverUrl}/getAutoOrders';
-    final headers = {'Content-Type': 'application/json'}; // Add this line
-    final body =
-        jsonEncode({'username': username}); // Encode the request body as JSON
+    final headers = {'Content-Type': 'application/json'};
+    final body = jsonEncode({'username': username});
     final response =
         await http.post(Uri.parse(url), headers: headers, body: body);
+
     if (response.statusCode == 200) {
-      autoOrders = jsonDecode(response.body);
+      final responseData = jsonDecode(response.body);
+      for (final order in responseData) {
+        final status = order['status'];
+        if (status == 'pending') {
+          autoOrders.add(order); // Add the order to autoOrders list
+        }
+      }
       isLoading = false;
     } else {
       print("Error");
@@ -310,73 +316,79 @@ class _TradePageOptionsState extends State<TradePageOptions>
                 padding: const EdgeInsets.all(5.0),
                 child: Container(
                   height: 110,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: autoOrders.length,
-                    itemBuilder: (context, index) {
-                      final order = autoOrders[index];
-                      return Padding(
-                        padding: EdgeInsets.all(6.0),
-                        child: Container(
-                          width: 100,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Color.fromARGB(128, 0, 0, 0),
-                                offset: Offset(0, 2),
-                                blurRadius: 4,
-                                spreadRadius: 0,
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Column(
-                                children: [
-                                  Text(
-                                    order['symbol'],
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.black,
+                  child: autoOrders.length == 0
+                      ? Center(
+                          child: Text("ไม่มีคำสั่งที่รอการดำเนินการ"),
+                        )
+                      : ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: autoOrders.length,
+                          itemBuilder: (context, index) {
+                            final order = autoOrders[index];
+                            return Padding(
+                              padding: EdgeInsets.all(6.0),
+                              child: Container(
+                                width: 100,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Color.fromARGB(128, 0, 0, 0),
+                                      offset: Offset(0, 2),
+                                      blurRadius: 4,
+                                      spreadRadius: 0,
                                     ),
-                                  ),
-                                  Text(
-                                    "${order['quantity'].toString()} หน่วย",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.black,
+                                  ],
+                                ),
+                                child: Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Column(
+                                      children: [
+                                        Text(
+                                          order['symbol'],
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                        Text(
+                                          "${order['quantity'].toString()} หน่วย",
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                        Chip(
+                                          backgroundColor:
+                                              order['side'] == 'buy'
+                                                  ? Colors.green
+                                                  : Colors.red,
+                                          label: Text(
+                                            order['side'] == 'buy'
+                                                ? '  ซื้อ  '
+                                                : ' ขาย ',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                  Chip(
-                                    backgroundColor: order['side'] == 'buy'
-                                        ? Colors.green
-                                        : Colors.red,
-                                    label: Text(
-                                      order['side'] == 'buy'
-                                          ? '  ซื้อ  '
-                                          : ' ขาย ',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
 
-                              // Add additional information or widgets related to the stock here
-                            ],
-                          ),
+                                    // Add additional information or widgets related to the stock here
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
                 ),
               ),
               GestureDetector(

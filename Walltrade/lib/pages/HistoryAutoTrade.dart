@@ -13,6 +13,8 @@ class NotifyActivity extends StatefulWidget {
 class _NotifyActivity extends State<NotifyActivity> {
   final String username;
   List<dynamic> autoOrders = [];
+  List<dynamic> autoOrdersPending = [];
+  List<dynamic> autoOrdersCompleted = [];
   bool isLoading = true;
   _NotifyActivity({required this.username});
 
@@ -28,9 +30,13 @@ class _NotifyActivity extends State<NotifyActivity> {
         isLoading = false;
       });
       for (final order in autoOrders) {
-        print(order['techniques']);
+        if(order['status']=='pending') {
+          autoOrdersPending.add(order);
+        }
+        else {
+          autoOrdersCompleted.add(order);
+        }
       }
-      print(autoOrders.length);
     } else {
       print("Error");
     }
@@ -62,9 +68,9 @@ class _NotifyActivity extends State<NotifyActivity> {
           children: [
             ListView.builder(
               scrollDirection: Axis.vertical,
-              itemCount: autoOrders.length,
+              itemCount: autoOrdersPending.length,
               itemBuilder: (context, index) {
-                final order = autoOrders[index];
+                final order = autoOrdersPending[index];
                 return Container(
                   padding: EdgeInsets.all(16),
                   margin: EdgeInsets.all(14),
@@ -203,9 +209,9 @@ class _NotifyActivity extends State<NotifyActivity> {
             Center(
               child: ListView.builder(
                 scrollDirection: Axis.vertical,
-                itemCount: autoOrders.length,
+                itemCount: autoOrdersCompleted.length,
                 itemBuilder: (context, index) {
-                  final order = autoOrders[index];
+                  final order = autoOrdersCompleted[index];
 
                   return Container(
                     padding: EdgeInsets.all(16),
