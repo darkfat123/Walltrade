@@ -725,7 +725,7 @@ def autotradeMACD():
                 print("MACD: ", macd)
                 print("Signal: ", signal)
 
-                if (last_macd < last_signal and macd > signal) and (macd and signal < zone):
+                if macd and signal < zone:
                     try:
                         api.submit_order(
                         symbol=symbol,
@@ -734,10 +734,10 @@ def autotradeMACD():
                         type='market',
                         time_in_force='gtc'        
                     )
-                        print('คำสั่งซื้อถูกส่งไปยัง Alpaca API แล้ว')
+                        return jsonify('autotrade success')
                     except Exception as e:
                         print(f'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ: {str(e)}')
-                    break
+                        return jsonify(f'error: {str(e)}')
 
                 last_macd = macd
                 last_signal = signal
@@ -745,33 +745,61 @@ def autotradeMACD():
                 time.sleep(5)
             
     else:
-        while True:
-            macd = handler.get_analysis().indicators["MACD.macd"]
-            signal = handler.get_analysis().indicators["MACD.signal"]
+        if cross:
+            while True:
+                macd = handler.get_analysis().indicators["MACD.macd"]
+                signal = handler.get_analysis().indicators["MACD.signal"]
 
-            print("Last MACD: ", last_macd)
-            print("Last Signal: ", last_signal)
-            print("MACD: ", macd)
-            print("Signal: ", signal)
-            if (last_macd > last_signal and macd < signal) and (macd and signal > 0):
-                try:
-                    api.submit_order(
-                    symbol=symbol,
-                    qty=qty,
-                    side=side,
-                    type=type,
-                    time_in_force=time_in_force           
-                )
-                    delete_query = f"DELETE FROM auto_order WHERE username = '{username}' AND symbol = '{symbol}'  AND techniques = '{techniques}' AND quantity = {qty} AND side = '{side}'"
-                    print(delete_query)
-                    cursor.execute(delete_query)
-                    conn.commit()
-                    cursor.close()
-                    conn.close()
-                    return jsonify('autotrade success')
-                except Exception as e:
-                    return jsonify(f'error: {str(e)}') 
-                # เพิ่มโค้ดที่ต้องการเมื่อตรงเงื่อนไขการซื้อหุ้น 
+                print("Last MACD: ", last_macd)
+                print("Last Signal: ", last_signal)
+                print("MACD: ", macd)
+                print("Signal: ", signal)
+                if (last_macd > last_signal and macd < signal) and (macd and signal > 0):
+                    try:
+                        api.submit_order(
+                        symbol=symbol,
+                        qty=qty,
+                        side='sell',
+                        type=type,
+                        time_in_force=time_in_force           
+                    )
+                        delete_query = f"DELETE FROM auto_order WHERE username = '{username}' AND symbol = '{symbol}'  AND techniques = '{techniques}' AND quantity = {qty} AND side = '{side}'"
+                        print(delete_query)
+                        cursor.execute(delete_query)
+                        conn.commit()
+                        cursor.close()
+                        conn.close()
+                        return jsonify('autotrade success')
+                    except Exception as e:
+                        return jsonify(f'error: {str(e)}') 
+                    # เพิ่มโค้ดที่ต้องการเมื่อตรงเงื่อนไขการซื้อหุ้น 
+        else:
+            while True:
+                macd = handler.get_analysis().indicators["MACD.macd"]
+                signal = handler.get_analysis().indicators["MACD.signal"]
+
+                print("Last MACD: ", last_macd)
+                print("Last Signal: ", last_signal)
+                print("MACD: ", macd)
+                print("Signal: ", signal)
+
+                if macd and signal > zone:
+                    try:
+                        api.submit_order(
+                        symbol=symbol,
+                        qty=qty,
+                        side='sell',
+                        type='market',
+                        time_in_force='gtc'        
+                    )
+                        return jsonify('autotrade success')
+                    except Exception as e:
+                        return jsonify(f'error: {str(e)}')            
+                                 
+                last_macd = macd
+                last_signal = signal
+                print()
+                time.sleep(5)
 
 @app.route('/autotradeSTO', methods=['POST'])
 def autotradeSTO():
@@ -915,7 +943,6 @@ def autotradeEMA():
     symbol = request.json.get('symbol')
     qty = float(request.json.get('qty')) #"0.0002"
     day = request.json.get('day') #"0.0002"
-    #priceEMA = float(request.json.get('zone')) #"0.00"
     side = request.json.get('side')
     type = "market"
     time_in_force = "gtc"
@@ -929,7 +956,7 @@ def autotradeEMA():
     print(result)
     # Create the Alpaca REST API client
     api = REST(result[0], result[1], base_url='https://paper-api.alpaca.markets')
-    print(symbol,qty,side,type,time_in_force)#,priceEMA
+    print(symbol,qty,side,type,time_in_force)
 
     handler = TA_Handler(
         symbol="BTCUSD",

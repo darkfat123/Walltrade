@@ -18,6 +18,7 @@ class _TradePageBuyState extends State<TradePageBuy> {
   TextEditingController crossupSTOController = TextEditingController();
   TextEditingController zoneSTOController = TextEditingController();
   TextEditingController dayController = TextEditingController();
+  String fixedZoneValue = '0';
   final String username;
   final TextEditingController _searchController = TextEditingController();
   bool macd_crossupIsChecked = false;
@@ -116,7 +117,7 @@ class _TradePageBuyState extends State<TradePageBuy> {
     }
   }
 
-    Future<void> placeOrderEMA(String qty, String side) async {
+  Future<void> placeOrderEMA(String qty, String side) async {
     final url = Uri.parse('${Constants.serverUrl}/autotradeEMA');
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode(
@@ -436,7 +437,6 @@ class _TradePageBuyState extends State<TradePageBuy> {
                                   TextButton(
                                     child: Text('OK'),
                                     onPressed: () {
-                                      
                                       Navigator.of(context).pop();
                                     },
                                   ),
@@ -566,6 +566,12 @@ class _TradePageBuyState extends State<TradePageBuy> {
                           setState(() {
                             macd_crossupIsChecked = newValue ?? false;
                             print(macd_crossupIsChecked);
+                            if (macd_crossupIsChecked) {
+                              zoneMACDController.text = fixedZoneValue;
+                            } else {
+                              zoneMACDController.text =
+                                  ''; // ไม่ต้องใส่ค่าเมื่อ Checkbox ไม่ถูกติ๊ก
+                            }
                           });
                         },
                       ),
@@ -608,6 +614,7 @@ class _TradePageBuyState extends State<TradePageBuy> {
                       Expanded(
                         child: TextField(
                           controller: zoneMACDController,
+                          enabled: !macd_crossupIsChecked,
                           decoration: InputDecoration(
                             labelText: 'ค่าที่ต้องการซื้อ',
                             border: OutlineInputBorder(),
