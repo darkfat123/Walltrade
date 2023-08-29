@@ -48,16 +48,17 @@ class _AssetListScreenState extends State<AssetListScreen>
         SnackBar(
           behavior: SnackBarBehavior.floating,
           content: Container(
-              padding: EdgeInsets.all(16),
-              height: 60,
-              decoration: BoxDecoration(
-                color: Colors.green,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                'เพิ่มลงรายการเรียบร้อยแล้ว!',
-                style: TextStyle(fontSize: 18),
-              ),),
+            padding: EdgeInsets.all(16),
+            height: 60,
+            decoration: BoxDecoration(
+              color: Colors.green,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              'เพิ่มลงรายการเรียบร้อยแล้ว!',
+              style: TextStyle(fontSize: 18),
+            ),
+          ),
           backgroundColor: Colors.transparent,
           elevation: 0,
         ),
@@ -141,32 +142,53 @@ class _AssetListScreenState extends State<AssetListScreen>
           ),
           Expanded(
             child: isLoading
-                ? Center(
-                    child: CircularProgressIndicator()
-                  )
+                ? Center(child: CircularProgressIndicator())
                 : ListView.builder(
                     itemCount: filteredList.length,
                     itemBuilder: (context, index) {
                       final asset = filteredList[index];
-                      return ListTile(
-                        title: Text(
-                          asset['Symbol'],
-                          style: TextStyle(fontWeight: FontWeight.w500),
-                        ),
-                        subtitle: Text(asset['Name']),
-                        onTap: () {
-                          navigateToAssetDetails(
-                              asset['Name'], asset['Symbol'], username);
-                        },
-                        trailing: IconButton(
-                          icon: FaIcon(
-                            FontAwesomeIcons.plus,
-                            size: 18,
+                      return Column(
+                        children: [
+                          ListTile(
+                            title: Text(
+                              asset['Symbol'],
+                              style: TextStyle(fontWeight: FontWeight.w500),
+                            ),
+                            subtitle: Text(asset['Name']),
+                            onTap: () {
+                              navigateToAssetDetails(
+                                  asset['Name'], asset['Symbol'], username);
+                            },
+                            trailing: Container(
+                              decoration: BoxDecoration(
+                                color: Color(0xFFECF8F9),
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.5),
+                                    spreadRadius: 2,
+                                    blurRadius: 5,
+                                    offset: Offset(0,
+                                        3), // changes the position of the shadow
+                                  ),
+                                ],
+                              ),
+                              child: IconButton(
+                                icon: FaIcon(
+                                  FontAwesomeIcons.plus,
+                                  size: 14,
+                                ),
+                                onPressed: () {
+                                  updateWatchlist(asset['Symbol'].toString());
+                                },
+                              ),
+                            ),
                           ),
-                          onPressed: () {
-                            updateWatchlist(asset['Symbol'].toString());
-                          },
-                        ),
+                          Divider(
+                            indent: 10,
+                            endIndent: 10,
+                          )
+                        ],
                       );
                     },
                   ),

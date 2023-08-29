@@ -58,8 +58,13 @@ class _TradePageOptionsState extends State<TradePageOptions>
 
   @override
   void initState() {
-    tabController = TabController(length: 2, vsync: this);
     super.initState();
+    tabController = TabController(length: 2, vsync: this);
+    tabController.addListener(() {
+      setState(() {
+        tabController.index;
+      });
+    });
     getCash();
     getAutoOrders();
   }
@@ -534,9 +539,6 @@ class _TradePageOptionsState extends State<TradePageOptions>
                           ),
                         ],
                       ),
-                    ),
-                    SizedBox(
-                      height: 20,
                     ),
                   ],
                 ),

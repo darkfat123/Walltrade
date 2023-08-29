@@ -133,29 +133,52 @@ class _AssetTHListScreenState extends State<AssetTHListScreen> {
                     itemBuilder: (context, index) {
                       final asset = filteredList[index];
                       final symbol = asset['Symbol'];
-                      return ListTile(
-                        title: Text(
-                          symbol,
-                          style: TextStyle(fontWeight: FontWeight.w500),
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  AssetTHDetailsScreen(symbol: symbol),
+                      return Column(
+                        children: [
+                          ListTile(
+                            title: Text(
+                              symbol,
+                              style: TextStyle(fontWeight: FontWeight.w500),
                             ),
-                          );
-                        },
-                        trailing: IconButton(
-                          icon: FaIcon(
-                            FontAwesomeIcons.plus,
-                            size: 18,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      AssetTHDetailsScreen(symbol: symbol),
+                                ),
+                              );
+                            },
+                            trailing: Container(
+                              decoration: BoxDecoration(
+                                color: Color(0xFFECF8F9),
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.5),
+                                    spreadRadius: 2,
+                                    blurRadius: 5,
+                                    offset: Offset(0,
+                                        3), // changes the position of the shadow
+                                  ),
+                                ],
+                              ),
+                              child: IconButton(
+                                icon: FaIcon(
+                                  FontAwesomeIcons.plus,
+                                  size: 14,
+                                ),
+                                onPressed: () {
+                                  updateWatchlist(symbol);
+                                },
+                              ),
+                            ),
                           ),
-                          onPressed: () {
-                            updateWatchlist(symbol);
-                          },
-                        ),
+                          Divider(
+                            indent: 10,
+                            endIndent: 10,
+                          ) // เพิ่ม Divider ตรงนี้
+                        ],
                       );
                     },
                   ),

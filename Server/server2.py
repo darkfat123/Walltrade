@@ -807,7 +807,7 @@ def autotradeSTO():
     symbol = request.json.get('symbol')
     qty = float(request.json.get('qty')) #"0.0002"
     zone_sto = float(request.json.get('zone')) #"0.00"
-    cross_sto_up = float(request.json.get('cross_sto')) #True/False
+    cross_sto = float(request.json.get('cross_sto')) 
     side = request.json.get('side')
     type = "market"
     time_in_force = "gtc"
@@ -822,7 +822,7 @@ def autotradeSTO():
     print(result)
     # Create the Alpaca REST API client
     api = REST(result[0], result[1], base_url='https://paper-api.alpaca.markets')
-    print(symbol,qty,side,type,time_in_force,zone_sto,cross_sto_up)
+    print(symbol,qty,side,type,time_in_force,zone_sto,cross_sto)
 
     
     handler = TA_Handler(
@@ -833,7 +833,8 @@ def autotradeSTO():
     )
 
     if side == 'buy':
-        if cross_sto_up!='':
+        if cross_sto>0:
+            print("cross buy")
             while True:
                 sto_k = handler.get_analysis().indicators["Stoch.K"]
                 sto_d = handler.get_analysis().indicators["Stoch.D"]
@@ -843,7 +844,7 @@ def autotradeSTO():
                 print("Last D: ", last_sto_d)
                 print("K: ", sto_k)
                 print("D: ", sto_d)
-                if sto_k < cross_sto_up and sto_d < cross_sto_up and sto_k > sto_d and last_sto_k < last_sto_d:
+                if sto_k < cross_sto and sto_d < cross_sto and sto_k > sto_d and last_sto_k < last_sto_d:
                     try:
                         api.submit_order(
                         symbol=symbol,
@@ -858,6 +859,7 @@ def autotradeSTO():
                     break
                 time.sleep(5)
         else:
+            print("zone buy")
             while True:
                 sto_k = handler.get_analysis().indicators["Stoch.K"]
                 sto_d = handler.get_analysis().indicators["Stoch.D"]
@@ -885,7 +887,8 @@ def autotradeSTO():
                 time.sleep(5)
             
     else: #sell
-        if cross_sto_down!='':
+        if cross_sto>0:
+            print("cross sell")
             while True:
                 sto_k = handler.get_analysis().indicators["Stoch.K"]
                 sto_d = handler.get_analysis().indicators["Stoch.D"]
@@ -895,7 +898,7 @@ def autotradeSTO():
                 print("Last D: ", last_sto_d)
                 print("K: ", sto_k)
                 print("D: ", sto_d)
-                if sto_k > cross_sto_down and sto_d > cross_sto_down and sto_k < sto_d and last_sto_k > last_sto_d:
+                if sto_k > cross_sto and sto_d > cross_sto and sto_k < sto_d and last_sto_k > last_sto_d:
                     try:
                         api.submit_order(
                         symbol=symbol,
@@ -910,6 +913,7 @@ def autotradeSTO():
                     break
                 time.sleep(5)
         else:
+            print("zone sell")
             while True:
                 sto_k = handler.get_analysis().indicators["Stoch.K"]
                 sto_d = handler.get_analysis().indicators["Stoch.D"]

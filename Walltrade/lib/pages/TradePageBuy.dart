@@ -20,6 +20,7 @@ class _TradePageBuyState extends State<TradePageBuy> {
   TextEditingController dayController = TextEditingController();
   String fixedZoneValue = '0';
   bool isZoneTextFieldEnabled = true;
+  bool isCrossTextFieldEnabled = true;
   final String username;
   final TextEditingController _searchController = TextEditingController();
   bool macd_crossupIsChecked = false;
@@ -370,19 +371,21 @@ class _TradePageBuyState extends State<TradePageBuy> {
                       Expanded(
                         child: TextField(
                           controller: zoneSTOController,
-                          //enabled: isZoneTextFieldEnabled,
+                          enabled: isZoneTextFieldEnabled,
                           decoration: InputDecoration(
-                            labelText: 'ค่าที่ต้องการซื้อ',
+                            labelText: '0-100',
                             border: OutlineInputBorder(),
                           ),
                           onChanged: (text) {
                             if (text.isNotEmpty) {
                               setState(() {
-                                isZoneTextFieldEnabled = false;
+                                crossupSTOController.text = "0";
+                                isCrossTextFieldEnabled = false;
                               });
                             } else {
                               setState(() {
-                                isZoneTextFieldEnabled = true;
+                                isCrossTextFieldEnabled = true;
+                                crossupSTOController.clear();
                               });
                             }
                           },
@@ -426,12 +429,25 @@ class _TradePageBuyState extends State<TradePageBuy> {
                       SizedBox(width: 5),
                       Expanded(
                         child: TextField(
-                          enabled: isZoneTextFieldEnabled,
+                          enabled: isCrossTextFieldEnabled,
                           controller: crossupSTOController,
                           decoration: InputDecoration(
                             labelText: '0-100',
                             border: OutlineInputBorder(),
                           ),
+                          onChanged: (text) {
+                            if (text.isNotEmpty) {
+                              setState(() {
+                                zoneSTOController.text = "0";
+                                isZoneTextFieldEnabled = false;
+                              });
+                            } else {
+                              setState(() {
+                                isZoneTextFieldEnabled = true;
+                                zoneSTOController.clear();
+                              });
+                            }
+                          },
                         ),
                       ),
                       IconButton(
