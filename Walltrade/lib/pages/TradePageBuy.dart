@@ -19,6 +19,7 @@ class _TradePageBuyState extends State<TradePageBuy> {
   TextEditingController zoneSTOController = TextEditingController();
   TextEditingController dayController = TextEditingController();
   String fixedZoneValue = '0';
+  bool isZoneTextFieldEnabled = true;
   final String username;
   final TextEditingController _searchController = TextEditingController();
   bool macd_crossupIsChecked = false;
@@ -369,10 +370,22 @@ class _TradePageBuyState extends State<TradePageBuy> {
                       Expanded(
                         child: TextField(
                           controller: zoneSTOController,
+                          //enabled: isZoneTextFieldEnabled,
                           decoration: InputDecoration(
                             labelText: 'ค่าที่ต้องการซื้อ',
                             border: OutlineInputBorder(),
                           ),
+                          onChanged: (text) {
+                            if (text.isNotEmpty) {
+                              setState(() {
+                                isZoneTextFieldEnabled = false;
+                              });
+                            } else {
+                              setState(() {
+                                isZoneTextFieldEnabled = true;
+                              });
+                            }
+                          },
                         ),
                       ),
                       IconButton(
@@ -413,6 +426,7 @@ class _TradePageBuyState extends State<TradePageBuy> {
                       SizedBox(width: 5),
                       Expanded(
                         child: TextField(
+                          enabled: isZoneTextFieldEnabled,
                           controller: crossupSTOController,
                           decoration: InputDecoration(
                             labelText: '0-100',
