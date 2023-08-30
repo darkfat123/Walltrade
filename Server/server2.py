@@ -1209,5 +1209,23 @@ def place_order_th():
         return jsonify(f'error: {str(e)}')
 
 
+@app.route('/cancelOrder', methods=['POST'])
+def cancelOrder():
+    username = request.json.get('username')
+    orderID = request.json.get('orderID')
+    isCancel = bool(request.json.get('isCancel'))
+
+    conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
+    query = f"SELECT status FROM auto_trade WHERE username = '{username}' AND OrderID ='{orderID}'"
+    cursor = conn.cursor()
+    cursor.execute(query)
+    result = cursor.fetchone()
+    if(result[0]=='pending' and isCancel):
+        cancel = f"UPDATE auto_trade SET status = 'completed' WHERE username = '{username}' AND OrderID ='{orderID}'"
+        cursor = conn.cursor()
+        cursor.execute(query)
+        return jsonify('success')
+
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0")
