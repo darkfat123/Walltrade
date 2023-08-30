@@ -30,10 +30,9 @@ class _NotifyActivity extends State<NotifyActivity> {
         isLoading = false;
       });
       for (final order in autoOrders) {
-        if(order['status']=='pending') {
+        if (order['status'] == 'pending') {
           autoOrdersPending.add(order);
-        }
-        else {
+        } else {
           autoOrdersCompleted.add(order);
         }
       }
@@ -74,7 +73,6 @@ class _NotifyActivity extends State<NotifyActivity> {
                 return Container(
                   padding: EdgeInsets.all(16),
                   margin: EdgeInsets.all(14),
-                  height: 150,
                   decoration: BoxDecoration(
                     color: Color(0xFFFFFFFF),
                     borderRadius: BorderRadius.circular(20),
@@ -95,7 +93,7 @@ class _NotifyActivity extends State<NotifyActivity> {
                           Text(
                             order['symbol'],
                             style: TextStyle(
-                              fontSize: 18,
+                              fontSize: 16,
                               fontWeight: FontWeight.w500,
                               color: Colors.black,
                             ),
@@ -147,14 +145,18 @@ class _NotifyActivity extends State<NotifyActivity> {
                             ),
                           ),
                           Chip(
-                            backgroundColor: Colors.blue.shade300,
-                            label: Text(
-                              order['techniques'],
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black,
-                              ),
+                            backgroundColor: Color(0xFF212436),
+                            label: Wrap(
+                              children: [
+                                Text(
+                                  "${order['techniques']}",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
@@ -216,7 +218,6 @@ class _NotifyActivity extends State<NotifyActivity> {
                   return Container(
                     padding: EdgeInsets.all(16),
                     margin: EdgeInsets.all(14),
-                    height: 150,
                     decoration: BoxDecoration(
                       color: Color(0xFFFFFFFF),
                       borderRadius: BorderRadius.circular(20),
@@ -281,13 +282,13 @@ class _NotifyActivity extends State<NotifyActivity> {
                               ),
                             ),
                             Chip(
-                              backgroundColor: Colors.blue.shade300,
+                              backgroundColor: Color(0xFF212436),
                               label: Text(
                                 order['techniques'],
                                 style: TextStyle(
-                                  fontSize: 14,
+                                  fontSize: 12,
                                   fontWeight: FontWeight.w500,
-                                  color: Colors.black,
+                                  color: Colors.white,
                                 ),
                               ),
                             ),

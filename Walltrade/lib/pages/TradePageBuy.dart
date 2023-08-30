@@ -178,6 +178,12 @@ class _TradePageBuyState extends State<TradePageBuy> {
   }
 
   @override
+  void dispose() {
+    // ยกเลิก timer หรือ animation ที่ใช้งาน
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
