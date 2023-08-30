@@ -125,7 +125,7 @@ class _TradePageOptionsState extends State<TradePageOptions>
                                 AssetImage('assets/img/profile.png'),
                             backgroundColor: Colors.transparent,
                             child: Container(
-                              height: 80,
+                              height:80,
                               width: 80,
                               decoration: const BoxDecoration(
                                 gradient: LinearGradient(
@@ -290,7 +290,7 @@ class _TradePageOptionsState extends State<TradePageOptions>
                     Text(
                       "คำสั่งที่รอการดำเนินการ",
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.w500,
                         color: Colors.black,
                       ),
@@ -308,7 +308,7 @@ class _TradePageOptionsState extends State<TradePageOptions>
                       child: Text(
                         "เพิ่มเติม",
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 12,
                           fontWeight: FontWeight.w300,
                           color: Colors.black,
                         ),
@@ -368,12 +368,16 @@ class _TradePageOptionsState extends State<TradePageOptions>
                                             color: Colors.black,
                                           ),
                                         ),
-                                        Chip(
-                                          backgroundColor:
-                                              order['side'] == 'buy'
+                                        Container(
+                                          padding: EdgeInsets.all(4),
+                                          margin: EdgeInsets.symmetric(vertical:2),
+                                          decoration: BoxDecoration(
+                                              color: order['side'] == 'buy'
                                                   ? Colors.green
                                                   : Colors.red,
-                                          label: Text(
+                                              borderRadius:
+                                                  BorderRadius.circular(10)),
+                                          child: Text(
                                             order['side'] == 'buy'
                                                 ? '  ซื้อ  '
                                                 : ' ขาย ',
@@ -486,15 +490,14 @@ class _TradePageOptionsState extends State<TradePageOptions>
                 child: Column(
                   children: [
                     Container(
-                      height: 50,
-                      width: MediaQuery.of(context).size.width * 0.8,
+                      height: 45,
+                      margin: EdgeInsets.symmetric(horizontal: 20),
                       decoration: BoxDecoration(
                           color: primary,
                           borderRadius: BorderRadius.circular(10)),
                       child: Padding(
                         padding: EdgeInsets.all(4),
                         child: Container(
-                          height: 40, // กำหนดความสูงที่ต้องการที่นี่
                           child: TabBar(
                             unselectedLabelColor: Colors.white,
                             labelColor: Colors.black,
@@ -504,13 +507,13 @@ class _TradePageOptionsState extends State<TradePageOptions>
                               Tab(
                                 child: Text(
                                   'คำสั่งซื้อ',
-                                  style: TextStyle(fontSize: 18),
+                                  style: TextStyle(fontSize: 16),
                                 ),
                               ),
                               Tab(
                                 child: Text(
                                   'คำสั่งขาย',
-                                  style: TextStyle(fontSize: 18),
+                                  style: TextStyle(fontSize: 16),
                                 ),
                               ),
                             ],

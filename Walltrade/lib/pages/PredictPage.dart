@@ -115,7 +115,7 @@ class _PredictPageState extends State<PredictPage> {
                         child: Text(
                           "ทำนายราคาหุ้น",
                           style: TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.w600),
+                              fontSize: 20, fontWeight: FontWeight.w600),
                         ),
                       ),
                     ),
@@ -328,7 +328,7 @@ class _PredictPageState extends State<PredictPage> {
                     child: Text(
                       "วิเคราะห์กราฟ",
                       style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                     ),
                   )
                 ],
@@ -343,7 +343,7 @@ class _PredictPageState extends State<PredictPage> {
                       options: CarouselOptions(
                         autoPlay: true,
                         autoPlayInterval: Duration(seconds: 5),
-                        height: 180.0,
+                        height: 160.0,
                       ),
                       items: newsList.map((news) {
                         return Builder(
@@ -401,6 +401,7 @@ class _PredictPageState extends State<PredictPage> {
                   }
                 },
               ),
+              SizedBox(height: 10,)
             ],
           ),
         ),
@@ -423,7 +424,7 @@ class TimeframeDropdown extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text('โปรดเลือกระยะเวลาที่ต้องการทำนาย'),
+        Text('ระยะเวลาที่ต้องการทำนาย'),
         DropdownButton<String>(
           value: selectedInterval,
           onChanged: onChanged,
