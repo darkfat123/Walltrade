@@ -23,12 +23,6 @@ class AssetTHDetailsScreen extends StatelessWidget {
                       fontSize: 20,
                     ),
                   ),
-                  Text(
-                    symbol,
-                    style: TextStyle(
-                      fontSize: 12,
-                    ),
-                  ),
                 ],
               ),
             ),

@@ -388,18 +388,17 @@ def deleteWatchlist():
 
 @app.route('/displayWatchlist', methods=['POST'])
 def displayWatchlist():
-    username = request.form.get('username')
-
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT watchlist FROM users_info WHERE username = %s", (username,))
-    watchlist = cur.fetchone()
-    cur.close()
-
-    if watchlist:
-        watchlist = json.loads(watchlist[0])
-        return jsonify(watchlist)
-    else:
-        return jsonify([])
+    username = request.json.get('username')
+    conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
+    cursor = conn.cursor()
+    query = f"SELECT watchlist FROM users_info WHERE username = '{username}'"
+    cursor.execute(query)
+    result = cursor.fetchone()
+    
+    if result is not None:
+        watchlist_json = result[0]
+        stock_list = json.loads(watchlist_json) if watchlist_json else []      
+    return jsonify(stock_list)
 
 
 @app.route('/getBalance', methods=['POST'])
@@ -567,7 +566,7 @@ def get_positions():
     
     return jsonify(positions)
 
-"""@app.route('/streamPrice', methods=['POST'])
+"""@app.route('/streamPriceUS', methods=['POST'])
 async def connect_to_alpaca():
     symbol = request.json.get('symbol')
     api = "PK8NXGV44WWTJA356CDG"

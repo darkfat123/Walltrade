@@ -195,7 +195,7 @@ class _HomePageState extends State<HomePage> {
     String username = widget.username;
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Color(0xFFECF8F9),
+        backgroundColor: Colors.white,
         body: SingleChildScrollView(
           child: Column(
             children: [
@@ -656,7 +656,7 @@ class _HomePageState extends State<HomePage> {
                                       )
                                     : Container(
                                         decoration: BoxDecoration(
-                                          color: Color(0xFFECF8F9),
+                                          color: Colors.white,
                                         ),
                                         child: ListView.builder(
                                           scrollDirection: Axis.horizontal,

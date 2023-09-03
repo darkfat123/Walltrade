@@ -84,7 +84,7 @@ class _NewsListPageState extends State<NewsListPage> {
       ),
       body: Container(
           decoration: BoxDecoration(
-            color: Color(0xFFECF8F9),
+            color: Colors.white,
           ),
           child: !isLoading
               ? ListView.builder(
@@ -199,7 +199,7 @@ class NewsDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFECF8F9),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Color(0xFF212436),
         title: Text(

@@ -21,6 +21,7 @@ class _AssetListScreenState extends State<AssetListScreen>
   List<dynamic> filteredList = [];
   bool isLoading = false;
   final String username;
+  List<dynamic> data = [];
   _AssetListScreenState({required this.username});
 
   final TextEditingController _searchController = TextEditingController();
@@ -68,6 +69,12 @@ class _AssetListScreenState extends State<AssetListScreen>
     }
   }
 
+  @override
+  void initState() {
+    super.initState();
+    watchlist();
+  }
+
   Future<void> fetchData() async {
     setState(() {
       isLoading = true;
@@ -100,6 +107,34 @@ class _AssetListScreenState extends State<AssetListScreen>
     );
   }
 
+  Future<void> deleteWatchlist(String symbol) async {
+    var url = '${Constants.serverUrl}/deleteWatchlist';
+    var body = jsonEncode(
+        {'username': username, 'symbol': symbol}); // Add the 'symbol' parameter
+
+    var response = await http.post(
+      Uri.parse(url),
+      body: body,
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      print(response.body);
+    } else {
+      print(
+          'Failed to delete watchlist item. Status code: ${response.statusCode}');
+    }
+  }
+
+  Future<void> watchlist() async {
+    var url = '${Constants.serverUrl}/displayWatchlist';
+    var body = jsonEncode({'username': username});
+
+    var response = await http.post(Uri.parse(url),
+        body: body, headers: {'Content-Type': 'application/json'});
+    data = jsonDecode(response.body);
+    print(data);
+  }
+
   void filterAssets(String searchQuery) {
     List<dynamic> tempList = [];
     tempList.addAll(assetList);
@@ -119,7 +154,7 @@ class _AssetListScreenState extends State<AssetListScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFECF8F9),
+      backgroundColor: Colors.white,
       body: Column(
         children: [
           Padding(
@@ -147,6 +182,7 @@ class _AssetListScreenState extends State<AssetListScreen>
                     itemCount: filteredList.length,
                     itemBuilder: (context, index) {
                       final asset = filteredList[index];
+                      final isSymbolInData = data.contains(asset['Symbol']);
                       return Column(
                         children: [
                           ListTile(
@@ -161,7 +197,7 @@ class _AssetListScreenState extends State<AssetListScreen>
                             },
                             trailing: Container(
                               decoration: BoxDecoration(
-                                color: Color(0xFFECF8F9),
+                                color: Colors.white,
                                 borderRadius: BorderRadius.circular(10),
                                 boxShadow: [
                                   BoxShadow(
@@ -173,15 +209,33 @@ class _AssetListScreenState extends State<AssetListScreen>
                                   ),
                                 ],
                               ),
-                              child: IconButton(
-                                icon: FaIcon(
-                                  FontAwesomeIcons.plus,
-                                  size: 14,
-                                ),
-                                onPressed: () {
-                                  updateWatchlist(asset['Symbol'].toString());
-                                },
-                              ),
+                              child: isSymbolInData
+                                  ? IconButton(
+                                      icon: FaIcon(FontAwesomeIcons.solidHeart,
+                                          size: 16, color: Colors.red),
+                                      onPressed: () {
+                                        deleteWatchlist(asset['Symbol']);
+                                        setState(() {
+                                          data.remove(asset[
+                                              'Symbol']); // ลบ symbol ออกจาก data
+                                        });
+                                        print(data);
+                                      },
+                                    )
+                                  : IconButton(
+                                      icon: FaIcon(FontAwesomeIcons.heart,
+                                          size: 16,
+                                          color: Colors
+                                              .red), // ใช้ icon ที่กำหนดไว้
+                                      onPressed: () {
+                                        updateWatchlist(asset['Symbol']);
+                                        setState(() {
+                                          data.add(asset[
+                                              'Symbol']); // เพิ่ม symbol เข้าไปใน data
+                                        });
+                                        print(data);
+                                      },
+                                    ),
                             ),
                           ),
                           Divider(
