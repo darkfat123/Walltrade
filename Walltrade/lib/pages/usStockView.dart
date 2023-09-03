@@ -177,75 +177,83 @@ class _AssetListScreenState extends State<AssetListScreen>
           ),
           Expanded(
             child: isLoading
-                ? Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    itemCount: filteredList.length,
-                    itemBuilder: (context, index) {
-                      final asset = filteredList[index];
-                      final isSymbolInData = data.contains(asset['Symbol']);
-                      return Column(
-                        children: [
-                          ListTile(
-                            title: Text(
-                              asset['Symbol'],
-                              style: TextStyle(fontWeight: FontWeight.w500),
-                            ),
-                            subtitle: Text(asset['Name']),
-                            onTap: () {
-                              navigateToAssetDetails(
-                                  asset['Name'], asset['Symbol'], username);
-                            },
-                            trailing: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.5),
-                                    spreadRadius: 2,
-                                    blurRadius: 5,
-                                    offset: Offset(0,
-                                        3), // changes the position of the shadow
+                ? Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : filteredList.length == 0
+                    ? Center(
+                        child: Text("เกิดข้อผิดพลาด โปรดลองใหม่ภายหลัง"),
+                      )
+                    : ListView.builder(
+                        itemCount: filteredList.length,
+                        itemBuilder: (context, index) {
+                          final asset = filteredList[index];
+                          final isSymbolInData = data.contains(asset['Symbol']);
+                          return Column(
+                            children: [
+                              ListTile(
+                                title: Text(
+                                  asset['Symbol'],
+                                  style: TextStyle(fontWeight: FontWeight.w500),
+                                ),
+                                subtitle: Text(asset['Name']),
+                                onTap: () {
+                                  navigateToAssetDetails(
+                                      asset['Name'], asset['Symbol'], username);
+                                },
+                                trailing: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.5),
+                                        spreadRadius: 2,
+                                        blurRadius: 5,
+                                        offset: Offset(0,
+                                            3), // changes the position of the shadow
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                  child: isSymbolInData
+                                      ? IconButton(
+                                          icon: FaIcon(
+                                              FontAwesomeIcons.solidHeart,
+                                              size: 16,
+                                              color: Colors.red),
+                                          onPressed: () {
+                                            deleteWatchlist(asset['Symbol']);
+                                            setState(() {
+                                              data.remove(asset[
+                                                  'Symbol']); // ลบ symbol ออกจาก data
+                                            });
+                                            print(data);
+                                          },
+                                        )
+                                      : IconButton(
+                                          icon: FaIcon(FontAwesomeIcons.heart,
+                                              size: 16,
+                                              color: Colors
+                                                  .red), // ใช้ icon ที่กำหนดไว้
+                                          onPressed: () {
+                                            updateWatchlist(asset['Symbol']);
+                                            setState(() {
+                                              data.add(asset[
+                                                  'Symbol']); // เพิ่ม symbol เข้าไปใน data
+                                            });
+                                            print(data);
+                                          },
+                                        ),
+                                ),
                               ),
-                              child: isSymbolInData
-                                  ? IconButton(
-                                      icon: FaIcon(FontAwesomeIcons.solidHeart,
-                                          size: 16, color: Colors.red),
-                                      onPressed: () {
-                                        deleteWatchlist(asset['Symbol']);
-                                        setState(() {
-                                          data.remove(asset[
-                                              'Symbol']); // ลบ symbol ออกจาก data
-                                        });
-                                        print(data);
-                                      },
-                                    )
-                                  : IconButton(
-                                      icon: FaIcon(FontAwesomeIcons.heart,
-                                          size: 16,
-                                          color: Colors
-                                              .red), // ใช้ icon ที่กำหนดไว้
-                                      onPressed: () {
-                                        updateWatchlist(asset['Symbol']);
-                                        setState(() {
-                                          data.add(asset[
-                                              'Symbol']); // เพิ่ม symbol เข้าไปใน data
-                                        });
-                                        print(data);
-                                      },
-                                    ),
-                            ),
-                          ),
-                          Divider(
-                            indent: 10,
-                            endIndent: 10,
-                          )
-                        ],
-                      );
-                    },
-                  ),
+                              Divider(
+                                indent: 10,
+                                endIndent: 10,
+                              )
+                            ],
+                          );
+                        },
+                      ),
           ),
         ],
       ),
