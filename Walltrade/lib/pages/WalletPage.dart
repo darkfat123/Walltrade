@@ -690,20 +690,8 @@ class _WalletPageState extends State<WalletPage> {
                 height: 16,
               ),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 4, vertical: 16),
-                margin: EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 2,
-                      blurRadius: 5,
-                      offset:
-                          Offset(0, 3), // changes the position of the shadow
-                    ),
-                  ],
                 ),
                 child: Column(
                   children: [

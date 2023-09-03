@@ -50,8 +50,7 @@ class _SearchPageState extends State<SearchPage>
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        body: SingleChildScrollView(
-          child: Container(
+        body: Container(
             color: Colors.white,
             padding: EdgeInsets.only(left: 10, right: 10),
             height: MediaQuery.of(context).size.height,
@@ -106,7 +105,7 @@ class _SearchPageState extends State<SearchPage>
               ],
             ),
           ),
-        ),
+        
       ),
     );
   }
