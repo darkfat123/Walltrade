@@ -218,69 +218,60 @@ def get_asset_list():
 
 @app.route('/thStockList', methods=['GET'])
 def thStockList():
-    set_stocks = [
-    "ADVANC",
-    "AOT",
-    "BBL",
-    "BCP",
-    "BDMS",
-    "BEM",
-    "BGRIM",
-    "BH",
-    "BJC",
-    "BPP",
-    "BTS",
-    "CBG",
-    "CENTEL",
-    "CK",
-    "CPALL",
-    "CPF",
-    "CPN",
-    "CRC",
-    "DELTA",
-    "EA",
-    "EGCO",
-    "GGC",
-    "GPSC",
-    "GULF",
-    "HANA",
-    "IRPC",
-    "IVL",
-    "KBANK",
-    "KCE",
-    "KKP",
-    "KTB",
-    "LH",
-    "M",
-    "MAJOR",
-    "OR",
-    "PTT",
-    "PTTEP",
-    "PTTGC",
-    "S",
-    "SAMART",
-    "SAWAD",
-    "SCB",
-    "SCC",
-    "SCP",
-    "SCGP",
-    "SIRI",
-    "SPALI",
-    "SPRC",
-    "STA",
-    "SUPER",
-    "TCAP",
-    "THANI",
-    "TISCO",
-    "TKN",
-    "TOA",
-    "TOP",
-    "TPIPP",
-    "TRUE",
-    "TTW",
-    "TU",
-    "WHA"
-]
+    thai_stocks = {
+    "ADVANC": "ADVANCED INFO SERVICE PUBLIC CO. LTD.",
+    "AOT": "AIRPORTS OF THAILAND PUBLIC CO. LTD.",
+    "BBL": "BANGKOK BANK PUBLIC CO. LTD.",
+    "BCP": "BANGCHAK CORPORATION PUBLIC CO. LTD.",
+    "BDMS": "BANGKOK DOMINION METAL CO. LTD.",
+    "BEM": "BANGKOK EXPRESSWAY AND METRO PUBLIC CO. LTD.",
+    "BGRIM": "B.GRIMM POWER PUBLIC CO. LTD.",
+    "BH": "BANGKOK HOSPITAL GROUP PUBLIC CO. LTD.",
+    "BJC": "BERLI JUCKER PUBLIC CO. LTD.",
+    "BPP": "BAN PU PUBLIC CO. LTD.",
+    "BTS": "BTS GROUP HOLDINGS PUBLIC CO. LTD.",
+    "CBG": "COSMIC GUEST CO. LTD.",
+    "CENTEL": "CENTRAL PLAZA HOTEL PUBLIC CO. LTD.",
+    "CK": "CHAROEN POKPHAND FOODS PUBLIC CO. LTD.",
+    "CPALL": "CENTRAL PLAZA CENTRALPATTANA PUBLIC CO. LTD.",
+    "CPF": "THE SIAM CEMENT PUBLIC CO. LTD.",
+    "CPN": "DELTA ELECTRONICS (THAILAND) PUBLIC CO. LTD.",
+    "CRC": "ELECTRICITY GENERATING PUBLIC CO. LTD.",
+    "DELTA": "GLOBAL GREEN CHEMICAL PUBLIC CO. LTD.",
+    "EA": "GULF ENERGY DEVELOPMENT PUBLIC CO. LTD.",
+    "EGCO": "KASIKORNBANK PUBLIC CO. LTD.",
+    "GGC": "KCE ELECTLECTRONICS PUBLIC CO. LTD.",
+    "GPSC": "KIATNAKIN BANK PUBLIC CO. LTD.",
+    "GULF": "KRUNG THAI BANK PUBLIC CO. LTD.",
+    "HANA": "LAND AND HOUSES PUBLIC CO. LTD.",
+    "IRPC": "THE MALL GROUP CO. LTD.",
+    "IVL": "MAJOR CINEPLEX GROUP PUBLIC CO. LTD.",
+    "KBANK": "THE ORIENTAL HOTEL PUBLIC CO. LTD.",
+    "KCE": "PTT PUBLIC CO. LTD.",
+    "KKP": "PTT EXPLORATION AND PRODUCTION PUBLIC CO. LTD.",
+    "KTB": "PTT GLOBAL CHEMICAL PUBLIC CO. LTD.",
+    "LH": "CP ALL PUBLIC CO. LTD.",
+    "M": "SAMART CORPORATION PUBLIC CO. LTD.",
+    "MAJOR": "SAWAD CAPITAL PUBLIC CO. LTD.",
+    "OR": "THE SIAM COMMERCIAL BANK PUBLIC CO. LTD.",
+    "PTT": "SIAM CEMENT PUBLIC CO. LTD.",
+    "PTTEP": "SIAM CITY CEMENT PUBLIC CO. LTD.",
+    "PTTGC": "SIAM COMMERCIAL PAPER CO. LTD.",
+    "S": "SIAM CEMENT GROUP PUBLIC CO. LTD.",
+    "SAMART": "SANSIRI PUBLIC CO. LTD.",
+    "SAWAD": "SUPREME ENERGY PUBLIC CO. LTD.",
+    "SCB": "THANACHART CAPITAL PUBLIC CO. LTD.",
+    "SCC": "THANACHART BANK PUBLIC CO. LTD.",
+    "SCP": "TISCO FINANCIAL GROUP PUBLIC CO. LTD.",
+    "SCGP": "THAI AGRI FOODS PUBLIC CO. LTD.",
+    "SIRI": "TOA PAINT (THAILAND) PUBLIC CO. LTD.",
+    "SPALI": "THAI OIL PUBLIC CO. LTD.",
+    "SPRC": "TPI POLYESTER CO. LTD.",
+    "STA": "TRUE CORPORATION PUBLIC CO. LTD.",
+    "SUPER": "TTW PUBLIC CO. LTD.",
+    "TCAP": "THAI UNION GROUP PUBLIC CO. LTD.",
+    "THANI": "WHA CORPORATION PUBLIC CO. LTD."
+    }
 
     investor = Investor(
         app_id="l6A2nvIv9t5YnPTE",
@@ -292,11 +283,13 @@ def thStockList():
     mkt_data = investor.MarketData()
     stocks_list = []
 
-    for symbol in set_stocks:
+    for symbol, full_name in thai_stocks.items():
         res = mkt_data.get_quote_symbol(symbol)
-        stock_data = {'Symbol': res['symbol'], 'Last': res['last']}
+        stock_data = {'Symbol': res['symbol'], 'Fullname': full_name, 'Last': res['last']}
         stocks_list.append(stock_data)
 
+
+    # ส่งข้อมูลในรูปแบบของ JSON
     return jsonify(stocks_list)
 
 

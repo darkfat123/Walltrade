@@ -14,7 +14,8 @@ class AssetTHListScreen extends StatefulWidget {
       _AssetTHListScreenState(username: username);
 }
 
-class _AssetTHListScreenState extends State<AssetTHListScreen> with AutomaticKeepAliveClientMixin {
+class _AssetTHListScreenState extends State<AssetTHListScreen>
+    with AutomaticKeepAliveClientMixin {
   final String username;
   List<dynamic> assetList = [];
   List<dynamic> filteredList = [];
@@ -38,6 +39,7 @@ class _AssetTHListScreenState extends State<AssetTHListScreen> with AutomaticKee
           filteredList = assetList;
           isLoading = false;
         });
+        print(assetList);
       } else {
         setState(() {
           isLoading = false;
@@ -51,8 +53,6 @@ class _AssetTHListScreenState extends State<AssetTHListScreen> with AutomaticKee
       print("Error fetching asset list: $e");
     }
   }
-
-  
 
   Future<void> deleteWatchlist(String symbol) async {
     var url = '${Constants.serverUrl}/deleteWatchlist';
@@ -167,15 +167,18 @@ class _AssetTHListScreenState extends State<AssetTHListScreen> with AutomaticKee
                     itemBuilder: (context, index) {
                       final asset = filteredList[index];
                       final symbol = asset['Symbol'];
+                      final fullname = asset['Fullname'];
                       final isSymbolInData = data.contains(
                           symbol); // เช็คว่า symbol อยู่ในรายการ data หรือไม่
-
                       return Column(
                         children: [
                           ListTile(
                             title: Text(
                               symbol,
                               style: TextStyle(fontWeight: FontWeight.w500),
+                            ),
+                            subtitle: Text(
+                              fullname,
                             ),
                             onTap: () {
                               Navigator.push(
@@ -241,9 +244,8 @@ class _AssetTHListScreenState extends State<AssetTHListScreen> with AutomaticKee
       ),
     );
   }
-  
+
   @override
   // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
-
 }
