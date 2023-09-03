@@ -162,83 +162,87 @@ class _AssetTHListScreenState extends State<AssetTHListScreen>
                 ? Center(
                     child: CircularProgressIndicator(),
                   )
-                : ListView.builder(
-                    itemCount: filteredList.length,
-                    itemBuilder: (context, index) {
-                      final asset = filteredList[index];
-                      final symbol = asset['Symbol'];
-                      final fullname = asset['Fullname'];
-                      final isSymbolInData = data.contains(
-                          symbol); // เช็คว่า symbol อยู่ในรายการ data หรือไม่
-                      return Column(
-                        children: [
-                          ListTile(
-                            title: Text(
-                              symbol,
-                              style: TextStyle(fontWeight: FontWeight.w500),
-                            ),
-                            subtitle: Text(
-                              fullname,
-                            ),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      AssetTHDetailsScreen(symbol: symbol),
+                : filteredList.length == 0
+                    ? Center(
+                        child: Text("เกิดข้อผิดพลาด โปรดลองใหม่ภายหลัง"),
+                      )
+                    : ListView.builder(
+                        itemCount: filteredList.length,
+                        itemBuilder: (context, index) {
+                          final asset = filteredList[index];
+                          final symbol = asset['Symbol'];
+                          final fullname = asset['Fullname'];
+                          final isSymbolInData = data.contains(
+                              symbol); // เช็คว่า symbol อยู่ในรายการ data หรือไม่
+                          return Column(
+                            children: [
+                              ListTile(
+                                title: Text(
+                                  symbol,
+                                  style: TextStyle(fontWeight: FontWeight.w500),
                                 ),
-                              );
-                            },
-                            trailing: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.5),
-                                    spreadRadius: 2,
-                                    blurRadius: 5,
-                                    offset: Offset(0, 3),
-                                  ),
-                                ],
-                              ),
-                              child: isSymbolInData
-                                  ? IconButton(
-                                      icon: FaIcon(icon,
-                                          size: 16, color: Colors.red),
-                                      onPressed: () {
-                                        deleteWatchlist(symbol);
-                                        setState(() {
-                                          data.remove(
-                                              symbol); // ลบ symbol ออกจาก data
-                                        });
-                                        print(data);
-                                      },
-                                    )
-                                  : IconButton(
-                                      icon: FaIcon(FontAwesomeIcons.heart,
-                                          size: 16,
-                                          color: Colors
-                                              .red), // ใช้ icon ที่กำหนดไว้
-                                      onPressed: () {
-                                        updateWatchlist(symbol);
-                                        setState(() {
-                                          data.add(
-                                              symbol); // เพิ่ม symbol เข้าไปใน data
-                                        });
-                                        print(data);
-                                      },
+                                subtitle: Text(
+                                  fullname,
+                                ),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          AssetTHDetailsScreen(symbol: symbol),
                                     ),
-                            ),
-                          ),
-                          Divider(
-                            indent: 10,
-                            endIndent: 10,
-                          )
-                        ],
-                      );
-                    },
-                  ),
+                                  );
+                                },
+                                trailing: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.5),
+                                        spreadRadius: 2,
+                                        blurRadius: 5,
+                                        offset: Offset(0, 3),
+                                      ),
+                                    ],
+                                  ),
+                                  child: isSymbolInData
+                                      ? IconButton(
+                                          icon: FaIcon(icon,
+                                              size: 16, color: Colors.red),
+                                          onPressed: () {
+                                            deleteWatchlist(symbol);
+                                            setState(() {
+                                              data.remove(
+                                                  symbol); // ลบ symbol ออกจาก data
+                                            });
+                                            print(data);
+                                          },
+                                        )
+                                      : IconButton(
+                                          icon: FaIcon(FontAwesomeIcons.heart,
+                                              size: 16,
+                                              color: Colors
+                                                  .red), // ใช้ icon ที่กำหนดไว้
+                                          onPressed: () {
+                                            updateWatchlist(symbol);
+                                            setState(() {
+                                              data.add(
+                                                  symbol); // เพิ่ม symbol เข้าไปใน data
+                                            });
+                                            print(data);
+                                          },
+                                        ),
+                                ),
+                              ),
+                              Divider(
+                                indent: 10,
+                                endIndent: 10,
+                              )
+                            ],
+                          );
+                        },
+                      ),
           ),
         ],
       ),
