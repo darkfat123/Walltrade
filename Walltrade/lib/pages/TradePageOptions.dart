@@ -47,7 +47,7 @@ class _TradePageOptionsState extends State<TradePageOptions>
       for (final order in responseData) {
         final status = order['status'];
         if (status == 'pending') {
-          autoOrders.add(order); // Add the order to autoOrders list
+          autoOrders.add(order); 
         }
       }
       isLoading = false;
