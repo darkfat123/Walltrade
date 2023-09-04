@@ -52,7 +52,7 @@ class _NotifyActivity extends State<NotifyActivity> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: Color(0xFFECF8F9),
+        backgroundColor: Colors.white,
         appBar: AppBar(
           backgroundColor: Color(0xFF212436),
           title: Text('คำสั่งเทรดอัตโนมัติ'),
