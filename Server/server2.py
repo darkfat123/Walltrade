@@ -21,6 +21,7 @@ from tradingview_ta import TA_Handler, Interval, Exchange
 from settrade_v2 import Investor
 from bs4 import BeautifulSoup
 from forex_python.converter import CurrencyRates
+import random
 
 
 
@@ -603,6 +604,8 @@ def autotradeRSI():
     type = "market"
     time_in_force = "gtc"
 
+    order_number = random.randrange(1, 100000)
+
     conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
     query = f"SELECT api_key, secret_key FROM users_info WHERE username = '{username}'"
     cursor = conn.cursor()
@@ -613,10 +616,8 @@ def autotradeRSI():
     # Create the Alpaca REST API client
     api = REST(result[0], result[1], base_url='https://paper-api.alpaca.markets')
     print(symbol,qty,side,type,time_in_force)
-    insert_query = "INSERT INTO auto_order (username, symbol, techniques, quantity, side, status) VALUES (%s, %s, %s, %s, %s,'pending')"
+    insert_query = f"INSERT INTO auto_order (OrderID , username, symbol, techniques, quantity, side, status) VALUES ({order_number},%s, %s, %s, %s, %s,'pending')"
     techniques = f"RSI<{lowerRSI}"
-    order_id = cursor.lastrowid
-    print(order_id)
     data = (username, symbol, techniques, qty, side)
     print(symbol,qty,side,type,time_in_force)
     handler = TA_Handler(

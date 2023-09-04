@@ -164,6 +164,26 @@ class _NotifyActivity extends State<NotifyActivity> {
                       Row(
                         children: [
                           Text(
+                            "หมายเลขคำสั่ง: ",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black,
+                            ),
+                          ),
+                          Text(
+                            "${order['OrderID'].toString()}",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Text(
                             "จำนวน: ",
                             style: TextStyle(
                               fontSize: 14,
@@ -290,6 +310,26 @@ class _NotifyActivity extends State<NotifyActivity> {
                                   fontWeight: FontWeight.w500,
                                   color: Colors.white,
                                 ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              "หมายเลขคำสั่ง: ",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black,
+                              ),
+                            ),
+                            Text(
+                              "${order['OrderID'].toString()}",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black,
                               ),
                             ),
                           ],
