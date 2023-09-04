@@ -636,6 +636,7 @@ def autotradeRSI():
             # Check the status in localhost and break the loop if it's 'completed'
             query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
             cursor2 = conn.cursor()
+            cursor2.execute("RESET QUERY CACHE;")
             cursor2.execute(query2)
             result2 = cursor2.fetchone()
             print(result2[0])
@@ -1249,7 +1250,13 @@ def cancelOrder():
         cursor = conn.cursor()
         cursor.execute(cancel)
         conn.commit()  # ต้องมีการ commit เพื่อบันทึกการเปลี่ยนแปลงในฐานข้อมูล
-        return jsonify('success')
+        return jsonify('deleted success')
+    else:
+        cancel = f"UPDATE auto_order SET status = 'pending' WHERE username = '{username}' AND OrderID ='{orderID}'"
+        cursor = conn.cursor()
+        cursor.execute(cancel)
+        conn.commit()  # ต้องมีการ commit เพื่อบันทึกการเปลี่ยนแปลงในฐานข้อมูล
+        return jsonify('add for undo success')
 
 
 if __name__ == '__main__':

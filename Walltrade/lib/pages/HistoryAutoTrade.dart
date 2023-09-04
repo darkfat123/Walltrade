@@ -41,14 +41,14 @@ class _NotifyActivity extends State<NotifyActivity> {
     }
   }
 
-  Future<void> cancelOrder(int orderID) async {
+  Future<void> cancelOrder(int orderID,bool isCancel) async {
     // Replace with your Flask server's URL
     final String serverUrl = '${Constants.serverUrl}/cancelOrder';
 
     final Map<String, dynamic> requestData = {
       'username': username,
       'orderID': orderID,
-      'isCancel': true,
+      'isCancel': isCancel,
     };
 
     final response = await http.post(
@@ -148,7 +148,27 @@ class _NotifyActivity extends State<NotifyActivity> {
                               ),
                               GestureDetector(
                                 onTap: () {
-                                  cancelOrder(order['OrderID']);
+                                  cancelOrder(order['OrderID'],true);
+                                  setState(() {
+                                    autoOrdersPending.remove(order);
+                                  });
+                                  print(autoOrdersPending);
+                                  final snackBar = SnackBar(
+                                    content: Text('Order removed'),
+                                    action: SnackBarAction(
+                                      label: 'Undo',
+                                      textColor: Colors.white,
+                                      onPressed: () {
+                                        cancelOrder(order['OrderID'],false);
+                                        setState(() {
+                                          autoOrdersPending.add(order);
+                                        });
+                                        print(autoOrdersPending);
+                                      },
+                                    ),
+                                  );
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(snackBar);
                                 },
                                 child: Icon(
                                   Icons.cancel,
