@@ -41,6 +41,33 @@ class _NotifyActivity extends State<NotifyActivity> {
     }
   }
 
+  Future<void> cancelOrder(int orderID) async {
+    // Replace with your Flask server's URL
+    final String serverUrl = '${Constants.serverUrl}/cancelOrder';
+
+    final Map<String, dynamic> requestData = {
+      'username': username,
+      'orderID': orderID,
+      'isCancel': true,
+    };
+
+    final response = await http.post(
+      Uri.parse(serverUrl),
+      headers: <String, String>{'Content-Type': 'application/json'},
+      body: jsonEncode(requestData),
+    );
+
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      final message = jsonResponse.toString();
+      // Handle the success message here
+      print(message);
+    } else {
+      // Handle error
+      print('Request failed with status: ${response.statusCode}');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -120,7 +147,9 @@ class _NotifyActivity extends State<NotifyActivity> {
                                 width: 8,
                               ),
                               GestureDetector(
-                                onTap: () {},
+                                onTap: () {
+                                  cancelOrder(order['OrderID']);
+                                },
                                 child: Icon(
                                   Icons.cancel,
                                   color: Colors.red,

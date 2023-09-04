@@ -599,7 +599,7 @@ def autotradeRSI():
     username = request.json.get('username')
     lowerRSI = float(request.json.get('lowerRSI'))
     symbol = request.json.get('symbol')
-    qty = float(request.json.get('qty')) #"0.0002"
+    qty = float(request.json.get('qty'))
     side = request.json.get('side')
     type = "market"
     time_in_force = "gtc"
@@ -626,13 +626,24 @@ def autotradeRSI():
         exchange="Binance",
         interval="1m"
     )
+    
     cursor.execute(insert_query, data)
     print(cursor)
     conn.commit()
+    
     if side == 'buy':
         while True:
+            # Check the status in localhost and break the loop if it's 'completed'
+            query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
+            cursor2 = conn.cursor()
+            cursor2.execute(query2)
+            result2 = cursor2.fetchone()
+            print(result2[0])
             print(handler.get_analysis().indicators["RSI"])
-            if handler.get_analysis().indicators["RSI"] <= lowerRSI:
+            if result2[0] == 'completed':
+                return jsonify('autotrade cancelled')
+            
+            elif handler.get_analysis().indicators["RSI"] <= lowerRSI:
                 try:
                     api.submit_order(
                     symbol=symbol,
@@ -640,8 +651,7 @@ def autotradeRSI():
                     side=side,
                     type=type,
                     time_in_force=time_in_force           
-                )
-                
+                )                
                     return jsonify('autotrade buy success')
                 except Exception as e:
                     return jsonify(f'error: {str(e)}')
@@ -1233,10 +1243,12 @@ def cancelOrder():
     cursor = conn.cursor()
     cursor.execute(query)
     result = cursor.fetchone()
+    print(orderID,username,result)
     if(result[0]=='pending' and isCancel):
         cancel = f"UPDATE auto_order SET status = 'completed' WHERE username = '{username}' AND OrderID ='{orderID}'"
         cursor = conn.cursor()
-        cursor.execute(query)
+        cursor.execute(cancel)
+        conn.commit()  # ต้องมีการ commit เพื่อบันทึกการเปลี่ยนแปลงในฐานข้อมูล
         return jsonify('success')
 
 
