@@ -41,7 +41,7 @@ class _NotifyActivity extends State<NotifyActivity> {
     }
   }
 
-  Future<void> cancelOrder(int orderID,bool isCancel) async {
+  Future<void> cancelOrder(int orderID, bool isCancel) async {
     // Replace with your Flask server's URL
     final String serverUrl = '${Constants.serverUrl}/cancelOrder';
 
@@ -148,24 +148,13 @@ class _NotifyActivity extends State<NotifyActivity> {
                               ),
                               GestureDetector(
                                 onTap: () {
-                                  cancelOrder(order['OrderID'],true);
+                                  cancelOrder(order['OrderID'], true);
                                   setState(() {
                                     autoOrdersPending.remove(order);
                                   });
                                   print(autoOrdersPending);
                                   final snackBar = SnackBar(
                                     content: Text('Order removed'),
-                                    action: SnackBarAction(
-                                      label: 'Undo',
-                                      textColor: Colors.white,
-                                      onPressed: () {
-                                        cancelOrder(order['OrderID'],false);
-                                        setState(() {
-                                          autoOrdersPending.add(order);
-                                        });
-                                        print(autoOrdersPending);
-                                      },
-                                    ),
                                   );
                                   ScaffoldMessenger.of(context)
                                       .showSnackBar(snackBar);
