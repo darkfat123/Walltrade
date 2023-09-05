@@ -604,13 +604,20 @@ def autotradeRSI():
     type = "market"
     time_in_force = "gtc"
 
-    order_number = random.randrange(1, 100000)
-
     conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
     query = f"SELECT api_key, secret_key FROM users_info WHERE username = '{username}'"
     cursor = conn.cursor()
     cursor.execute(query)
     result = cursor.fetchone()
+
+    while True:
+        order_number = random.randrange(1, 100000)
+        sql_check_duplicate = "SELECT COUNT(*) FROM auto_order WHERE OrderID = %s" 
+        cursor.execute(sql_check_duplicate, (order_number,))
+        count = cursor.fetchone()[0]
+        if count == 0:
+            order_number=order_number
+            break
 
     print(result)
     # Create the Alpaca REST API client
@@ -642,7 +649,7 @@ def autotradeRSI():
             print(result2[0])
             print(handler.get_analysis().indicators["RSI"])
             if result2[0] == 'completed':
-                return jsonify('autotrade cancelled')
+                return jsonify('autotrade buy rsi cancelled')
             
             elif handler.get_analysis().indicators["RSI"] <= lowerRSI:
                 try:
@@ -659,8 +666,18 @@ def autotradeRSI():
                 # เพิ่มโค้ดที่ต้องการเมื่อตรงเงื่อนไขการซื้อหุ้น
     else:
         while True:
+             # Check the status in localhost and break the loop if it's 'completed'
+            query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
+            cursor2 = conn.cursor()
+            cursor2.execute("RESET QUERY CACHE;")
+            cursor2.execute(query2)
+            result2 = cursor2.fetchone()
+            print(result2[0])
             print(handler.get_analysis().indicators["RSI"])
-            if handler.get_analysis().indicators["RSI"] >= lowerRSI:
+            if result2[0] == 'completed':
+                return jsonify('autotrade sell rsi cancelled')
+            
+            elif handler.get_analysis().indicators["RSI"] >= lowerRSI:
                 try:
                     api.submit_order(
                     symbol=symbol,
@@ -708,6 +725,14 @@ def autotradeMACD():
         exchange="Binance",
         interval="1m"
     )
+    while True:
+        order_number = random.randrange(1, 100000)
+        sql_check_duplicate = "SELECT COUNT(*) FROM auto_order WHERE OrderID = %s" 
+        cursor.execute(sql_check_duplicate, (order_number,))
+        count = cursor.fetchone()[0]
+        if count == 0:
+            order_number=order_number
+            break
 
     if side == 'buy':
         if cross:
@@ -719,21 +744,30 @@ def autotradeMACD():
                 print("Last Signal: ", last_signal)
                 print("MACD: ", macd)
                 print("Signal: ", signal)
-
-                if (last_macd < last_signal and macd > signal) and (macd and signal < 0):
-                    try:
-                        api.submit_order(
-                        symbol=symbol,
-                        qty=qty,
-                        side='buy',
-                        type='market',
-                        time_in_force='gtc'        
-                    )
-                        print(f'Buy at MACD: {macd},Signal: {signal},Qty: {qty}')
-                        return jsonify('autotrade success')
-                    except Exception as e:
-                        print(f'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ: {str(e)}')
-                        return jsonify(f'error: {str(e)}')
+                    
+                query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
+                cursor2 = conn.cursor()
+                cursor2.execute("RESET QUERY CACHE;")
+                cursor2.execute(query2)
+                result2 = cursor2.fetchone()
+                print(result2[0])
+                if result2[0] == 'completed':
+                    return jsonify('autotrade buy macd cancelled')
+                
+                elif (last_macd < last_signal and macd > signal) and (macd and signal < 0):
+                        try:
+                            api.submit_order(
+                            symbol=symbol,
+                            qty=qty,
+                            side='buy',
+                            type='market',
+                            time_in_force='gtc'        
+                        )
+                            print(f'Buy at MACD: {macd},Signal: {signal},Qty: {qty}')
+                            return jsonify('autotrade success')
+                        except Exception as e:
+                            print(f'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ: {str(e)}')
+                            return jsonify(f'error: {str(e)}')
 
                 last_macd = macd
                 last_signal = signal
@@ -749,7 +783,16 @@ def autotradeMACD():
                 print("MACD: ", macd)
                 print("Signal: ", signal)
 
-                if macd and signal < zone:
+                query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
+                cursor2 = conn.cursor()
+                cursor2.execute("RESET QUERY CACHE;")
+                cursor2.execute(query2)
+                result2 = cursor2.fetchone()
+                print(result2[0])
+                if result2[0] == 'completed':
+                    return jsonify('autotrade buy macd cancelled')
+                
+                elif macd and signal < zone:
                     try:
                         api.submit_order(
                         symbol=symbol,
@@ -778,7 +821,17 @@ def autotradeMACD():
                 print("Last Signal: ", last_signal)
                 print("MACD: ", macd)
                 print("Signal: ", signal)
-                if (last_macd > last_signal and macd < signal) and (macd and signal > 0):
+
+                query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
+                cursor2 = conn.cursor()
+                cursor2.execute("RESET QUERY CACHE;")
+                cursor2.execute(query2)
+                result2 = cursor2.fetchone()
+                print(result2[0])
+                if result2[0] == 'completed':
+                    return jsonify('autotrade sell macd cancelled')
+                
+                elif (last_macd > last_signal and macd < signal) and (macd and signal > 0):
                     try:
                         api.submit_order(
                         symbol=symbol,
@@ -786,13 +839,8 @@ def autotradeMACD():
                         side='sell',
                         type=type,
                         time_in_force=time_in_force           
-                    )
-                        delete_query = f"DELETE FROM auto_order WHERE username = '{username}' AND symbol = '{symbol}'  AND techniques = '{techniques}' AND quantity = {qty} AND side = '{side}'"
-                        print(delete_query)
-                        cursor.execute(delete_query)
-                        conn.commit()
-                        cursor.close()
-                        conn.close()
+                    )                      
+
                         return jsonify('autotrade success')
                     except Exception as e:
                         return jsonify(f'error: {str(e)}') 
@@ -807,7 +855,16 @@ def autotradeMACD():
                 print("MACD: ", macd)
                 print("Signal: ", signal)
 
-                if macd and signal > zone:
+                query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
+                cursor2 = conn.cursor()
+                cursor2.execute("RESET QUERY CACHE;")
+                cursor2.execute(query2)
+                result2 = cursor2.fetchone()
+                print(result2[0])
+                if result2[0] == 'completed':
+                    return jsonify('autotrade sell macd cancelled')
+                
+                elif macd and signal > zone:
                     try:
                         api.submit_order(
                         symbol=symbol,
@@ -843,6 +900,15 @@ def autotradeSTO():
     cursor.execute(query)
     result = cursor.fetchone()
 
+    while True:
+        order_number = random.randrange(1, 100000)
+        sql_check_duplicate = "SELECT COUNT(*) FROM auto_order WHERE OrderID = %s" 
+        cursor.execute(sql_check_duplicate, (order_number,))
+        count = cursor.fetchone()[0]
+        if count == 0:
+            order_number=order_number
+            break
+
     print(result)
     # Create the Alpaca REST API client
     api = REST(result[0], result[1], base_url='https://paper-api.alpaca.markets')
@@ -868,7 +934,17 @@ def autotradeSTO():
                 print("Last D: ", last_sto_d)
                 print("K: ", sto_k)
                 print("D: ", sto_d)
-                if sto_k < cross_sto and sto_d < cross_sto and sto_k > sto_d and last_sto_k < last_sto_d:
+
+                query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
+                cursor2 = conn.cursor()
+                cursor2.execute("RESET QUERY CACHE;")
+                cursor2.execute(query2)
+                result2 = cursor2.fetchone()
+                print(result2[0])
+                if result2[0] == 'completed':
+                    return jsonify('autotrade sell sto cancelled')
+                
+                elif sto_k < cross_sto and sto_d < cross_sto and sto_k > sto_d and last_sto_k < last_sto_d:
                     try:
                         api.submit_order(
                         symbol=symbol,
@@ -895,7 +971,16 @@ def autotradeSTO():
                 print("K: ", sto_k)
                 print("D: ", sto_d)
 
-                if sto_k <= zone_sto and sto_d <= zone_sto:
+                query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
+                cursor2 = conn.cursor()
+                cursor2.execute("RESET QUERY CACHE;")
+                cursor2.execute(query2)
+                result2 = cursor2.fetchone()
+                print(result2[0])
+                if result2[0] == 'completed':
+                    return jsonify('autotrade sell sto cancelled')
+                
+                elif sto_k <= zone_sto and sto_d <= zone_sto:
                     try:
                         api.submit_order(
                         symbol=symbol,
@@ -922,7 +1007,16 @@ def autotradeSTO():
                 print("Last D: ", last_sto_d)
                 print("K: ", sto_k)
                 print("D: ", sto_d)
-                if sto_k > cross_sto and sto_d > cross_sto and sto_k < sto_d and last_sto_k > last_sto_d:
+                query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
+                cursor2 = conn.cursor()
+                cursor2.execute("RESET QUERY CACHE;")
+                cursor2.execute(query2)
+                result2 = cursor2.fetchone()
+                print(result2[0])
+                if result2[0] == 'completed':
+                    return jsonify('autotrade sell sto cancelled')
+                
+                elif sto_k > cross_sto and sto_d > cross_sto and sto_k < sto_d and last_sto_k > last_sto_d:
                     try:
                         api.submit_order(
                         symbol=symbol,
@@ -949,7 +1043,16 @@ def autotradeSTO():
                 print("K: ", sto_k)
                 print("D: ", sto_d)
 
-                if sto_k >= zone_sto and sto_d >= zone_sto:
+                query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
+                cursor2 = conn.cursor()
+                cursor2.execute("RESET QUERY CACHE;")
+                cursor2.execute(query2)
+                result2 = cursor2.fetchone()
+                print(result2[0])
+                if result2[0] == 'completed':
+                    return jsonify('autotrade sell sto cancelled')
+                
+                elif sto_k >= zone_sto and sto_d >= zone_sto:
                     try:
                         api.submit_order(
                         symbol=symbol,
@@ -981,10 +1084,21 @@ def autotradeEMA():
     cursor.execute(query)
     result = cursor.fetchone()
 
+    
+
     print(result)
     # Create the Alpaca REST API client
     api = REST(result[0], result[1], base_url='https://paper-api.alpaca.markets')
     print(symbol,qty,side,type,time_in_force)
+
+    while True:
+        order_number = random.randrange(1, 100000)
+        sql_check_duplicate = "SELECT COUNT(*) FROM auto_order WHERE OrderID = %s" 
+        cursor.execute(sql_check_duplicate, (order_number,))
+        count = cursor.fetchone()[0]
+        if count == 0:
+            order_number=order_number
+            break
 
     handler = TA_Handler(
         symbol="BTCUSD",
@@ -996,7 +1110,16 @@ def autotradeEMA():
         while True:
             ema = handler.get_analysis().indicators[f"EMA{day}"]
             close = handler.get_analysis().indicators["close"]
-            if close <= ema and last_close > last_ema:
+            query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
+            cursor2 = conn.cursor()
+            cursor2.execute("RESET QUERY CACHE;")
+            cursor2.execute(query2)
+            result2 = cursor2.fetchone()
+            print(result2[0])
+            if result2[0] == 'completed':
+                return jsonify('autotrade buy ema cancelled')
+                
+            elif close <= ema and last_close > last_ema:
                 try:
                     api.submit_order(
                     symbol=symbol,
@@ -1016,7 +1139,16 @@ def autotradeEMA():
          while True:
             ema = handler.get_analysis().indicators[f"EMA{day}"]
             close = handler.get_analysis().indicators["close"]
-            if close >= ema and last_close < last_ema:
+            query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
+            cursor2 = conn.cursor()
+            cursor2.execute("RESET QUERY CACHE;")
+            cursor2.execute(query2)
+            result2 = cursor2.fetchone()
+            print(result2[0])
+            if result2[0] == 'completed':
+                return jsonify('autotrade sell ema cancelled')
+                
+            elif close >= ema and last_close < last_ema:
                 try:
                     api.submit_order(
                     symbol=symbol,
@@ -1049,7 +1181,6 @@ def getStockPriceUS():
         prices = []
         if stock_list == []:
             return jsonify({'error': 'Empty'})
-        else:
             for symbol in stock_list:
                 try:
                     handler = TA_Handler(symbol=symbol, screener="america", exchange="NASDAQ", interval="1d")

@@ -328,7 +328,81 @@ class _TradePageBuyState extends State<TradePageBuy> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    placeOrderRSI(qtyController.text, "buy");
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: Text('ยืนยันคำสั่งซื้อ'),
+                          content: IntrinsicHeight(
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      "ประเภทคำสั่ง: ",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                    Chip(
+                                        backgroundColor: Colors.green,
+                                        label: Text(
+                                          "ซื้อ",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.w400,
+                                              color: Colors.white),
+                                        )),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Text(
+                                      'จำนวน: ',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                    Text(
+                                      '${qtyController.text} หน่วย',
+                                    )
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Text(
+                                      'เทคนิคที่ใช้: ',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                    Text(
+                                      'RSI น้อยกว่า ${lowerRSIController.text} ',
+                                    )
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          actions: [
+                            TextButton(
+                              child: Text('ตกลง'),
+                              onPressed: () {
+                                placeOrderRSI(qtyController.text, 'buy');
+                                Navigator.of(context).pop();
+
+                                // แสดง Snackbar
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                        'Order placed successfully!'), // ข้อความที่ต้องการแสดงใน Snackbar
+                                    duration: Duration(
+                                        seconds:
+                                            2), // ระยะเวลาในการแสดง Snackbar
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
                   },
                   child: Text('ยืนยัน'),
                 ),
@@ -935,31 +1009,33 @@ class TimeframeDropdown extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           Text('โปรดเลือก Timeframe'),
-          DropdownButton<String>(
-            value: selectedInterval,
-            onChanged: onChanged,
-            items: [
-              DropdownMenuItem(
-                value: '1 hour',
-                child: Text('1 hour'),
-              ),
-              DropdownMenuItem(
-                value: '4 hours',
-                child: Text('4 hours'),
-              ),
-              DropdownMenuItem(
-                value: '1 day',
-                child: Text('1 day'),
-              ),
-              DropdownMenuItem(
-                value: '1 week',
-                child: Text('1 week'),
-              ),
-              DropdownMenuItem(
-                value: '1 month',
-                child: Text('1 month'),
-              ),
-            ],
+          DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: selectedInterval,
+              onChanged: onChanged,
+              items: [
+                DropdownMenuItem(
+                  value: '1 hour',
+                  child: Text('1 hour'),
+                ),
+                DropdownMenuItem(
+                  value: '4 hours',
+                  child: Text('4 hours'),
+                ),
+                DropdownMenuItem(
+                  value: '1 day',
+                  child: Text('1 day'),
+                ),
+                DropdownMenuItem(
+                  value: '1 week',
+                  child: Text('1 week'),
+                ),
+                DropdownMenuItem(
+                  value: '1 month',
+                  child: Text('1 month'),
+                ),
+              ],
+            ),
           ),
           IconButton(
             icon: Icon(
