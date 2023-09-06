@@ -624,19 +624,22 @@ def autotradeRSI():
     api = REST(result[0], result[1], base_url='https://paper-api.alpaca.markets')
     print(symbol,qty,side,type,time_in_force)
     insert_query = f"INSERT INTO auto_order (OrderID , username, symbol, techniques, quantity, side, status) VALUES ({order_number},%s, %s, %s, %s, %s,'pending')"
-    techniques = f"RSI<{lowerRSI}"
+    if side == "buy":
+        techniques = f"RSI < {lowerRSI}"
+    else:
+        techniques = f"RSI > {lowerRSI}"
     data = (username, symbol, techniques, qty, side)
-    print(symbol,qty,side,type,time_in_force)
+    print(symbol,qty,side,type,time_in_force)   
+    cursor.execute(insert_query, data)
+    print(cursor)
+    conn.commit()
+
     handler = TA_Handler(
         symbol=symbol,
         screener="Crypto",
         exchange="Binance",
         interval="1m"
     )
-    
-    cursor.execute(insert_query, data)
-    print(cursor)
-    conn.commit()
     
     if side == 'buy':
         while True:
@@ -725,6 +728,7 @@ def autotradeMACD():
         exchange="Binance",
         interval="1m"
     )
+
     while True:
         order_number = random.randrange(1, 100000)
         sql_check_duplicate = "SELECT COUNT(*) FROM auto_order WHERE OrderID = %s" 
@@ -733,6 +737,23 @@ def autotradeMACD():
         if count == 0:
             order_number=order_number
             break
+
+    insert_query = f"INSERT INTO auto_order (OrderID , username, symbol, techniques, quantity, side, status) VALUES ({order_number},%s, %s, %s, %s, %s,'pending')"
+    if side == "buy":
+        if cross:
+            techniques = f"MACD ตัดขึ้น Signal และ < 0"
+        else:
+            techniques = f"MACD & Signal < {zone}"
+    else:
+        if cross:
+            techniques = f"MACD ตัดลง Signal และ > 0"
+        else:
+            techniques = f"MACD & Signal > {zone}"
+    data = (username, symbol, techniques, qty, side)
+    print(symbol,qty,side,type,time_in_force)   
+    cursor.execute(insert_query, data)
+    print(cursor)
+    conn.commit()
 
     if side == 'buy':
         if cross:
@@ -922,6 +943,23 @@ def autotradeSTO():
         interval="1m"
     )
 
+    insert_query = f"INSERT INTO auto_order (OrderID , username, symbol, techniques, quantity, side, status) VALUES ({order_number},%s, %s, %s, %s, %s,'pending')"
+    if side == "buy":
+        if cross_sto > 0:
+            techniques = f"%K ตัดขึ้น %D และ < {cross_sto}"
+        else:
+            techniques = f"%K และ %D < {zone_sto}"
+    else:
+        if cross_sto > 0:
+            techniques = f"%K ตัดลง %D และ > {cross_sto}"
+        else:
+            techniques = f"%K และ %D > {zone_sto}"
+    data = (username, symbol, techniques, qty, side)
+    print(symbol,qty,side,type,time_in_force)   
+    cursor.execute(insert_query, data)
+    print(cursor)
+    conn.commit()
+
     if side == 'buy':
         if cross_sto>0:
             print("cross buy")
@@ -1083,9 +1121,7 @@ def autotradeEMA():
     cursor = conn.cursor()
     cursor.execute(query)
     result = cursor.fetchone()
-
-    
-
+  
     print(result)
     # Create the Alpaca REST API client
     api = REST(result[0], result[1], base_url='https://paper-api.alpaca.markets')
@@ -1106,6 +1142,20 @@ def autotradeEMA():
         exchange="Binance",
         interval="1m"
     )
+
+    insert_query = f"INSERT INTO auto_order (OrderID , username, symbol, techniques, quantity, side, status) VALUES ({order_number},%s, %s, %s, %s, %s,'pending')"
+
+    if side == "buy":
+        techniques = f"ซื้อเมื่อราคา <= EMA{day}"
+    else:
+        techniques = f"ขายเมื่อราคา >= EMA{day}"
+
+    data = (username, symbol, techniques, qty, side)
+    print(symbol,qty,side,type,time_in_force)   
+    cursor.execute(insert_query, data)
+    print("cursor:",cursor)
+    conn.commit()
+
     if side == 'buy':
         while True:
             ema = handler.get_analysis().indicators[f"EMA{day}"]
@@ -1181,6 +1231,7 @@ def getStockPriceUS():
         prices = []
         if stock_list == []:
             return jsonify({'error': 'Empty'})
+        else:
             for symbol in stock_list:
                 try:
                     handler = TA_Handler(symbol=symbol, screener="america", exchange="NASDAQ", interval="1d")
@@ -1388,6 +1439,39 @@ def cancelOrder():
         cursor.execute(cancel)
         conn.commit()  # ต้องมีการ commit เพื่อบันทึกการเปลี่ยนแปลงในฐานข้อมูล
         return jsonify('add for undo success')
+
+@app.route('/multiAutotrade', methods=['POST'])
+def multiAutotrade():
+    username = request.json.get('username')
+    isRSI = bool(request.json.get('isRSI'))
+    isSTO = bool(request.json.get('isSTO'))
+    isMACD = bool(request.json.get('isMACD'))
+    isEMA = bool(request.json.get('isEMA'))
+    
+    if isRSI and isSTO:
+    
+    elif isRSI and isMACD:
+
+    elif isRSI and isEMA:
+
+    elif isSTO and isMACD:
+
+    elif isSTO and isEMA:
+    
+    elif isMACD and isEMA:
+
+    elif isRSI and isSTO and isMACD:
+
+    elif isRSI and isSTO and isEMA:
+
+    elif isRSI and isMACD and isEMA:
+
+    elif isSTO and isMACD and isEMA:
+
+    elif isRSI and isSTO and isMACD and isEMA:
+
+
+    
 
 
 if __name__ == '__main__':
