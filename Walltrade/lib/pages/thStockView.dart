@@ -164,7 +164,7 @@ class _AssetTHListScreenState extends State<AssetTHListScreen>
                   )
                 : filteredList.length == 0
                     ? Center(
-                        child: Text("เกิดข้อผิดพลาด โปรดลองใหม่ภายหลัง"),
+                        child: Text("ไม่พบรายการหุ้น"),
                       )
                     : ListView.builder(
                         itemCount: filteredList.length,

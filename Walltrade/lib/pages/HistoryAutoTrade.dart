@@ -242,19 +242,22 @@ class _NotifyActivity extends State<NotifyActivity> {
                       Row(
                         children: [
                           Text(
-                            "buy or sell: ",
+                            "ประเภท: ",
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                               color: Colors.black,
                             ),
                           ),
-                          Text(
-                            order['side'],
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
+                          Chip(
+                            backgroundColor: order['side'] == 'buy' ? Colors.green : Colors.red,
+                            label: Text(
+                              order['side'] == 'buy' ? 'ซื้อ' : 'ขาย',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black,
+                              ),
                             ),
                           ),
                         ],
@@ -395,7 +398,7 @@ class _NotifyActivity extends State<NotifyActivity> {
                         Row(
                           children: [
                             Text(
-                              "buy or sell: ",
+                              "ประเภท: ",
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
@@ -403,7 +406,7 @@ class _NotifyActivity extends State<NotifyActivity> {
                               ),
                             ),
                             Text(
-                              order['side'],
+                              order['side'] == 'buy' ? 'ซื้อ' : 'ขาย',
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
