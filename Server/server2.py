@@ -1474,9 +1474,18 @@ def multiAutotradeUS():
             order_number=order_number
             break
 
-    if isRSI and isSTO:
-    
-    elif isRSI and isMACD:
+    '''if isRSI and isSTO:
+        rsi_value = float(request.json.get('rsi'))
+        zone_sto = float(request.json.get('zone')) #"0.00"
+        cross_sto = float(request.json.get('cross_sto')) 
+        while True:
+            RSI(symbol)
+            STO(symbol,zone_sto,cross_sto)
+            if RSI <= rsi_value:
+                #buy
+            else:
+                #sell
+   # elif isRSI and isMACD:
 
     elif isRSI and isEMA:
 
@@ -1494,11 +1503,99 @@ def multiAutotradeUS():
 
     elif isSTO and isMACD and isEMA:
 
-    elif isRSI and isSTO and isMACD and isEMA:
-        return 0
+    elif isRSI and isSTO and isMACD and isEMA:'''
+    return 0
+
+def RSI(symbol,rsi_value):
+    handler = getSymbolHandler(symbol)
+    rsi = handler.get_analysis().indicators["RSI"]
+    if rsi < rsi_value:
+        return 'buy'
+    else:
+        return 'sell'
+
+def STO(symbol,zone_sto,cross_sto,side):
+
+    handler = getSymbolHandler(symbol)
+
+    stoK = handler.get_analysis().indicators["Stoch.K"]
+    stoD =handler.get_analysis().indicators["Stoch.D"] 
+    last_stoK = handler.get_analysis().indicators["Stoch.K[1]"]
+    last_stoD =handler.get_analysis().indicators["Stoch.D[1]"]
+
+    if side == 'buy':
+        if cross_sto>0:
+            if stoK < cross_sto and stoD < cross_sto and stoK > stoD and last_stoK < last_stoD:
+                return "buy"        
+        elif stoK <= zone_sto and stoD <= zone_sto:
+                return "buy"
+    else:
+        if cross_sto>0:
+            if stoK > cross_sto and stoD > cross_sto and stoK < stoD and last_stoK > last_stoD:
+                return "sell"  
+            elif stoK >= zone_sto and stoD >= zone_sto:
+                return "sell"
 
     
 
+def MACD(symbol):
+    handler = TA_Handler(
+            symbol=symbol,
+            screener="Crypto",
+            exchange="Binance",
+            interval="1m"
+        )
+
+    macd = handler.get_analysis().indicators["MACD.macd"]
+    signal =handler.get_analysis().indicators["MACD.signal"] 
+    return macd  , signal
+
+def EMA(symbol,day):
+    handler = TA_Handler(
+            symbol=symbol,
+            screener="Crypto",
+            exchange="Binance",
+            interval="1m"
+        )
+
+    ema = handler.get_analysis().indicators[f"EMA{day}"]
+    return ema
+
+def getSymbolHandler(symbol):
+    try:
+        handler = TA_Handler(
+            symbol=symbol,
+            screener="NASDAQ",
+            exchange="America",
+            interval="1m"
+        )
+        return handler 
+    except Exception as e:
+        try:
+            handler = TA_Handler(
+                symbol=symbol,
+                screener="NYSE",
+                exchange="America",
+                interval="1m"
+            )
+            return handler 
+        except Exception as e:
+            try:
+                handler = TA_Handler(
+                    symbol=symbol,
+                    screener="SET",
+                    exchange="Thailand",
+                    interval="1m"
+                )
+                return handler 
+            except Exception as e:
+                handler = TA_Handler(
+                    symbol=symbol,
+                    screener="Binance",
+                    exchange="Crypto",
+                    interval="1m"
+                )
+                return handler  
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0")
