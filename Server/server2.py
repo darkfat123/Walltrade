@@ -1440,14 +1440,40 @@ def cancelOrder():
         conn.commit()  # ต้องมีการ commit เพื่อบันทึกการเปลี่ยนแปลงในฐานข้อมูล
         return jsonify('add for undo success')
 
-@app.route('/multiAutotrade', methods=['POST'])
-def multiAutotrade():
+@app.route('/multiAutotradeUS', methods=['POST'])
+def multiAutotradeUS():
     username = request.json.get('username')
     isRSI = bool(request.json.get('isRSI'))
     isSTO = bool(request.json.get('isSTO'))
     isMACD = bool(request.json.get('isMACD'))
     isEMA = bool(request.json.get('isEMA'))
     
+    symbol = request.json.get('symbol')
+    qty = float(request.json.get('qty')) #"0.0002"
+    side = request.json.get('side')
+    type = "market"
+    time_in_force = "gtc"
+
+    conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
+    query = f"SELECT api_key, secret_key FROM users_info WHERE username = '{username}'"
+    cursor = conn.cursor()
+    cursor.execute(query)
+    result = cursor.fetchone()
+  
+    print(result)
+    # Create the Alpaca REST API client
+    api = REST(result[0], result[1], base_url='https://paper-api.alpaca.markets')
+    print(symbol,qty,side,type,time_in_force)
+
+    while True:
+        order_number = random.randrange(1, 100000)
+        sql_check_duplicate = "SELECT COUNT(*) FROM auto_order WHERE OrderID = %s" 
+        cursor.execute(sql_check_duplicate, (order_number,))
+        count = cursor.fetchone()[0]
+        if count == 0:
+            order_number=order_number
+            break
+
     if isRSI and isSTO:
     
     elif isRSI and isMACD:
@@ -1469,7 +1495,7 @@ def multiAutotrade():
     elif isSTO and isMACD and isEMA:
 
     elif isRSI and isSTO and isMACD and isEMA:
-
+        return 0
 
     
 
