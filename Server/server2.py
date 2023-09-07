@@ -1537,17 +1537,99 @@ def STO(symbol,zone_sto,cross_sto,side):
                 return "sell"
 
     
+def MACD(symbol,cross,zone,side):
 
-def MACD(symbol):
-    handler = TA_Handler(
-            symbol=symbol,
-            screener="Crypto",
-            exchange="Binance",
-            interval="1m"
-        )
+    handler = getSymbolHandler(symbol)
 
     macd = handler.get_analysis().indicators["MACD.macd"]
-    signal =handler.get_analysis().indicators["MACD.signal"] 
+    signal =handler.get_analysis().indicators["MACD.signal"]
+    if side == 'buy':
+        if cross:
+            while True:
+                macd = handler.get_analysis().indicators["MACD.macd"]
+                signal = handler.get_analysis().indicators["MACD.signal"]
+
+                print("Last MACD: ", last_macd)
+                print("Last Signal: ", last_signal)
+                print("MACD: ", macd)
+                print("Signal: ", signal)
+                    
+                if (last_macd < last_signal and macd > signal) and (macd and signal < 0): 
+                    print(f'Buy at MACD: {macd},Signal: {signal}')
+                    return "buy"
+                
+                last_macd = macd
+                last_signal = signal
+                print()
+                time.sleep(5)
+        else:
+            while True:
+                macd = handler.get_analysis().indicators["MACD.macd"]
+                signal = handler.get_analysis().indicators["MACD.signal"]
+
+                print("Last MACD: ", last_macd)
+                print("Last Signal: ", last_signal)
+                print("MACD: ", macd)
+                print("Signal: ", signal)
+                if macd and signal < zone:
+                    return 'buy'
+                last_macd = macd
+                last_signal = signal
+                print()
+                time.sleep(5)
+            
+    else:
+        if cross:
+            while True:
+                macd = handler.get_analysis().indicators["MACD.macd"]
+                signal = handler.get_analysis().indicators["MACD.signal"]
+
+                print("Last MACD: ", last_macd)
+                print("Last Signal: ", last_signal)
+                print("MACD: ", macd)
+                print("Signal: ", signal)
+
+                if (last_macd > last_signal and macd < signal) and (macd and signal > 0):
+                    return "sell"
+                else:
+                    return jsonify(f'error: {str(e)}') 
+                    # เพิ่มโค้ดที่ต้องการเมื่อตรงเงื่อนไขการซื้อหุ้น 
+        else:
+            while True:
+                macd = handler.get_analysis().indicators["MACD.macd"]
+                signal = handler.get_analysis().indicators["MACD.signal"]
+
+                print("Last MACD: ", last_macd)
+                print("Last Signal: ", last_signal)
+                print("MACD: ", macd)
+                print("Signal: ", signal)
+
+                query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
+                cursor2 = conn.cursor()
+                cursor2.execute("RESET QUERY CACHE;")
+                cursor2.execute(query2)
+                result2 = cursor2.fetchone()
+                print(result2[0])
+                if result2[0] == 'completed':
+                    return jsonify('autotrade sell macd cancelled')
+                
+                elif macd and signal > zone:
+                    try:
+                        api.submit_order(
+                        symbol=symbol,
+                        qty=qty,
+                        side='sell',
+                        type='market',
+                        time_in_force='gtc'        
+                    )
+                        return jsonify('autotrade success')
+                    except Exception as e:
+                        return jsonify(f'error: {str(e)}')            
+                                 
+                last_macd = macd
+                last_signal = signal
+                print()
+                time.sleep(5) 
     return macd  , signal
 
 def EMA(symbol,day):
@@ -1596,6 +1678,8 @@ def getSymbolHandler(symbol):
                     interval="1m"
                 )
                 return handler  
+
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0")
