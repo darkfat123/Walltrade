@@ -1474,14 +1474,14 @@ def multiAutotradeUS():
             order_number=order_number
             break
 
-    '''if isRSI and isSTO:
+    if isRSI and isSTO:
         rsi_value = float(request.json.get('rsi'))
         zone_sto = float(request.json.get('zone')) #"0.00"
         cross_sto = float(request.json.get('cross_sto')) 
         while True:
             RSI(symbol)
             STO(symbol,zone_sto,cross_sto)
-            if RSI <= rsi_value:
+            if RSI == "buy" and STO == "buy":
                 #buy
             else:
                 #sell
@@ -1503,8 +1503,8 @@ def multiAutotradeUS():
 
     elif isSTO and isMACD and isEMA:
 
-    elif isRSI and isSTO and isMACD and isEMA:'''
-    return 0
+    elif isRSI and isSTO and isMACD and isEMA:
+
 
 def RSI(symbol,rsi_value):
     handler = getSymbolHandler(symbol)
