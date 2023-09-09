@@ -1466,6 +1466,19 @@ def multiAutotrade():
         if count == 0:
             order_number=order_number
             break
+
+    insert_query = f"INSERT INTO auto_order (OrderID , username, symbol, techniques, quantity, side, status) VALUES ({order_number},%s, %s, %s, %s, %s,'pending')"
+
+    if side == "buy":
+        techniques = f"ซื้อเมื่อราคา <= EMA{day}"
+    else:
+        techniques = f"ขายเมื่อราคา >= EMA{day}"
+
+    data = (username, symbol, techniques, qty, side)
+    print(symbol,qty,side,type,time_in_force)   
+    cursor.execute(insert_query, data)
+    print("cursor:",cursor)
+    conn.commit()
     
     try:
         if isRSI and isSTO and not isMACD and not isEMA:
