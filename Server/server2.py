@@ -1454,6 +1454,8 @@ def multiAutotrade():
     type = "market"
     time_in_force = "gtc"
 
+    techniques = []
+
     conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
     cursor = conn.cursor()
     print(symbol,qty,side,type,time_in_force)
@@ -1470,14 +1472,44 @@ def multiAutotrade():
     insert_query = f"INSERT INTO auto_order (OrderID , username, symbol, techniques, quantity, side, status) VALUES ({order_number},%s, %s, %s, %s, %s,'pending')"
 
     if side == "buy":
-        techniques = f"ซื้อเมื่อราคา <= EMA{day}"
+        if isRSI:
+            rsi_value = float(request.json.get('rsi'))
+            techniques.append(f"RSI < {rsi_value}")
+        if isSTO:
+            cross_sto = float(request.json.get('cross_sto')) 
+            if cross_sto > 0:
+                techniques.append(f"%K ตัดขึ้น %D และ < {cross_sto}")
+            else:
+                techniques.append(f"%K และ %D < {zone_sto}")
+        if isMACD:
+            cross = bool(request.json.get('cross_macd')) 
+            if cross:
+                techniques.append(f"MACD ตัดขึ้น Signal และ < 0")
+            else:
+                techniques.append(f"MACD & Signal < {zone}")
+        if isEMA:
+            techniques.append(f"ซื้อเมื่อราคา <= EMA{day}")
     else:
-        techniques = f"ขายเมื่อราคา >= EMA{day}"
+        if isRSI:
+            rsi_value = float(request.json.get('rsi'))
+            techniques.append(f"RSI > {rsi_value}")
+        if isSTO:
+            cross_sto = float(request.json.get('cross_sto')) 
+            if cross_sto > 0:
+                techniques.append(f"%K ตัดลง %D และ > {cross_sto}")
+            else:
+                techniques.append(f"%K และ %D > {zone_sto}")
+        if isMACD:
+            cross = bool(request.json.get('cross_macd')) 
+            if cross:
+                techniques.append(f"MACD ตัดลง Signal และ > 0")
+            else:
+                techniques.append(f"MACD & Signal > {zone}")
+        if isEMA:
+            techniques.append(f"ขายเมื่อราคา >= EMA{day}")
 
     data = (username, symbol, techniques, qty, side)
-    print(symbol,qty,side,type,time_in_force)   
     cursor.execute(insert_query, data)
-    print("cursor:",cursor)
     conn.commit()
     
     try:
