@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:Walltrade/variables/serverURL.dart';
 import 'package:flutter/material.dart';
 
 class MoreTechnicalOrder extends StatefulWidget {
@@ -14,6 +17,20 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
   List<Widget> containers = [];
   Set<String> selectedMenus = {};
   String selectedInterval = '1 hour';
+  TextEditingController timeIntervalController = TextEditingController();
+  TextEditingController qtyController = TextEditingController();
+  TextEditingController lowerRSIController = TextEditingController();
+  TextEditingController zoneMACDController = TextEditingController();
+  TextEditingController crossupSTOController = TextEditingController();
+  TextEditingController zoneSTOController = TextEditingController();
+  TextEditingController dayController = TextEditingController();
+  bool macd_crossupIsChecked = false;
+
+  bool isZoneTextFieldEnabled = true;
+  bool isCrossTextFieldEnabled = true;
+
+  TextEditingController symbolController = TextEditingController();
+
   Map<String, bool> menuSelectionStatus = {
     'RSI': false,
     'STO': false,
@@ -24,6 +41,37 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
   Color getMenuColor(String menu) {
     final bool? isSelected = menuSelectionStatus[menu];
     return isSelected == true ? Color(0xFF1D5B79) : Color(0xFF2A3547);
+  }
+
+  Future<void> placeMultiAutotrade(String symbol) async {
+    final url = Uri.parse('${Constants.serverUrl}/multiAutotrade');
+    final headers = {
+      'Content-Type': 'application/json',
+    };
+
+    final body = jsonEncode({
+      'username': username,
+      'isRSI': menuSelectionStatus['RSI'],
+      'isSTO': menuSelectionStatus['STO'],
+      'isMACD': menuSelectionStatus['MACD'],
+      'isEMA': menuSelectionStatus['EMA'],
+      'symbol': symbol,
+      'rsi': lowerRSIController.text,
+      'cross_sto': crossupSTOController.text,
+      'zone_sto': zoneSTOController.text,
+      'cross_macd': macd_crossupIsChecked,
+      'zone': zoneMACDController.text,
+      'day': dayController.text,
+      'qty': qtyController.text,
+    });
+
+    final response = await http.post(url, headers: headers, body: body);
+
+    if (response.statusCode == 200) {
+      print('Request succeeded!');
+    } else {
+      print('Request failed with status code: ${response.statusCode}');
+    }
   }
 
   void toggleContainer(String menu) {
@@ -77,7 +125,9 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                           children: [
                             Text(
                               'RSI (Relative Strength Index)',
-                              style: TextStyle(fontWeight: FontWeight.w600,color: Colors.white),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white),
                             )
                           ],
                         ),
@@ -94,6 +144,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                             SizedBox(width: 5),
                             Expanded(
                               child: TextField(
+                                controller: lowerRSIController,
                                 decoration: InputDecoration(
                                   labelText: '0-100',
                                   border: OutlineInputBorder(),
@@ -179,7 +230,9 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                               children: [
                                 Text(
                                   'STO (Stochastic Oscillator)',
-                                  style: TextStyle(fontWeight: FontWeight.w600,color: Colors.white),
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white),
                                 )
                               ],
                             ),
@@ -196,10 +249,25 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                                 SizedBox(width: 5),
                                 Expanded(
                                   child: TextField(
+                                    controller: zoneSTOController,
+                                    enabled: isZoneTextFieldEnabled,
                                     decoration: InputDecoration(
                                       labelText: 'ค่าที่ต้องการซื้อ',
                                       border: OutlineInputBorder(),
                                     ),
+                                    onChanged: (text) {
+                                      if (text.isNotEmpty) {
+                                        setState(() {
+                                          crossupSTOController.text = "0";
+                                          isCrossTextFieldEnabled = false;
+                                        });
+                                      } else {
+                                        setState(() {
+                                          isCrossTextFieldEnabled = true;
+                                          crossupSTOController.clear();
+                                        });
+                                      }
+                                    },
                                   ),
                                 ),
                                 IconButton(
@@ -240,10 +308,25 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                                 SizedBox(width: 5),
                                 Expanded(
                                   child: TextField(
+                                    enabled: isCrossTextFieldEnabled,
+                                    controller: crossupSTOController,
                                     decoration: InputDecoration(
                                       labelText: 'ค่าที่ซื้อเมื่อต่ำกว่า',
                                       border: OutlineInputBorder(),
                                     ),
+                                    onChanged: (text) {
+                                      if (text.isNotEmpty) {
+                                        setState(() {
+                                          zoneSTOController.text = "0";
+                                          isZoneTextFieldEnabled = false;
+                                        });
+                                      } else {
+                                        setState(() {
+                                          isZoneTextFieldEnabled = true;
+                                          zoneSTOController.clear();
+                                        });
+                                      }
+                                    },
                                   ),
                                 ),
                                 IconButton(
@@ -326,7 +409,8 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                                       Text(
                                         'MACD (Moving Average Convergence Divergence)',
                                         style: TextStyle(
-                                            fontWeight: FontWeight.w600,color: Colors.white),
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white),
                                       )
                                     ],
                                   ),
@@ -388,6 +472,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                                       SizedBox(width: 5),
                                       Expanded(
                                         child: TextField(
+                                          controller: zoneMACDController,
                                           decoration: InputDecoration(
                                             labelText: 'ค่าที่ต้องการซื้อ',
                                             border: OutlineInputBorder(),
@@ -470,7 +555,8 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                                       Text(
                                         'EMA (Exponential Moving Average)',
                                         style: TextStyle(
-                                            fontWeight: FontWeight.w600,color: Colors.white),
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white),
                                       )
                                     ],
                                   ),
@@ -485,6 +571,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                                       SizedBox(width: 5),
                                       Expanded(
                                         child: TextField(
+                                          controller: dayController,
                                           decoration: InputDecoration(
                                             labelText: 'จำนวนวันที่ต้องการใช้',
                                             border: OutlineInputBorder(),
@@ -701,7 +788,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
               ? Center(
                   child: Container(
                     padding: EdgeInsets.all(16),
-                    margin: EdgeInsets.symmetric(vertical:10,horizontal: 16),
+                    margin: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
                     decoration: BoxDecoration(
                       color: Colors.grey,
                       borderRadius: BorderRadius.circular(10),
@@ -718,7 +805,9 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                     child: Column(
                       children: [
                         Text(
-                            "เทคนิคที่ต้องการใช้: ${selectedMenus.join(', ')}",style: TextStyle(),),
+                          "เทคนิคที่ต้องการใช้: ${selectedMenus.join(', ')}",
+                          style: TextStyle(),
+                        ),
                         TimeframeDropdown(
                           selectedInterval: selectedInterval,
                           onChanged: (String? newValue) {
@@ -734,8 +823,9 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                             SizedBox(width: 5),
                             Expanded(
                               child: TextField(
+                                controller: symbolController,
                                 decoration: InputDecoration(
-                                  labelText: 'เช่น META,AAPL,PTT,SCB' ,
+                                  labelText: 'เช่น META,AAPL,PTT,SCB',
                                   labelStyle: TextStyle(fontSize: 14),
                                   border: OutlineInputBorder(),
                                 ),
@@ -743,7 +833,9 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                             ),
                           ],
                         ),
-                        SizedBox(height: 10,),
+                        SizedBox(
+                          height: 10,
+                        ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
@@ -751,6 +843,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                             SizedBox(width: 5),
                             Expanded(
                               child: TextField(
+                                controller: qtyController,
                                 decoration: InputDecoration(
                                   labelText: 'เช่น 0.1 ,1000 ,5',
                                   border: OutlineInputBorder(),
@@ -785,6 +878,14 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                             ),
                           ],
                         ),
+                        ElevatedButton(
+                          onPressed: () {
+                            placeMultiAutotrade(symbolController.text);
+                          },
+                          child: Container(
+                            child: Text("ยืนยัน"),
+                          ),
+                        )
                       ],
                     ),
                   ),
