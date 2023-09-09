@@ -1901,7 +1901,7 @@ def placeOrderAutoTrade(symbol,username,qty,side):
                                     price_type= "MP-MKT",
                                     pin=resultTH[4]
                                     )
-            print(f'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ: {str(e)}')
+            print('ส่งคำสั่งซื้อสำเร็จ')
             return "passed"
         except Exception as e:
             print(f'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ: {str(e)}')
