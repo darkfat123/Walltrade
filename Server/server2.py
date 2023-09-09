@@ -1440,8 +1440,8 @@ def cancelOrder():
         conn.commit()  # ต้องมีการ commit เพื่อบันทึกการเปลี่ยนแปลงในฐานข้อมูล
         return jsonify('add for undo success')
 
-@app.route('/multiAutotradeUS', methods=['POST'])
-def multiAutotradeUS():
+@app.route('/multiAutotrade', methods=['POST'])
+def multiAutotrade():
     username = request.json.get('username')
     isRSI = bool(request.json.get('isRSI'))
     isSTO = bool(request.json.get('isSTO'))
@@ -1455,14 +1455,7 @@ def multiAutotradeUS():
     time_in_force = "gtc"
 
     conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
-    query = f"SELECT api_key, secret_key FROM users_info WHERE username = '{username}'"
     cursor = conn.cursor()
-    cursor.execute(query)
-    result = cursor.fetchone()
-  
-    print(result)
-    # Create the Alpaca REST API client
-    api = REST(result[0], result[1], base_url='https://paper-api.alpaca.markets')
     print(symbol,qty,side,type,time_in_force)
 
     while True:
@@ -1473,46 +1466,241 @@ def multiAutotradeUS():
         if count == 0:
             order_number=order_number
             break
-
-    if isRSI and isSTO:
-        rsi_value = float(request.json.get('rsi'))
-        zone_sto = float(request.json.get('zone')) #"0.00"
-        cross_sto = float(request.json.get('cross_sto')) 
-        while True:
-            RSI(symbol)
-            STO(symbol,zone_sto,cross_sto)
-            if RSI == "buy" and STO == "buy":
-                #buy
-            else:
-                #sell
-   # elif isRSI and isMACD:
-
-    elif isRSI and isEMA:
-
-    elif isSTO and isMACD:
-
-    elif isSTO and isEMA:
     
-    elif isMACD and isEMA:
+    try:
+        if isRSI and isSTO and not isMACD and not isEMA:
+            rsi_value = float(request.json.get('rsi'))
+            zone_sto = float(request.json.get('zone')) #"0.00"
+            cross_sto = float(request.json.get('cross_sto')) 
+            if side == "buy":
+                while True:
+                    rsi_result = RSI(symbol=symbol,rsi_value=rsi_value,side=side)
+                    sto_result = STO(symbol=symbol,zone_sto=zone_sto,cross_sto=cross_sto,side=side)
+                    if rsi_result == "buy" and sto_result == "buy":
+                        placeOrderAutoTrade(symbol,username,qty,side)
+            else:
+                while True:
+                    rsi_result = RSI(symbol=symbol,rsi_value=rsi_value,side=side)
+                    sto_result = STO(symbol=symbol,zone_sto=zone_sto,cross_sto=cross_sto,side=side)
+                    if rsi_result == "sell" and sto_result == "sell":
+                        placeOrderAutoTrade(symbol,username,qty,side)
 
-    elif isRSI and isSTO and isMACD:
+        elif isRSI and isMACD and not isSTO and not isEMA:
+            rsi_value = float(request.json.get('rsi'))
+            zone = float(request.json.get('zone')) #"0.00"
+            cross = bool(request.json.get('cross_macd')) 
+            if side == "buy":
+                while True:
+                    rsi_results = RSI(symbol=symbol,rsi_value=rsi_value,side=side)
+                    macd_results = MACD(symbol=symbol,zone=zone,cross=cross,side=side)
+                    if rsi_results == "buy" and macd_results == "buy":
+                        placeOrderAutoTrade(symbol,username,qty,side)
+            else:
+                while True:
+                    rsi_results = RSI(symbol=symbol,rsi_value=rsi_value,side=side)
+                    macd_results = MACD(symbol=symbol,zone=zone,cross=cross,side=side)
+                    if rsi_results == "sell" and macd_results == "sell":
+                        placeOrderAutoTrade(symbol,username,qty,side)
 
-    elif isRSI and isSTO and isEMA:
+        elif isRSI and isEMA and not isSTO and not isMACD:
+            rsi_value = float(request.json.get('rsi'))
+            day = request.json.get('day')
+            if side == "buy":
+                while True:
+                    rsi_results = RSI(symbol=symbol,rsi_value=rsi_value,side=side)
+                    ema_results = EMA(symbol=symbol,day=day,side=side)
+                    if rsi_results == "buy" and ema_results == "buy":
+                        placeOrderAutoTrade(symbol,username,qty,side)
+            else:
+                while True:
+                    rsi_results = RSI(symbol=symbol,rsi_value=rsi_value,side=side)
+                    ema_results = EMA(symbol=symbol,day=day,side=side)
+                    if rsi_results == "sell" and ema_results == "sell":
+                        placeOrderAutoTrade(symbol,username,qty,side)
 
-    elif isRSI and isMACD and isEMA:
+        elif isSTO and isMACD and not isRSI and not isEMA:
+            zone_sto = float(request.json.get('zone')) #"0.00"
+            cross_sto = float(request.json.get('cross_sto')) 
+            zone = float(request.json.get('zone')) #"0.00"
+            cross = bool(request.json.get('cross_macd')) 
 
-    elif isSTO and isMACD and isEMA:
+            if side == "buy":
+                while True:
+                    sto_result = STO(symbol=symbol,zone_sto=zone_sto,cross_sto=cross_sto,side=side)
+                    macd_result = MACD(symbol=symbol,zone=zone,cross=cross,side=side)
+                    if sto_result == "buy" and macd_result == "buy":
+                        placeOrderAutoTrade(symbol,username,qty,side)
+            else:
+                while True:
+                    sto_result = STO(symbol=symbol,zone_sto=zone_sto,cross_sto=cross_sto,side=side)
+                    macd_result = MACD(symbol=symbol,zone=zone,cross=cross,side=side)
+                    if sto_result == "sell" and macd_result == "sell":
+                        placeOrderAutoTrade(symbol,username,qty,side)
 
-    elif isRSI and isSTO and isMACD and isEMA:
+        elif isSTO and isEMA and not isRSI and not isMACD:
+            zone_sto = float(request.json.get('zone')) #"0.00"
+            cross_sto = float(request.json.get('cross_sto')) 
+            day = request.json.get('day')
+
+            if side == "buy":
+                while True:
+                    sto_result = STO(symbol=symbol,zone_sto=zone_sto,cross_sto=cross_sto,side=side)
+                    ema_result = EMA(symbol=symbol,day=day,side=side)
+                    if sto_result == "buy" and ema_result == "buy":
+                        placeOrderAutoTrade(symbol,username,qty,side)
+            else:
+                while True:
+                    sto_result = STO(symbol=symbol,zone_sto=zone_sto,cross_sto=cross_sto,side=side)
+                    ema_result = EMA(symbol=symbol,day=day,side=side)
+                    if sto_result == "sell" and ema_result == "sell":
+                        placeOrderAutoTrade(symbol,username,qty,side)
+
+        elif isMACD and isEMA and not isRSI and not isSTO:
+            zone = float(request.json.get('zone')) #"0.00"
+            cross = bool(request.json.get('cross_macd')) 
+            day = request.json.get('day')
+
+            if side == "buy":
+                while True:
+                    macd_result = MACD(symbol=symbol,zone=zone,cross=cross)
+                    ema_result = EMA(symbol=symbol,day=day,side=side)
+                    if macd_result == "buy" and ema_result  == "buy":
+                        placeOrderAutoTrade(symbol,username,qty,side)
+            else:
+                while True:
+                    macd_result = MACD(symbol=symbol,zone=zone,cross=cross)
+                    ema_result = EMA(symbol=symbol,day=day,side=side)
+                    if macd_result == "sell" and ema_result  == "sell":
+                        placeOrderAutoTrade(symbol,username,qty,side)
+
+        elif isRSI and isSTO and isMACD and not isEMA:
+            rsi_value = float(request.json.get('rsi'))
+            zone_sto = float(request.json.get('zone')) #"0.00"
+            cross_sto = float(request.json.get('cross_sto')) 
+            zone = float(request.json.get('zone')) #"0.00"
+            cross = bool(request.json.get('cross_macd')) 
+
+            if side == "buy":
+                while True:
+                    rsi_result = RSI(symbol=symbol,rsi_value=rsi_value,side=side)
+                    sto_result = STO(symbol=symbol,zone_sto=zone_sto,cross_sto=cross_sto,side=side)
+                    macd_result =MACD(symbol=symbol,zone=zone,cross=cross,side=side)
+                    if rsi_result == "buy" and sto_result == "buy" and macd_result == "buy":
+                        placeOrderAutoTrade(symbol,username,qty,side)
+            else:
+                while True:
+                    rsi_result = RSI(symbol=symbol,rsi_value=rsi_value,side=side)
+                    sto_result = STO(symbol=symbol,zone_sto=zone_sto,cross_sto=cross_sto,side=side)
+                    macd_result =MACD(symbol=symbol,zone=zone,cross=cross,side=side)
+                    if rsi_result == "sell" and sto_result == "sell" and macd_result == "sell":
+                        placeOrderAutoTrade(symbol,username,qty,side)
+
+        elif isRSI and isSTO and isEMA and not isMACD:
+            rsi_value = float(request.json.get('rsi'))
+            zone_sto = float(request.json.get('zone')) #"0.00"
+            cross_sto = float(request.json.get('cross_sto')) 
+            day = request.json.get('day')
+
+            if side == "buy":
+                while True:
+                    rsi_result = RSI(symbol=symbol,rsi_value=rsi_value,side=side)
+                    sto_result = STO(symbol=symbol,zone_sto=zone_sto,cross_sto=cross_sto,side=side)
+                    ema_result = EMA(symbol=symbol,day=day,side=side)
+                    if rsi_result == "buy" and sto_result == "buy" and ema_result == "buy":
+                        placeOrderAutoTrade(symbol,username,qty,side)
+            else:
+                while True:
+                    rsi_result = RSI(symbol=symbol,rsi_value=rsi_value,side=side)
+                    sto_result = STO(symbol=symbol,zone_sto=zone_sto,cross_sto=cross_sto,side=side)
+                    macd_result =MACD(symbol=symbol,zone=zone,cross=cross,side=side)
+                    if rsi_result == "sell" and sto_result == "sell" and ema_result == "sell":
+                        placeOrderAutoTrade(symbol,username,qty,side)
+
+        elif isRSI and isMACD and isEMA and not isSTO:
+            rsi_value = float(request.json.get('rsi'))
+            zone = float(request.json.get('zone')) #"0.00"
+            cross = bool(request.json.get('cross_macd')) 
+            day = request.json.get('day')
+
+            if side == "buy":
+                while True:
+                    rsi_result = RSI(symbol=symbol,rsi_value=rsi_value,side=side)
+                    macd_result =MACD(symbol=symbol,zone=zone,cross=cross,side=side)
+                    ema_result = EMA(symbol=symbol,day=day,side=side)
+                    if rsi_result == "buy" and macd_result == "buy" and ema_result == "buy":
+                        placeOrderAutoTrade(symbol,username,qty,side)
+            else:
+                while True:
+                    rsi_result = RSI(symbol=symbol,rsi_value=rsi_value,side=side)
+                    macd_result =MACD(symbol=symbol,zone=zone,cross=cross,side=side)
+                    ema_result = EMA(symbol=symbol,day=day,side=side)
+                    if rsi_result == "sell" and macd_result == "sell" and ema_result == "sell":
+                        placeOrderAutoTrade(symbol,username,qty,side)
+            
+        elif isSTO and isMACD and isEMA and not isRSI:
+            zone_sto = float(request.json.get('zone')) #"0.00"
+            cross_sto = float(request.json.get('cross_sto')) 
+            zone = float(request.json.get('zone')) #"0.00"
+            cross = bool(request.json.get('cross_macd')) 
+            day = request.json.get('day')
+
+            if side == "buy":
+                while True:
+                    rsi_result = RSI(symbol=symbol,rsi_value=rsi_value,side=side)
+                    macd_result =MACD(symbol=symbol,zone=zone,cross=cross,side=side)
+                    ema_result = EMA(symbol=symbol,day=day,side=side)
+                    if rsi_result == "buy" and macd_result == "buy" and ema_result == "buy":
+                        placeOrderAutoTrade(symbol,username,qty,side)
+            else:
+                while True:
+                    rsi_result = RSI(symbol=symbol,rsi_value=rsi_value,side=side)
+                    macd_result =MACD(symbol=symbol,zone=zone,cross=cross,side=side)
+                    ema_result = EMA(symbol=symbol,day=day,side=side)
+                    if rsi_result == "sell" and sto_result == "sell" and macd_result == "sell":
+                        placeOrderAutoTrade(symbol,username,qty,side)
+
+        elif isRSI and isSTO and isMACD and isEMA:
+            rsi_value = float(request.json.get('rsi'))
+            zone_sto = float(request.json.get('zone')) #"0.00"
+            cross_sto = float(request.json.get('cross_sto')) 
+            zone = float(request.json.get('zone')) #"0.00"
+            cross = bool(request.json.get('cross_macd')) 
+            day = request.json.get('day')
+
+            if side == "buy":
+                while True:
+                    rsi_result = RSI(symbol=symbol,rsi_value=rsi_value,side=side)
+                    sto_result = STO(symbol=symbol,zone_sto=zone_sto,cross_sto=cross_sto,side=side)
+                    macd_result = MACD(symbol=symbol,zone=zone,cross=cross,side=side)
+                    ema_result = EMA(symbol=symbol,day=day,side=side)
+                    if rsi_result == "buy" and sto_result=="buy" and macd_result == "buy" and ema_result == "buy":
+                        placeOrderAutoTrade(symbol,username,qty,side)
+            else:
+                while True:
+                    rsi_result = RSI(symbol=symbol,rsi_value=rsi_value,side=side)
+                    sto_result = STO(symbol=symbol,zone_sto=zone_sto,cross_sto=cross_sto,side=side)
+                    macd_result = MACD(symbol=symbol,zone=zone,cross=cross,side=side)
+                    ema_result = EMA(symbol=symbol,day=day,side=side)
+                    if rsi_result == "sell" and sto_result=="sell" and macd_result == "sell" and ema_result == "sell":
+                        placeOrderAutoTrade(symbol,username,qty,side)
+
+        print(f"ส่งคำสั่งซื้อสำเร็จ {order_number}")
+        return jsonify(f'error: {str(e)}')                
+    except Exception as e:
+        print(f'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ: {str(e)}')
+        return jsonify(f'error: {str(e)}')
 
 
-def RSI(symbol,rsi_value):
+
+def RSI(symbol,rsi_value,side):
     handler = getSymbolHandler(symbol)
     rsi = handler.get_analysis().indicators["RSI"]
-    if rsi < rsi_value:
-        return 'buy'
+    if side == "buy":
+        if rsi < rsi_value:
+            return 'buy'
     else:
-        return 'sell'
+        if rsi > rsi_value:
+            return 'sell'
 
 def STO(symbol,zone_sto,cross_sto,side):
 
@@ -1626,7 +1814,7 @@ def EMA(symbol,day,side):
             ema = handler.get_analysis().indicators[f"EMA{day}"]
             close = handler.get_analysis().indicators["close"]
             if close >= ema and last_close < last_ema:
-                return "buy"      
+                return "sell"      
             last_ema = ema
             last_close = close
             time.sleep(5)
@@ -1667,7 +1855,57 @@ def getSymbolHandler(symbol):
                 )
                 return handler  
 
+def placeOrderAutoTrade(symbol,username,qty,side):
+    conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
+    queryUS = f"SELECT api_key, secret_key FROM users_info WHERE username = '{username}'"
+    cursor = conn.cursor()
+    cursor.execute(queryUS)
+    resultUS = cursor.fetchone()
+    
+    queryTH = f"SELECT th_api_key, th_secret_key, broker_id, app_code, pin FROM users_info WHERE username = '{username}'"
+    cursor = conn.cursor()
+    cursor.execute(queryTH)
+    resultTH = cursor.fetchone()
+    
 
+    try:
+        api = REST(resultUS[0], resultUS[1], base_url='https://paper-api.alpaca.markets')
+    except Exception as e:
+        try:
+            api = REST(resultUS[0], resultUS[1], base_url='https://api.alpaca.markets')
+        except Exception as e:
+            api = Investor(
+                app_id=resultTH[0],                                 
+                app_secret=resultTH[1], 
+                broker_id=resultTH[2],
+                app_code=resultTH[3],
+                is_auto_queue = False)
+            
+    try:
+        api.submit_order(
+                    symbol=symbol,
+                    qty=qty,
+                    side=side,
+                    type='market',
+                    time_in_force='gtc'        
+                )
+        print('คำสั่งซื้อขายถูกส่งไปยัง Settrade Sandbox แล้ว')
+        return "passed"
+    except Exception as e:
+        try:
+            equity = api.Equity(account_no=f"{username}-E")  
+            place_order = equity.place_order(
+                                    side= side,
+                                    symbol= symbol,
+                                    volume= qty,
+                                    price_type= "MP-MKT",
+                                    pin=resultTH[4]
+                                    )
+            print(f'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ: {str(e)}')
+            return "passed"
+        except Exception as e:
+            print(f'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ: {str(e)}')
+            return "failed"
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0")
