@@ -47,7 +47,7 @@ class _TradePageOptionsState extends State<TradePageOptions>
       for (final order in responseData) {
         final status = order['status'];
         if (status == 'pending') {
-          autoOrders.add(order); 
+          autoOrders.add(order);
         }
       }
       isLoading = false;
@@ -125,7 +125,7 @@ class _TradePageOptionsState extends State<TradePageOptions>
                                 AssetImage('assets/img/profile.png'),
                             backgroundColor: Colors.transparent,
                             child: Container(
-                              height:80,
+                              height: 80,
                               width: 80,
                               decoration: const BoxDecoration(
                                 gradient: LinearGradient(
@@ -370,7 +370,8 @@ class _TradePageOptionsState extends State<TradePageOptions>
                                         ),
                                         Container(
                                           padding: EdgeInsets.all(4),
-                                          margin: EdgeInsets.symmetric(vertical:2),
+                                          margin:
+                                              EdgeInsets.symmetric(vertical: 2),
                                           decoration: BoxDecoration(
                                               color: order['side'] == 'buy'
                                                   ? Colors.green

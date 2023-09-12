@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:Walltrade/variables/serverURL.dart';
 import 'package:flutter/material.dart';
 
 class MoreTechnicalOrder extends StatefulWidget {
@@ -14,614 +11,748 @@ class MoreTechnicalOrder extends StatefulWidget {
 class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
   final String username;
   _MoreTechnicalOrderState({required this.username});
-  List<Widget> containers = [];
-  Set<String> selectedMenus = {};
-  String selectedInterval = '1 hour';
-  TextEditingController timeIntervalController = TextEditingController();
-  TextEditingController qtyController = TextEditingController();
+  List<String> selectedMenus = [];
+  Map<String, bool> menuSelectionStatus = {};
+  bool macd_crossupIsChecked = false;
   TextEditingController lowerRSIController = TextEditingController();
   TextEditingController zoneMACDController = TextEditingController();
-  TextEditingController crossupSTOController = TextEditingController();
   TextEditingController zoneSTOController = TextEditingController();
+  TextEditingController crossupSTOController = TextEditingController();
   TextEditingController dayController = TextEditingController();
-  bool macd_crossupIsChecked = false;
-
-  bool isZoneTextFieldEnabled = true;
-  bool isCrossTextFieldEnabled = true;
-
   TextEditingController symbolController = TextEditingController();
+  TextEditingController qtyController = TextEditingController();
+  bool isCrossTextFieldEnabled = true;
+  bool isZoneTextFieldEnabled = true;
 
-  Map<String, bool> menuSelectionStatus = {
-    'RSI': false,
-    'STO': false,
-    'MACD': false,
-    'EMA': false,
-  };
-
-  Color getMenuColor(String menu) {
-    final bool? isSelected = menuSelectionStatus[menu];
-    return isSelected == true ? Color(0xFF1D5B79) : Color(0xFF2A3547);
-  }
-
-  Future<void> placeMultiAutotrade(String symbol) async {
-    final url = Uri.parse('${Constants.serverUrl}/multiAutotrade');
-    final headers = {
-      'Content-Type': 'application/json',
-    };
-
-    final body = jsonEncode({
-      'username': username,
-      'isRSI': menuSelectionStatus['RSI'],
-      'isSTO': menuSelectionStatus['STO'],
-      'isMACD': menuSelectionStatus['MACD'],
-      'isEMA': menuSelectionStatus['EMA'],
-      'symbol': symbol,
-      'rsi': lowerRSIController.text,
-      'cross_sto': crossupSTOController.text,
-      'zone_sto': zoneSTOController.text,
-      'cross_macd': macd_crossupIsChecked,
-      'zone': zoneMACDController.text,
-      'day': dayController.text,
-      'qty': qtyController.text,
-    });
-
-    final response = await http.post(url, headers: headers, body: body);
-
-    if (response.statusCode == 200) {
-      print('Request succeeded!');
-    } else {
-      print('Request failed with status code: ${response.statusCode}');
-    }
-  }
+  String selectedInterval = '1 hour';
 
   void toggleContainer(String menu) {
     setState(() {
       if (selectedMenus.contains(menu)) {
         selectedMenus.remove(menu);
-        containers.removeWhere(
-            (container) => (container.key as ValueKey).value == menu);
-        menuSelectionStatus[menu] = false;
       } else {
         selectedMenus.add(menu);
-        menu == 'RSI'
-            ? containers.add(
-                Container(
-                  key: ValueKey(menu),
-                  padding: EdgeInsets.all(12),
-                  margin: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
+      }
+    });
+  }
+
+  Widget moreInfoSymbol() {
+    return Center(
+      child: Container(
+        padding: EdgeInsets.all(16),
+        margin: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+        decoration: BoxDecoration(
+          color: Color(0xFF2A3547),
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: Offset(0, 3), // changes the position of the shadow
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.black,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.7),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: Offset(0, 3), // changes the position of the shadow
+                  ),
+                ],
+              ),
+              child: Text(
+                "เทคนิคที่ต้องการใช้: ${selectedMenus.join(', ')}",
+                style: TextStyle(
+                    color: Colors.amber.shade800, fontWeight: FontWeight.w600),
+              ),
+            ),
+            TimeframeDropdown(
+              selectedInterval: selectedInterval,
+              onChanged: (String? newValue) {
+                setState(() {
+                  selectedInterval = newValue!;
+                });
+              },
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Text(
+                  'สัญลักษณ์หุ้น',
+                  style: TextStyle(color: Colors.white),
+                ),
+                SizedBox(width: 5),
+                Expanded(
+                  child: TextField(
+                    controller: symbolController,
+                    decoration: const InputDecoration(
+                      labelText: 'เช่น META, AAPL, PTT, SCB',
+                      labelStyle: TextStyle(fontSize: 14, color: Colors.white),
+                      filled: true, // กำหนดให้มีสีพื้นหลัง
+                      fillColor:
+                          Color(0xFF2A3547), // สีพื้นหลังของช่องพิมพ์ TextField
+                      contentPadding: EdgeInsets.symmetric(
+                          vertical: 10.0,
+                          horizontal:
+                              10.0), // ปรับความสูงและความยาวของช่องพิมพ์ที่นี่
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color:
+                              Colors.black, // สีเส้นโครงรอบช่องพิมพ์ในสถานะปกติ
+                          width:
+                              2.0, // ความหนาของเส้นโครงรอบช่องพิมพ์ในสถานะปกติ
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors
+                              .white, // สีเส้นโครงรอบช่องพิมพ์เมื่อมีการเน้น
+                          width:
+                              2.0, // ความหนาของเส้นโครงรอบช่องพิมพ์เมื่อมีการเน้น
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Text(
+                  'จำนวนหุ้น',
+                  style: TextStyle(color: Colors.white),
+                ),
+                SizedBox(width: 5),
+                Expanded(
+                  child: TextField(
+                    controller: qtyController,
+                    decoration: const InputDecoration(
+                      labelText: 'เช่น 0.1,1000,5',
+                      labelStyle: TextStyle(fontSize: 14, color: Colors.white),
+                      filled: true, // กำหนดให้มีสีพื้นหลัง
+                      fillColor:
+                          Color(0xFF2A3547), // สีพื้นหลังของช่องพิมพ์ TextField
+                      contentPadding: EdgeInsets.symmetric(
+                          vertical: 10.0,
+                          horizontal:
+                              10.0), // ปรับความสูงและความยาวของช่องพิมพ์ที่นี่
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color:
+                              Colors.black, // สีเส้นโครงรอบช่องพิมพ์ในสถานะปกติ
+                          width:
+                              2.0, // ความหนาของเส้นโครงรอบช่องพิมพ์ในสถานะปกติ
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors
+                              .white, // สีเส้นโครงรอบช่องพิมพ์เมื่อมีการเน้น
+                          width:
+                              2.0, // ความหนาของเส้นโครงรอบช่องพิมพ์เมื่อมีการเน้น
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(
+                    Icons.info,
+                    size: 24,
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset:
-                            Offset(0, 3), // changes the position of the shadow
-                      ),
-                    ],
-                  ), // ใช้เมธอด getMenuColor เพื่อเลือกสีเมนู
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.symmetric(vertical: 18),
-                        margin: EdgeInsets.symmetric(horizontal: 18),
-                        decoration: BoxDecoration(
-                          color: Color(0xFF2A3547),
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
-                              spreadRadius: 2,
-                              blurRadius: 5,
-                              offset: Offset(
-                                  0, 3), // changes the position of the shadow
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'RSI (Relative Strength Index)',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white),
-                            )
-                          ],
-                        ),
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Text('ระบุค่า RSI ที่ต้องการซื้อ'),
-                            SizedBox(width: 5),
-                            Expanded(
-                              child: TextField(
-                                controller: lowerRSIController,
-                                decoration: InputDecoration(
-                                  labelText: '0-100',
-                                  border: OutlineInputBorder(),
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              icon: Icon(
-                                Icons.info,
-                                size: 24,
-                              ),
+                  ),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: Text('More Info'),
+                          content:
+                              Text('Additional information about timeframes.'),
+                          actions: [
+                            TextButton(
+                              child: Text('OK'),
                               onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (context) {
-                                    return AlertDialog(
-                                      title: Text('More Info'),
-                                      content: Text(
-                                          'Additional information about timeframes.'),
-                                      actions: [
-                                        TextButton(
-                                          child: Text('OK'),
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
+                                Navigator.of(context).pop();
                               },
                             ),
                           ],
-                        ),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                    ],
-                  ),
+                        );
+                      },
+                    );
+                  },
                 ),
-              )
-            : menu == 'STO'
-                ? containers.add(
-                    Container(
-                      key: ValueKey(menu),
-                      padding: EdgeInsets.all(12),
-                      margin: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 2,
-                            blurRadius: 5,
-                            offset: Offset(
-                                0, 3), // changes the position of the shadow
+              ],
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (selectedMenus.length < 2) {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text('เกิดข้อผิดพลาด'),
+                        content: Text(
+                            'โปรดเลือกเทคนิคชี้วัดที่ต้องการใช้อย่างน้อย 2 เทคนิค'),
+                        actions: [
+                          TextButton(
+                            child: Text('ตกลง'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
                           ),
                         ],
-                      ), // ใช้เมธอด getMenuColor เพื่อเลือกสีเมนู
+                      );
+                    },
+                  );
+                }
+              },
+              child: Text("ยืนยัน"),
+            )
+          ],
+        ),
+      ),
+    );
+  }
 
-                      child: Column(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(vertical: 18),
-                            margin: EdgeInsets.symmetric(horizontal: 18),
-                            decoration: BoxDecoration(
-                              color: Color(0xFF2A3547),
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.5),
-                                  spreadRadius: 2,
-                                  blurRadius: 5,
-                                  offset: Offset(0,
-                                      3), // changes the position of the shadow
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'STO (Stochastic Oscillator)',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white),
-                                )
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            height: 20,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Text('ระบุค่า STO %K และ %D ที่ต้องการซื้อ'),
-                                SizedBox(width: 5),
-                                Expanded(
-                                  child: TextField(
-                                    controller: zoneSTOController,
-                                    enabled: isZoneTextFieldEnabled,
-                                    decoration: InputDecoration(
-                                      labelText: 'ค่าที่ต้องการซื้อ',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    onChanged: (text) {
-                                      if (text.isNotEmpty) {
-                                        setState(() {
-                                          crossupSTOController.text = "0";
-                                          isCrossTextFieldEnabled = false;
-                                        });
-                                      } else {
-                                        setState(() {
-                                          isCrossTextFieldEnabled = true;
-                                          crossupSTOController.clear();
-                                        });
-                                      }
-                                    },
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: Icon(
-                                    Icons.info,
-                                    size: 24,
-                                  ),
-                                  onPressed: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) {
-                                        return AlertDialog(
-                                          title: Text('More Info'),
-                                          content: Text(
-                                              'Additional information about timeframes.'),
-                                          actions: [
-                                            TextButton(
-                                              child: Text('OK'),
-                                              onPressed: () {
-                                                Navigator.of(context).pop();
-                                              },
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Text('STO %K ตัดขึ้น %D และมีโซนที่ต่ำกว่า'),
-                                SizedBox(width: 5),
-                                Expanded(
-                                  child: TextField(
-                                    enabled: isCrossTextFieldEnabled,
-                                    controller: crossupSTOController,
-                                    decoration: InputDecoration(
-                                      labelText: 'ค่าที่ซื้อเมื่อต่ำกว่า',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    onChanged: (text) {
-                                      if (text.isNotEmpty) {
-                                        setState(() {
-                                          zoneSTOController.text = "0";
-                                          isZoneTextFieldEnabled = false;
-                                        });
-                                      } else {
-                                        setState(() {
-                                          isZoneTextFieldEnabled = true;
-                                          zoneSTOController.clear();
-                                        });
-                                      }
-                                    },
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: Icon(
-                                    Icons.info,
-                                    size: 24,
-                                  ),
-                                  onPressed: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) {
-                                        return AlertDialog(
-                                          title: Text('More Info'),
-                                          content: Text(
-                                              'Additional information about timeframes.'),
-                                          actions: [
-                                            TextButton(
-                                              child: Text('OK'),
-                                              onPressed: () {
-                                                Navigator.of(context).pop();
-                                              },
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                        ],
+  Widget buildEMA() {
+    return Container(
+        key: ValueKey('EMA'),
+        padding: EdgeInsets.all(12),
+        margin: EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: Offset(0, 3), // changes the position of the shadow
+            ),
+          ],
+        ), // ใช้เมธอด getMenuColor เพื่อเลือกสีเมนู
+
+        child: Column(
+          children: [
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 18),
+              margin: EdgeInsets.symmetric(horizontal: 18),
+              decoration: BoxDecoration(
+                color: Color(0xFF2A3547),
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: Offset(0, 3), // changes the position of the shadow
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'EMA (Exponential Moving Average)',
+                    style: TextStyle(
+                        fontWeight: FontWeight.w600, color: Colors.white),
+                  )
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text('ระบุวันของ EMA'),
+                  SizedBox(width: 5),
+                  Expanded(
+                    child: TextField(
+                      controller: dayController,
+                      decoration: InputDecoration(
+                        labelText: 'จำนวนวันที่ต้องการใช้',
+                        border: OutlineInputBorder(),
                       ),
                     ),
-                  )
-                : menu == 'MACD'
-                    ? containers.add(
-                        Container(
-                            key: ValueKey(menu),
-                            padding: EdgeInsets.all(12),
-                            margin: EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.5),
-                                  spreadRadius: 2,
-                                  blurRadius: 5,
-                                  offset: Offset(0,
-                                      3), // changes the position of the shadow
-                                ),
-                              ],
-                            ), // ใช้เมธอด getMenuColor เพื่อเลือกสีเมนู
-
-                            child: Column(
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.symmetric(vertical: 18),
-                                  margin: EdgeInsets.symmetric(horizontal: 18),
-                                  decoration: BoxDecoration(
-                                    color: Color(0xFF2A3547),
-                                    borderRadius: BorderRadius.circular(10),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.withOpacity(0.5),
-                                        spreadRadius: 2,
-                                        blurRadius: 5,
-                                        offset: Offset(0,
-                                            3), // changes the position of the shadow
-                                      ),
-                                    ],
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        'MACD (Moving Average Convergence Divergence)',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.white),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(height: 10),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      Text(
-                                          'MACD ตัดขึ้น Signal และมีโซนที่ต่ำกว่า 0'),
-                                      Checkbox(
-                                        value: true,
-                                        onChanged: (bool? newValue) {
-                                          setState(() {});
-                                        },
-                                      ),
-                                      SizedBox(width: 5),
-                                      IconButton(
-                                        icon: Icon(
-                                          Icons.info,
-                                          size: 24,
-                                        ),
-                                        onPressed: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (context) {
-                                              return AlertDialog(
-                                                title: Text('More Info'),
-                                                content: Text(
-                                                    'Additional information about timeframes.'),
-                                                actions: [
-                                                  TextButton(
-                                                    child: Text('OK'),
-                                                    onPressed: () {
-                                                      Navigator.of(context)
-                                                          .pop();
-                                                    },
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      Text(
-                                          'ระบุโซน MACD & Signal ที่ต้องการซื้อ'),
-                                      SizedBox(width: 5),
-                                      Expanded(
-                                        child: TextField(
-                                          controller: zoneMACDController,
-                                          decoration: InputDecoration(
-                                            labelText: 'ค่าที่ต้องการซื้อ',
-                                            border: OutlineInputBorder(),
-                                          ),
-                                        ),
-                                      ),
-                                      IconButton(
-                                        icon: Icon(
-                                          Icons.info,
-                                          size: 24,
-                                        ),
-                                        onPressed: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (context) {
-                                              return AlertDialog(
-                                                title: Text('More Info'),
-                                                content: Text(
-                                                    'Additional information about timeframes.'),
-                                                actions: [
-                                                  TextButton(
-                                                    child: Text('OK'),
-                                                    onPressed: () {
-                                                      Navigator.of(context)
-                                                          .pop();
-                                                    },
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            )),
-                      )
-                    : containers.add(
-                        Container(
-                            key: ValueKey(menu),
-                            padding: EdgeInsets.all(12),
-                            margin: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.5),
-                                  spreadRadius: 2,
-                                  blurRadius: 5,
-                                  offset: Offset(0,
-                                      3), // changes the position of the shadow
-                                ),
-                              ],
-                            ), // ใช้เมธอด getMenuColor เพื่อเลือกสีเมนู
-
-                            child: Column(
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.symmetric(vertical: 18),
-                                  margin: EdgeInsets.symmetric(horizontal: 18),
-                                  decoration: BoxDecoration(
-                                    color: Color(0xFF2A3547),
-                                    borderRadius: BorderRadius.circular(10),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.withOpacity(0.5),
-                                        spreadRadius: 2,
-                                        blurRadius: 5,
-                                        offset: Offset(0,
-                                            3), // changes the position of the shadow
-                                      ),
-                                    ],
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        'EMA (Exponential Moving Average)',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.white),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      Text('ระบุวันของ EMA'),
-                                      SizedBox(width: 5),
-                                      Expanded(
-                                        child: TextField(
-                                          controller: dayController,
-                                          decoration: InputDecoration(
-                                            labelText: 'จำนวนวันที่ต้องการใช้',
-                                            border: OutlineInputBorder(),
-                                          ),
-                                        ),
-                                      ),
-                                      IconButton(
-                                        icon: Icon(
-                                          Icons.info,
-                                          size: 24,
-                                        ),
-                                        onPressed: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (context) {
-                                              return AlertDialog(
-                                                title: Text('More Info'),
-                                                content: Text(
-                                                    'Additional information about timeframes.'),
-                                                actions: [
-                                                  TextButton(
-                                                    child: Text('OK'),
-                                                    onPressed: () {
-                                                      Navigator.of(context)
-                                                          .pop();
-                                                    },
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            )),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.info,
+                      size: 24,
+                    ),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text('More Info'),
+                            content: Text(
+                                'Additional information about timeframes.'),
+                            actions: [
+                              TextButton(
+                                child: Text('OK'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ],
+                          );
+                        },
                       );
-        menuSelectionStatus[menu] = true;
-      }
-    });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ));
+  }
 
-    print("${menuSelectionStatus}");
+  Widget buildRSI() {
+    return Container(
+      key: ValueKey('RSI'),
+      padding: EdgeInsets.all(12),
+      margin: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: Offset(0, 3), // changes the position of the shadow
+          ),
+        ],
+      ), // ใช้เมธอด getMenuColor เพื่อเลือกสีเมนู
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 18),
+            margin: EdgeInsets.symmetric(horizontal: 18),
+            decoration: BoxDecoration(
+              color: Color(0xFF2A3547),
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 2,
+                  blurRadius: 5,
+                  offset: Offset(0, 3), // changes the position of the shadow
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'RSI (Relative Strength Index)',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w600, color: Colors.white),
+                )
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Text('ระบุค่า RSI ที่ต้องการซื้อ'),
+                SizedBox(width: 5),
+                Expanded(
+                  child: TextField(
+                    controller: lowerRSIController,
+                    decoration: InputDecoration(
+                      labelText: '0-100',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(
+                    Icons.info,
+                    size: 24,
+                  ),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: Text('More Info'),
+                          content:
+                              Text('Additional information about timeframes.'),
+                          actions: [
+                            TextButton(
+                              child: Text('OK'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 10,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildMACD() {
+    return Container(
+        key: ValueKey('MACD'),
+        padding: EdgeInsets.all(12),
+        margin: EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: Offset(0, 3), // changes the position of the shadow
+            ),
+          ],
+        ), // ใช้เมธอด getMenuColor เพื่อเลือกสีเมนู
+
+        child: Column(
+          children: [
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 18),
+              margin: EdgeInsets.symmetric(horizontal: 18),
+              decoration: BoxDecoration(
+                color: Color(0xFF2A3547),
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: Offset(0, 3), // changes the position of the shadow
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'MACD (Moving Average Convergence Divergence)',
+                    style: TextStyle(
+                        fontWeight: FontWeight.w600, color: Colors.white),
+                  )
+                ],
+              ),
+            ),
+            SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text('MACD ตัดขึ้น Signal และมีโซนที่ต่ำกว่า 0'),
+                  SizedBox(width: 5),
+                  Checkbox(
+                    value: macd_crossupIsChecked,
+                    onChanged: (bool? newValue) {
+                      setState(() {
+                        macd_crossupIsChecked = newValue ?? false;
+                        print(macd_crossupIsChecked);
+                        if (macd_crossupIsChecked) {
+                          zoneMACDController.text = '0';
+                        } else {
+                          zoneMACDController.text =
+                              ''; // ไม่ต้องใส่ค่าเมื่อ Checkbox ไม่ถูกติ๊ก
+                        }
+                      });
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.info,
+                      size: 24,
+                    ),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text('More Info'),
+                            content: Text(
+                                'Additional information about timeframes.'),
+                            actions: [
+                              TextButton(
+                                child: Text('OK'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text('ระบุโซน MACD & Signal ที่ต้องการซื้อ'),
+                  SizedBox(width: 5),
+                  Expanded(
+                    child: TextField(
+                      controller: zoneMACDController,
+                      enabled: !macd_crossupIsChecked,
+                      decoration: InputDecoration(
+                        labelText: 'ค่าที่ต้องการซื้อ',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.info,
+                      size: 24,
+                    ),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text('More Info'),
+                            content: Text(
+                                'Additional information about timeframes.'),
+                            actions: [
+                              TextButton(
+                                child: Text('OK'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ));
+  }
+
+  Widget buildSTO() {
+    return Container(
+      key: ValueKey('STO'),
+      padding: EdgeInsets.all(12),
+      margin: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: Offset(0, 3), // changes the position of the shadow
+          ),
+        ],
+      ), // ใช้เมธอด getMenuColor เพื่อเลือกสีเมนู
+
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 18),
+            margin: EdgeInsets.symmetric(horizontal: 18),
+            decoration: BoxDecoration(
+              color: Color(0xFF2A3547),
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 2,
+                  blurRadius: 5,
+                  offset: Offset(0, 3), // changes the position of the shadow
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'STO (Stochastic Oscillator)',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w600, color: Colors.white),
+                )
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Text('ระบุค่า STO %K และ %D ที่ต้องการซื้อ'),
+                SizedBox(width: 5),
+                Expanded(
+                  child: TextField(
+                    controller: zoneSTOController,
+                    enabled: isZoneTextFieldEnabled,
+                    decoration: InputDecoration(
+                      labelText: '0-100',
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (text) {
+                      if (text.isNotEmpty) {
+                        setState(() {
+                          crossupSTOController.text = "0";
+                          isCrossTextFieldEnabled = false;
+                        });
+                      } else {
+                        setState(() {
+                          isCrossTextFieldEnabled = true;
+                          crossupSTOController.clear();
+                        });
+                      }
+                    },
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(
+                    Icons.info,
+                    size: 24,
+                  ),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: Text('More Info'),
+                          content:
+                              Text('Additional information about timeframes.'),
+                          actions: [
+                            TextButton(
+                              child: Text('OK'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Text('STO %K ตัดขึ้น %D และมีโซนที่ต่ำกว่า'),
+                SizedBox(width: 5),
+                Expanded(
+                  child: TextField(
+                    enabled: isCrossTextFieldEnabled,
+                    controller: crossupSTOController,
+                    decoration: InputDecoration(
+                      labelText: '0-100',
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (text) {
+                      if (text.isNotEmpty) {
+                        setState(() {
+                          zoneSTOController.text = "0";
+                          isZoneTextFieldEnabled = false;
+                        });
+                      } else {
+                        setState(() {
+                          isZoneTextFieldEnabled = true;
+                          zoneSTOController.clear();
+                        });
+                      }
+                    },
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(
+                    Icons.info,
+                    size: 24,
+                  ),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: Text('More Info'),
+                          content:
+                              Text('Additional information about timeframes.'),
+                          actions: [
+                            TextButton(
+                              child: Text('OK'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 10,
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFECF8F9),
       appBar: AppBar(
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -648,258 +779,159 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
           ],
         ),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SizedBox(
-            height: 10,
-          ),
-          Center(
-            child: Container(
-              padding: EdgeInsets.symmetric(vertical: 0, horizontal: 12),
-              child: Text(
-                "โปรดเลือกเทคนิคที่ต้องการใช้",
-                style: TextStyle(color: Colors.amber.shade800),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            moreInfoSymbol(),
+            Container(
+              margin: EdgeInsets.all(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      toggleContainer('RSI');
+                    },
+                    child: Container(
+                      width: 60, // กำหนดความกว้างของปุ่ม
+                      height: 60, // กำหนดความสูงของปุ่ม
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Color(0xFF2A3547), width: 3),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: Offset(
+                                0, 3), // changes the position of the shadow
+                          ),
+                        ],
+                        shape: BoxShape.circle, // กำหนดให้รูปร่างเป็นวงกลม
+                        color: Color(0xFFABC270), // สีพื้นหลังของปุ่ม
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'RSI',
+                          style: TextStyle(
+                            color: Colors.white, // สีข้อความ
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      toggleContainer('STO');
+                    },
+                    child: Container(
+                      width: 60, // กำหนดความกว้างของปุ่ม
+                      height: 60, // กำหนดความสูงของปุ่ม
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Color(0xFF2A3547), width: 3),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: Offset(
+                                0, 3), // changes the position of the shadow
+                          ),
+                        ],
+                        shape: BoxShape.circle, // กำหนดให้รูปร่างเป็นวงกลม
+                        color: Color(0xFFFEC868), // สีพื้นหลังของปุ่ม
+                      ),
+                      child: Center(
+                        child: Text(
+                          'STO',
+                          style: TextStyle(
+                            color: Colors.white, // สีข้อความ
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      toggleContainer('MACD');
+                    },
+                    child: Container(
+                      width: 60, // กำหนดความกว้างของปุ่ม
+                      height: 60, // กำหนดความสูงของปุ่ม
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Color(0xFF2A3547), width: 3),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: Offset(
+                                0, 3), // changes the position of the shadow
+                          ),
+                        ],
+                        shape: BoxShape.circle, // กำหนดให้รูปร่างเป็นวงกลม
+                        color: Color(0xFFFDA769), // สีพื้นหลังของปุ่ม
+                      ),
+                      child: Center(
+                        child: Text(
+                          'MACD',
+                          style: TextStyle(
+                            color: Colors.white, // สีข้อความ
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      toggleContainer('EMA');
+                    },
+                    child: Container(
+                      width: 60, // กำหนดความกว้างของปุ่ม
+                      height: 60, // กำหนดความสูงของปุ่ม
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Color(0xFF2A3547), width: 3),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: Offset(
+                                0, 3), // changes the position of the shadow
+                          ),
+                        ],
+                        shape: BoxShape.circle, // กำหนดให้รูปร่างเป็นวงกลม
+                        color: Color(0xFF473C33), // สีพื้นหลังของปุ่ม
+                      ),
+                      child: Center(
+                        child: Text(
+                          'EMA',
+                          style: TextStyle(
+                            color: Colors.white, // สีข้อความ
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 4),
-            margin: EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Color(0xFFEEE2DE),
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.5),
-                  spreadRadius: 2,
-                  blurRadius: 5,
-                  offset: Offset(0, 3), // changes the position of the shadow
-                ),
-              ],
+            Column(
+              children: selectedMenus.map((menu) {
+                return menu == 'RSI'
+                    ? buildRSI()
+                    : menu == 'STO'
+                        ? buildSTO()
+                        : menu == 'MACD'
+                            ? buildMACD()
+                            : buildEMA();
+              }).toList(),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                GestureDetector(
-                  onTap: () => toggleContainer("RSI"),
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    margin: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: getMenuColor("RSI"),
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 2,
-                          blurRadius: 5,
-                          offset: Offset(
-                              0, 3), // changes the position of the shadow
-                        ),
-                      ],
-                    ),
-                    child: Text(
-                      "RSI",
-                      style: TextStyle(
-                          fontWeight: FontWeight.w600, color: Colors.white),
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () => toggleContainer("STO"),
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    margin: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: getMenuColor("STO"),
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 2,
-                          blurRadius: 5,
-                          offset: Offset(
-                              0, 3), // changes the position of the shadow
-                        ),
-                      ],
-                    ),
-                    child: Text(
-                      "STO",
-                      style: TextStyle(
-                          fontWeight: FontWeight.w600, color: Colors.white),
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () => toggleContainer("MACD"),
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    margin: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: getMenuColor("MACD"),
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 2,
-                          blurRadius: 5,
-                          offset: Offset(
-                              0, 3), // changes the position of the shadow
-                        ),
-                      ],
-                    ),
-                    child: Text(
-                      "MACD",
-                      style: TextStyle(
-                          fontWeight: FontWeight.w600, color: Colors.white),
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () => toggleContainer("EMA"),
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    margin: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: getMenuColor("EMA"),
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 2,
-                          blurRadius: 5,
-                          offset: Offset(
-                              0, 3), // changes the position of the shadow
-                        ),
-                      ],
-                    ),
-                    child: Text(
-                      "EMA",
-                      style: TextStyle(
-                          fontWeight: FontWeight.w600, color: Colors.white),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          selectedMenus.isNotEmpty
-              ? Center(
-                  child: Container(
-                    padding: EdgeInsets.all(16),
-                    margin: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 2,
-                          blurRadius: 5,
-                          offset: Offset(
-                              0, 3), // changes the position of the shadow
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          "เทคนิคที่ต้องการใช้: ${selectedMenus.join(', ')}",
-                          style: TextStyle(),
-                        ),
-                        TimeframeDropdown(
-                          selectedInterval: selectedInterval,
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              selectedInterval = newValue!;
-                            });
-                          },
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Text('สัญลักษณ์หุ้น'),
-                            SizedBox(width: 5),
-                            Expanded(
-                              child: TextField(
-                                controller: symbolController,
-                                decoration: InputDecoration(
-                                  labelText: 'เช่น META,AAPL,PTT,SCB',
-                                  labelStyle: TextStyle(fontSize: 14),
-                                  border: OutlineInputBorder(),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Text('จำนวนหุ้น'),
-                            SizedBox(width: 5),
-                            Expanded(
-                              child: TextField(
-                                controller: qtyController,
-                                decoration: InputDecoration(
-                                  labelText: 'เช่น 0.1 ,1000 ,5',
-                                  border: OutlineInputBorder(),
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              icon: Icon(
-                                Icons.info,
-                                size: 24,
-                              ),
-                              onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (context) {
-                                    return AlertDialog(
-                                      title: Text('More Info'),
-                                      content: Text(
-                                          'Additional information about timeframes.'),
-                                      actions: [
-                                        TextButton(
-                                          child: Text('OK'),
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            placeMultiAutotrade(symbolController.text);
-                          },
-                          child: Container(
-                            child: Text("ยืนยัน"),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                )
-              : SizedBox(),
-          Expanded(
-            child: ListView.builder(
-              itemCount: containers.length,
-              itemBuilder: (context, index) {
-                return containers[index];
-              },
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -920,28 +952,47 @@ class TimeframeDropdown extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Text('โปรดเลือก Timeframe'),
-          DropdownButton<String>(
-            value: selectedInterval,
-            onChanged: onChanged,
-            items: [
-              DropdownMenuItem(
-                value: '1 hour',
-                child: Text('1 hour'),
-              ),
-              DropdownMenuItem(
-                value: '4 hours',
-                child: Text('4 hours'),
-              ),
-              DropdownMenuItem(
-                value: '1 day',
-                child: Text('1 day'),
-              ),
-              DropdownMenuItem(
-                value: '1 week',
-                child: Text('1 week'),
-              ),
-            ],
+          Text(
+            'Timeframe',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+          ),
+          DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              dropdownColor: Colors.black,
+              borderRadius: BorderRadius.circular(10),
+              value: selectedInterval,
+              onChanged: onChanged,
+              items: [
+                DropdownMenuItem(
+                  value: '1 hour',
+                  child: Text(
+                    '1 hour',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: '4 hours',
+                  child: Text(
+                    '4 hours',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: '1 day',
+                  child: Text(
+                    '1 day',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: '1 week',
+                  child: Text(
+                    '1 week',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
           ),
           IconButton(
             icon: Icon(
