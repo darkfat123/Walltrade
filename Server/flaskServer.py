@@ -1447,7 +1447,10 @@ def multiAutotrade():
     isSTO = bool(request.json.get('isSTO'))
     isMACD = bool(request.json.get('isMACD'))
     isEMA = bool(request.json.get('isEMA'))
-    
+    print("isRSI = ",isRSI)
+    print("isSTO = ",isSTO)
+    print("isMACD = ",isMACD)
+    print("isEMA = ",isEMA)
     symbol = request.json.get('symbol')
     qty = float(request.json.get('qty')) #"0.0002"
     side = request.json.get('side')
@@ -1469,7 +1472,8 @@ def multiAutotrade():
             order_number=order_number
             break
 
-    insert_query = f"INSERT INTO auto_order (OrderID , username, symbol, techniques, quantity, side, status) VALUES ({order_number},%s, %s, %s, %s, %s,'pending')"
+    insert_query = "INSERT INTO auto_order (OrderID, username, symbol, techniques, quantity, side, status) VALUES (%s, %s, %s, %s, %s, %s, 'pending')"
+
 
     if side == "buy":
         if isRSI:
@@ -1477,17 +1481,20 @@ def multiAutotrade():
             techniques.append(f"RSI < {rsi_value}")
         if isSTO:
             cross_sto = float(request.json.get('cross_sto')) 
+            zone_sto = bool(request.json.get('zone_sto')) 
             if cross_sto > 0:
                 techniques.append(f"%K ตัดขึ้น %D และ < {cross_sto}")
             else:
                 techniques.append(f"%K และ %D < {zone_sto}")
         if isMACD:
             cross = bool(request.json.get('cross_macd')) 
+            zone = bool(request.json.get('zone_macd')) 
             if cross:
                 techniques.append(f"MACD ตัดขึ้น Signal และ < 0")
             else:
                 techniques.append(f"MACD & Signal < {zone}")
         if isEMA:
+            day = int(request.json.get('day'))
             techniques.append(f"ซื้อเมื่อราคา <= EMA{day}")
     else:
         if isRSI:
@@ -1495,27 +1502,31 @@ def multiAutotrade():
             techniques.append(f"RSI > {rsi_value}")
         if isSTO:
             cross_sto = float(request.json.get('cross_sto')) 
+            zone_sto = bool(request.json.get('zone_sto')) 
             if cross_sto > 0:
                 techniques.append(f"%K ตัดลง %D และ > {cross_sto}")
             else:
                 techniques.append(f"%K และ %D > {zone_sto}")
         if isMACD:
             cross = bool(request.json.get('cross_macd')) 
+            zone = bool(request.json.get('zone_macd')) 
             if cross:
                 techniques.append(f"MACD ตัดลง Signal และ > 0")
             else:
                 techniques.append(f"MACD & Signal > {zone}")
         if isEMA:
+            day = int(request.json.get('day'))
             techniques.append(f"ขายเมื่อราคา >= EMA{day}")
+    print(techniques)
 
-    data = (username, symbol, techniques, qty, side)
-    cursor.execute(insert_query, data)
+    data_to_insert = (order_number, username, symbol, ','.join(techniques), qty, side)
+    cursor.execute(insert_query, data_to_insert)
     conn.commit()
     
     try:
         if isRSI and isSTO and not isMACD and not isEMA:
             rsi_value = float(request.json.get('rsi'))
-            zone_sto = float(request.json.get('zone')) #"0.00"
+            zone_sto = float(request.json.get('zone_sto')) #"0.00"
             cross_sto = float(request.json.get('cross_sto')) 
             if side == "buy":
                 while True:
@@ -1532,7 +1543,7 @@ def multiAutotrade():
 
         elif isRSI and isMACD and not isSTO and not isEMA:
             rsi_value = float(request.json.get('rsi'))
-            zone = float(request.json.get('zone')) #"0.00"
+            zone = float(request.json.get('zone_macd')) #"0.00"
             cross = bool(request.json.get('cross_macd')) 
             if side == "buy":
                 while True:
@@ -1550,12 +1561,24 @@ def multiAutotrade():
         elif isRSI and isEMA and not isSTO and not isMACD:
             rsi_value = float(request.json.get('rsi'))
             day = request.json.get('day')
+            last_ema = 0
+            last_close = 0
             if side == "buy":
-                while True:
-                    rsi_results = RSI(symbol=symbol,rsi_value=rsi_value,side=side)
-                    ema_results = EMA(symbol=symbol,day=day,side=side)
-                    if rsi_results == "buy" and ema_results == "buy":
-                        placeOrderAutoTrade(symbol,username,qty,side)
+                print("เข้าเงื่อนไข RSI EMA")
+                while True:                                    
+                    ema = getSymbolHandler(symbol=symbol).indicators[f"EMA{day}"]
+                    close = getSymbolHandler(symbol=symbol).indicators["close"]
+                    if getSymbolHandler(symbol=symbol).indicators["RSI"] < rsi_value and close <= ema and last_close > last_ema:
+                        placeOrderAutoTrade(symbol=symbol,username=username,qty=qty,side=side)
+                        return jsonify("Suscess")
+                    last_ema = ema
+                    last_close = close
+                    print("EMA = ",ema)
+                    print("Last EMA = ",last_ema)
+                    print("Close = ",close)
+                    print("Last Close = ",last_close)
+                    print()
+                    
             else:
                 while True:
                     rsi_results = RSI(symbol=symbol,rsi_value=rsi_value,side=side)
@@ -1564,9 +1587,9 @@ def multiAutotrade():
                         placeOrderAutoTrade(symbol,username,qty,side)
 
         elif isSTO and isMACD and not isRSI and not isEMA:
-            zone_sto = float(request.json.get('zone')) #"0.00"
+            zone_sto = float(request.json.get('zone_sto')) #"0.00"
             cross_sto = float(request.json.get('cross_sto')) 
-            zone = float(request.json.get('zone')) #"0.00"
+            zone = float(request.json.get('zone_macd')) #"0.00"
             cross = bool(request.json.get('cross_macd')) 
 
             if side == "buy":
@@ -1583,7 +1606,7 @@ def multiAutotrade():
                         placeOrderAutoTrade(symbol,username,qty,side)
 
         elif isSTO and isEMA and not isRSI and not isMACD:
-            zone_sto = float(request.json.get('zone')) #"0.00"
+            zone_sto = float(request.json.get('zone_sto')) #"0.00"
             cross_sto = float(request.json.get('cross_sto')) 
             day = request.json.get('day')
 
@@ -1601,7 +1624,7 @@ def multiAutotrade():
                         placeOrderAutoTrade(symbol,username,qty,side)
 
         elif isMACD and isEMA and not isRSI and not isSTO:
-            zone = float(request.json.get('zone')) #"0.00"
+            zone = float(request.json.get('zone_macd')) #"0.00"
             cross = bool(request.json.get('cross_macd')) 
             day = request.json.get('day')
 
@@ -1620,9 +1643,9 @@ def multiAutotrade():
 
         elif isRSI and isSTO and isMACD and not isEMA:
             rsi_value = float(request.json.get('rsi'))
-            zone_sto = float(request.json.get('zone')) #"0.00"
+            zone_sto = float(request.json.get('zone_sto')) #"0.00"
             cross_sto = float(request.json.get('cross_sto')) 
-            zone = float(request.json.get('zone')) #"0.00"
+            zone = float(request.json.get('zone_macd')) #"0.00"
             cross = bool(request.json.get('cross_macd')) 
 
             if side == "buy":
@@ -1642,7 +1665,7 @@ def multiAutotrade():
 
         elif isRSI and isSTO and isEMA and not isMACD:
             rsi_value = float(request.json.get('rsi'))
-            zone_sto = float(request.json.get('zone')) #"0.00"
+            zone_sto = float(request.json.get('zone_sto')) #"0.00"
             cross_sto = float(request.json.get('cross_sto')) 
             day = request.json.get('day')
 
@@ -1663,7 +1686,7 @@ def multiAutotrade():
 
         elif isRSI and isMACD and isEMA and not isSTO:
             rsi_value = float(request.json.get('rsi'))
-            zone = float(request.json.get('zone')) #"0.00"
+            zone = float(request.json.get('zone_macd')) #"0.00"
             cross = bool(request.json.get('cross_macd')) 
             day = request.json.get('day')
 
@@ -1683,9 +1706,9 @@ def multiAutotrade():
                         placeOrderAutoTrade(symbol,username,qty,side)
             
         elif isSTO and isMACD and isEMA and not isRSI:
-            zone_sto = float(request.json.get('zone')) #"0.00"
+            zone_sto = float(request.json.get('zone_sto')) #"0.00"
             cross_sto = float(request.json.get('cross_sto')) 
-            zone = float(request.json.get('zone')) #"0.00"
+            zone = float(request.json.get('zone_macd')) #"0.00"
             cross = bool(request.json.get('cross_macd')) 
             day = request.json.get('day')
 
@@ -1706,9 +1729,9 @@ def multiAutotrade():
 
         elif isRSI and isSTO and isMACD and isEMA:
             rsi_value = float(request.json.get('rsi'))
-            zone_sto = float(request.json.get('zone')) #"0.00"
+            zone_sto = float(request.json.get('zone_sto')) #"0.00"
             cross_sto = float(request.json.get('cross_sto')) 
-            zone = float(request.json.get('zone')) #"0.00"
+            zone = float(request.json.get('zone_macd')) #"0.00"
             cross = bool(request.json.get('cross_macd')) 
             day = request.json.get('day')
 
@@ -1730,7 +1753,7 @@ def multiAutotrade():
                         placeOrderAutoTrade(symbol,username,qty,side)
 
         print(f"ส่งคำสั่งซื้อสำเร็จ {order_number}")
-        return jsonify(f'error: {str(e)}')                
+        return jsonify(f"ส่งคำสั่งซื้อสำเร็จ {order_number}")                
     except Exception as e:
         print(f'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ: {str(e)}')
         return jsonify(f'error: {str(e)}')
@@ -1738,23 +1761,27 @@ def multiAutotrade():
 
 
 def RSI(symbol,rsi_value,side):
-    handler = getSymbolHandler(symbol)
-    rsi = handler.get_analysis().indicators["RSI"]
+    analysis = getSymbolHandler(symbol)
+    rsi = analysis.indicators["RSI"]
     if side == "buy":
         if rsi < rsi_value:
             return 'buy'
+        else:
+            return 'neutral'
     else:
         if rsi > rsi_value:
             return 'sell'
+        else:
+            return 'neutral'
 
 def STO(symbol,zone_sto,cross_sto,side):
 
-    handler = getSymbolHandler(symbol)
+    analysis = getSymbolHandler(symbol)
 
-    stoK = handler.get_analysis().indicators["Stoch.K"]
-    stoD =handler.get_analysis().indicators["Stoch.D"] 
-    last_stoK = handler.get_analysis().indicators["Stoch.K[1]"]
-    last_stoD =handler.get_analysis().indicators["Stoch.D[1]"]
+    stoK = analysis.indicators["Stoch.K"]
+    stoD =analysis.indicators["Stoch.D"] 
+    last_stoK = analysis.indicators["Stoch.K[1]"]
+    last_stoD =analysis.indicators["Stoch.D[1]"]
 
     if side == 'buy':
         if cross_sto>0:
@@ -1772,15 +1799,13 @@ def STO(symbol,zone_sto,cross_sto,side):
     
 def MACD(symbol,cross,zone,side):
 
-    handler = getSymbolHandler(symbol)
+    analysis = getSymbolHandler(symbol)
 
-    macd = handler.get_analysis().indicators["MACD.macd"]
-    signal =handler.get_analysis().indicators["MACD.signal"]
     if side == 'buy':
         if cross:
             while True:
-                macd = handler.get_analysis().indicators["MACD.macd"]
-                signal = handler.get_analysis().indicators["MACD.signal"]
+                macd = analysis.indicators["MACD.macd"]
+                signal = analysis.indicators["MACD.signal"]
 
                 print("Last MACD: ", last_macd)
                 print("Last Signal: ", last_signal)
@@ -1797,8 +1822,8 @@ def MACD(symbol,cross,zone,side):
                 time.sleep(5)
         else:
             while True:
-                macd = handler.get_analysis().indicators["MACD.macd"]
-                signal = handler.get_analysis().indicators["MACD.signal"]
+                macd = analysis.indicators["MACD.macd"]
+                signal = analysis.indicators["MACD.signal"]
 
                 print("Last MACD: ", last_macd)
                 print("Last Signal: ", last_signal)
@@ -1814,8 +1839,8 @@ def MACD(symbol,cross,zone,side):
     else:
         if cross:
             while True:
-                macd = handler.get_analysis().indicators["MACD.macd"]
-                signal = handler.get_analysis().indicators["MACD.signal"]
+                macd = analysis.indicators["MACD.macd"]
+                signal = analysis.indicators["MACD.signal"]
 
                 print("Last MACD: ", last_macd)
                 print("Last Signal: ", last_signal)
@@ -1826,8 +1851,8 @@ def MACD(symbol,cross,zone,side):
                     return "sell"
         else:
             while True:
-                macd = handler.get_analysis().indicators["MACD.macd"]
-                signal = handler.get_analysis().indicators["MACD.signal"]
+                macd = analysis.indicators["MACD.macd"]
+                signal = analysis.indicators["MACD.signal"]
 
                 print("Last MACD: ", last_macd)
                 print("Last Signal: ", last_signal)
@@ -1836,69 +1861,68 @@ def MACD(symbol,cross,zone,side):
 
                 if macd and signal > zone:     
                     return "sell" 
+                else:
+                    'macd neutral' 
                                    
                 last_macd = macd
                 last_signal = signal
                 print()
                 time.sleep(5) 
 
-def EMA(symbol,day,side):
+def EMA(symbol,day,side,last_ema,last_close):
 
-    handler = getSymbolHandler(symbol)
-
+    analysis = getSymbolHandler(symbol)
     if side == 'buy':
         while True:
-            ema = handler.get_analysis().indicators[f"EMA{day}"]
-            close = handler.get_analysis().indicators["close"]
+            ema = analysis.indicators[f"EMA{day}"]
+            close = analysis.indicators["close"]
             if close <= ema and last_close > last_ema:
-               return "buy"         
-            last_close = close
-            time.sleep(5)
+                return "buy"        
+            else:
+                print("ema: " ,ema)
+                print("close: " ,close) 
+                print("last ema: " ,last_ema) 
+                print("last close: " ,last_close)  
+                print()  
+                return 'ema neutral'
+                
+            
     else:
          while True:
-            ema = handler.get_analysis().indicators[f"EMA{day}"]
-            close = handler.get_analysis().indicators["close"]
+            ema = analysis.indicators[f"EMA{day}"]
+            close = analysis.indicators["close"]
             if close >= ema and last_close < last_ema:
-                return "sell"      
-            last_ema = ema
-            last_close = close
-            time.sleep(5)
+                return "sell"
+            else:
+                last_ema = ema
+                last_close = close
+           
+                return 'ema neutral'       
+        
 
 def getSymbolHandler(symbol):
-    try:
-        handler = TA_Handler(
-            symbol=symbol,
-            screener="NASDAQ",
-            exchange="America",
-            interval="1m"
-        )
-        return handler 
-    except Exception as e:
+    exchanges_to_try = [
+        {"screener": "america", "exchange": "NASDAQ"},
+        {"screener": "america", "exchange": "NYSE"},
+        {"screener": "thailand", "exchange": "SET"},
+        {"screener": "Crypto", "exchange": "Binance"},
+    ]
+
+    for exchange_info in exchanges_to_try:
         try:
             handler = TA_Handler(
                 symbol=symbol,
-                screener="NYSE",
-                exchange="America",
+                screener=exchange_info["screener"],
+                exchange=exchange_info["exchange"],
                 interval="1m"
             )
-            return handler 
-        except Exception as e:
-            try:
-                handler = TA_Handler(
-                    symbol=symbol,
-                    screener="SET",
-                    exchange="Thailand",
-                    interval="1m"
-                )
-                return handler 
-            except Exception as e:
-                handler = TA_Handler(
-                    symbol=symbol,
-                    screener="Binance",
-                    exchange="Crypto",
-                    interval="1m"
-                )
-                return handler  
+            analysis = handler.get_analysis()
+            return analysis
+        except Exception:
+            continue
+
+    return None
+
 
 def placeOrderAutoTrade(symbol,username,qty,side):
     conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
@@ -1934,7 +1958,7 @@ def placeOrderAutoTrade(symbol,username,qty,side):
                     type='market',
                     time_in_force='gtc'        
                 )
-        print('คำสั่งซื้อขายถูกส่งไปยัง Settrade Sandbox แล้ว')
+        print('คำสั่งซื้อขายถูกส่งไปยัง Alpaca แล้ว')
         return "passed"
     except Exception as e:
         try:
@@ -1946,7 +1970,7 @@ def placeOrderAutoTrade(symbol,username,qty,side):
                                     price_type= "MP-MKT",
                                     pin=resultTH[4]
                                     )
-            print('ส่งคำสั่งซื้อสำเร็จ')
+            print('คำสั่งซื้อขายถูกส่งไปยัง Settrade Sandbox แล้ว')
             return "passed"
         except Exception as e:
             print(f'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ: {str(e)}')

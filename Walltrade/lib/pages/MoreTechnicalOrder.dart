@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import '../variables/serverURL.dart';
 
 class MoreTechnicalOrder extends StatefulWidget {
   final String username;
@@ -12,7 +16,12 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
   final String username;
   _MoreTechnicalOrderState({required this.username});
   List<String> selectedMenus = [];
-  Map<String, bool> menuSelectionStatus = {};
+  Map<String, bool> menuSelectionStatus = {
+    'RSI': false,
+    'STO': false,
+    'MACD': false,
+    'EMA': false
+  };
   bool macd_crossupIsChecked = false;
   TextEditingController lowerRSIController = TextEditingController();
   TextEditingController zoneMACDController = TextEditingController();
@@ -26,14 +35,52 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
 
   String selectedInterval = '1 hour';
 
+  String selectedDay = '5';
+
   void toggleContainer(String menu) {
     setState(() {
       if (selectedMenus.contains(menu)) {
         selectedMenus.remove(menu);
+        menuSelectionStatus[menu] = false;
       } else {
         selectedMenus.add(menu);
+        menuSelectionStatus[menu] = true;
       }
+      print(menuSelectionStatus);
     });
+  }
+
+  Future<void> multiAutotrade(String side) async {
+    var url = Uri.parse('${Constants.serverUrl}/multiAutotrade');
+    var headers = {'Content-Type': 'application/json'};
+    var body = {
+      'username': username,
+      'isRSI': menuSelectionStatus['RSI'],
+      'isSTO': menuSelectionStatus['STO'],
+      'isMACD': menuSelectionStatus['MACD'],
+      'isEMA': menuSelectionStatus['EMA'],
+      'symbol': symbolController.text.toUpperCase(),
+      'qty': double.parse(qtyController.text),
+      'side': side,
+      'rsi': lowerRSIController.text,
+      'zone_sto': zoneSTOController.text,
+      'cross_sto': crossupSTOController.text,
+      'zone_macd': zoneMACDController.text,
+      'cross_macd': macd_crossupIsChecked,
+      'day': int.parse(dayController.text),
+    };
+
+    var response =
+        await http.post(url, headers: headers, body: jsonEncode(body));
+
+    // ตรวจสอบสถานะการตอบสนอง
+    if (response.statusCode == 200) {
+      // สำเร็จ
+      print('ส่งข้อมูลสำเร็จ');
+    } else {
+      // ไม่สำเร็จ
+      print('การส่งข้อมูลไม่สำเร็จ');
+    }
   }
 
   Widget moreInfoSymbol() {
@@ -221,9 +268,38 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                       );
                     },
                   );
+                } else {
+                  multiAutotrade('buy');
                 }
               },
-              child: Text("ยืนยัน"),
+              child: Text("ซื้อ"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (selectedMenus.length < 2) {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text('เกิดข้อผิดพลาด'),
+                        content: Text(
+                            'โปรดเลือกเทคนิคชี้วัดที่ต้องการใช้อย่างน้อย 2 เทคนิค'),
+                        actions: [
+                          TextButton(
+                            child: Text('ตกลง'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                } else {
+                  multiAutotrade('sell');
+                }
+              },
+              child: Text("ขาย"),
             )
           ],
         ),
@@ -279,47 +355,13 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text('ระบุวันของ EMA'),
-                  SizedBox(width: 5),
-                  Expanded(
-                    child: TextField(
-                      controller: dayController,
-                      decoration: InputDecoration(
-                        labelText: 'จำนวนวันที่ต้องการใช้',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.info,
-                      size: 24,
-                    ),
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: Text('More Info'),
-                            content: Text(
-                                'Additional information about timeframes.'),
-                            actions: [
-                              TextButton(
-                                child: Text('OK'),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ],
+              child: EMADropdown(
+                selectedDay: selectedDay,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedDay = newValue!;
+                  });
+                },
               ),
             ),
           ],
@@ -989,6 +1031,109 @@ class TimeframeDropdown extends StatelessWidget {
                   child: Text(
                     '1 week',
                     style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: Icon(
+              Icons.info,
+              size: 24,
+            ),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text('More Info'),
+                    content: Text('Additional information about timeframes.'),
+                    actions: [
+                      TextButton(
+                        child: Text('OK'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class EMADropdown extends StatelessWidget {
+  final String selectedDay;
+  final Function(String?) onChanged;
+
+  const EMADropdown({
+    required this.selectedDay,
+    required this.onChanged,
+  });
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Text(
+            'จำนวนวันของ EMA',
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+          ),
+          DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              dropdownColor: Color.fromARGB(255, 226, 218, 218),
+              borderRadius: BorderRadius.circular(10),
+              value: selectedDay,
+              onChanged: onChanged,
+              icon: Icon(Icons.arrow_drop_down_circle),
+              items: [
+                DropdownMenuItem(
+                  value: '5',
+                  child: Text(
+                    'EMA5',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: '10',
+                  child: Text(
+                    'EMA10',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: '20',
+                  child: Text(
+                    'EMA20',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: '50',
+                  child: Text(
+                    'EMA50',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: '100',
+                  child: Text(
+                    'EMA100',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: '200',
+                  child: Text(
+                    'EMA200',
+                    style: TextStyle(color: Colors.black),
                   ),
                 ),
               ],
