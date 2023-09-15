@@ -32,7 +32,6 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
   TextEditingController qtyController = TextEditingController();
   bool isCrossTextFieldEnabled = true;
   bool isZoneTextFieldEnabled = true;
-
   String selectedInterval = '1 hour';
 
   String selectedDay = '5';
@@ -47,7 +46,6 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
         menuSelectionStatus[menu] = true;
       }
       print(menuSelectionStatus);
-
     });
   }
 
@@ -107,13 +105,14 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
               padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: Colors.black,
+                color: Colors.grey.shade200,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.7),
                     spreadRadius: 2,
                     blurRadius: 5,
-                    offset: const Offset(0, 3), // changes the position of the shadow
+                    offset: const Offset(
+                        0, 3), // changes the position of the shadow
                   ),
                 ],
               ),
@@ -142,6 +141,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                 Expanded(
                   child: TextField(
                     controller: symbolController,
+                    style: TextStyle(color: Colors.white),
                     decoration: const InputDecoration(
                       labelText: 'เช่น META, AAPL, PTT, SCB',
                       labelStyle: TextStyle(fontSize: 14, color: Colors.white),
@@ -187,6 +187,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                 Expanded(
                   child: TextField(
                     controller: qtyController,
+                    style: TextStyle(color: Colors.white),
                     decoration: const InputDecoration(
                       labelText: 'เช่น 0.1,1000,5',
                       labelStyle: TextStyle(fontSize: 14, color: Colors.white),
@@ -228,8 +229,8 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                       builder: (context) {
                         return AlertDialog(
                           title: const Text('More Info'),
-                          content:
-                              const Text('Additional information about timeframes.'),
+                          content: const Text(
+                              'Additional information about timeframes.'),
                           actions: [
                             TextButton(
                               child: const Text('OK'),
@@ -339,7 +340,8 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                     color: Colors.grey.withOpacity(0.5),
                     spreadRadius: 2,
                     blurRadius: 5,
-                    offset: const Offset(0, 3), // changes the position of the shadow
+                    offset: const Offset(
+                        0, 3), // changes the position of the shadow
                   ),
                 ],
               ),
@@ -399,7 +401,8 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                   color: Colors.grey.withOpacity(0.5),
                   spreadRadius: 2,
                   blurRadius: 5,
-                  offset: const Offset(0, 3), // changes the position of the shadow
+                  offset:
+                      const Offset(0, 3), // changes the position of the shadow
                 ),
               ],
             ),
@@ -444,8 +447,8 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                       builder: (context) {
                         return AlertDialog(
                           title: const Text('More Info'),
-                          content:
-                              const Text('Additional information about timeframes.'),
+                          content: const Text(
+                              'Additional information about timeframes.'),
                           actions: [
                             TextButton(
                               child: const Text('OK'),
@@ -501,7 +504,8 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                     color: Colors.grey.withOpacity(0.5),
                     spreadRadius: 2,
                     blurRadius: 5,
-                    offset: const Offset(0, 3), // changes the position of the shadow
+                    offset: const Offset(
+                        0, 3), // changes the position of the shadow
                   ),
                 ],
               ),
@@ -649,7 +653,8 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                   color: Colors.grey.withOpacity(0.5),
                   spreadRadius: 2,
                   blurRadius: 5,
-                  offset: const Offset(0, 3), // changes the position of the shadow
+                  offset:
+                      const Offset(0, 3), // changes the position of the shadow
                 ),
               ],
             ),
@@ -708,8 +713,8 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                       builder: (context) {
                         return AlertDialog(
                           title: const Text('More Info'),
-                          content:
-                              const Text('Additional information about timeframes.'),
+                          content: const Text(
+                              'Additional information about timeframes.'),
                           actions: [
                             TextButton(
                               child: const Text('OK'),
@@ -767,8 +772,8 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                       builder: (context) {
                         return AlertDialog(
                           title: const Text('More Info'),
-                          content:
-                              const Text('Additional information about timeframes.'),
+                          content: const Text(
+                              'Additional information about timeframes.'),
                           actions: [
                             TextButton(
                               child: const Text('OK'),
@@ -834,12 +839,14 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                   GestureDetector(
                     onTap: () {
                       toggleContainer('RSI');
+                      print(menuSelectionStatus['RSI']);
                     },
                     child: Container(
                       width: 60, // กำหนดความกว้างของปุ่ม
                       height: 60, // กำหนดความสูงของปุ่ม
                       decoration: BoxDecoration(
-                        border: Border.all(color: const Color(0xFF2A3547), width: 3),
+                        border: Border.all(
+                            color: const Color(0xFF2A3547), width: 3),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withOpacity(0.5),
@@ -850,17 +857,29 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                           ),
                         ],
                         borderRadius: BorderRadius.circular(10),
-                        color: const Color(0xFFABC270), // สีพื้นหลังของปุ่ม
+                        color: menuSelectionStatus['RSI'] == true
+                            ? Color(0xFF2A3547)
+                            : Colors.white, // สีพื้นหลังของปุ่ม
                       ),
-                      child: const Center(
-                        child: Text(
-                          'RSI',
-                          style: TextStyle(
-                            color: Colors.white, // สีข้อความ
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
+                      child: menuSelectionStatus['RSI'] == true
+                          ? Center(
+                              child: Text(
+                                'RSI',
+                                style: TextStyle(
+                                  color: Colors.white, // สีข้อความ
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            )
+                          : Center(
+                              child: Text(
+                                'RSI',
+                                style: TextStyle(
+                                  color: Colors.black, // สีข้อความ
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                     ),
                   ),
                   GestureDetector(
@@ -871,7 +890,8 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                       width: 60, // กำหนดความกว้างของปุ่ม
                       height: 60, // กำหนดความสูงของปุ่ม
                       decoration: BoxDecoration(
-                        border: Border.all(color: const Color(0xFF2A3547), width: 3),
+                        border: Border.all(
+                            color: const Color(0xFF2A3547), width: 3),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withOpacity(0.5),
@@ -881,18 +901,32 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                                 0, 3), // changes the position of the shadow
                           ),
                         ],
-                        shape: BoxShape.circle, // กำหนดให้รูปร่างเป็นวงกลม
-                        color: const Color(0xFFFEC868), // สีพื้นหลังของปุ่ม
+                        borderRadius: BorderRadius.circular(
+                            10), // กำหนดให้รูปร่างเป็นวงกลม
+                        color: menuSelectionStatus['STO'] == true
+                            ? Color(0xFF2A3547)
+                            : Colors.white, // สีพื้นหลังของปุ่ม
+                        // สีพื้นหลังของปุ่ม
                       ),
-                      child: const Center(
-                        child: Text(
-                          'STO',
-                          style: TextStyle(
-                            color: Colors.white, // สีข้อความ
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
+                      child: menuSelectionStatus['STO'] == true
+                          ? Center(
+                              child: Text(
+                                'STO',
+                                style: TextStyle(
+                                  color: Colors.white, // สีข้อความ
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            )
+                          : Center(
+                              child: Text(
+                                'STO',
+                                style: TextStyle(
+                                  color: Colors.black, // สีข้อความ
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                     ),
                   ),
                   GestureDetector(
@@ -903,7 +937,8 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                       width: 60, // กำหนดความกว้างของปุ่ม
                       height: 60, // กำหนดความสูงของปุ่ม
                       decoration: BoxDecoration(
-                        border: Border.all(color: const Color(0xFF2A3547), width: 3),
+                        border: Border.all(
+                            color: const Color(0xFF2A3547), width: 3),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withOpacity(0.5),
@@ -913,18 +948,32 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                                 0, 3), // changes the position of the shadow
                           ),
                         ],
-                        shape: BoxShape.circle, // กำหนดให้รูปร่างเป็นวงกลม
-                        color: const Color(0xFFFDA769), // สีพื้นหลังของปุ่ม
+                        borderRadius: BorderRadius.circular(
+                            10), // กำหนดให้รูปร่างเป็นวงกลม
+                        color: menuSelectionStatus['MACD'] == true
+                            ? Color(0xFF2A3547)
+                            : Colors.white, // สีพื้นหลังของปุ่ม
+                        // สีพื้นหลังของปุ่ม
                       ),
-                      child: const Center(
-                        child: Text(
-                          'MACD',
-                          style: TextStyle(
-                            color: Colors.white, // สีข้อความ
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
+                      child: menuSelectionStatus['MACD'] == true
+                          ? Center(
+                              child: Text(
+                                'MACD',
+                                style: TextStyle(
+                                  color: Colors.white, // สีข้อความ
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            )
+                          : Center(
+                              child: Text(
+                                'MACD',
+                                style: TextStyle(
+                                  color: Colors.black, // สีข้อความ
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                     ),
                   ),
                   GestureDetector(
@@ -935,7 +984,8 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                       width: 60, // กำหนดความกว้างของปุ่ม
                       height: 60, // กำหนดความสูงของปุ่ม
                       decoration: BoxDecoration(
-                        border: Border.all(color: const Color(0xFF2A3547), width: 3),
+                        border: Border.all(
+                            color: const Color(0xFF2A3547), width: 3),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withOpacity(0.5),
@@ -945,18 +995,31 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                                 0, 3), // changes the position of the shadow
                           ),
                         ],
-                        shape: BoxShape.circle, // กำหนดให้รูปร่างเป็นวงกลม
-                        color: const Color(0xFF473C33), // สีพื้นหลังของปุ่ม
+                        borderRadius: BorderRadius.circular(
+                            10), // กำหนดให้รูปร่างเป็นวงกลม
+                        color: menuSelectionStatus['EMA'] == true
+                            ? Color(0xFF2A3547)
+                            : Colors.white, // สีพื้นหลังของปุ่ม
                       ),
-                      child: const Center(
-                        child: Text(
-                          'EMA',
-                          style: TextStyle(
-                            color: Colors.white, // สีข้อความ
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
+                      child: menuSelectionStatus['EMA'] == true
+                          ? Center(
+                              child: Text(
+                                'EMA',
+                                style: TextStyle(
+                                  color: Colors.white, // สีข้อความ
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            )
+                          : Center(
+                              child: Text(
+                                'EMA',
+                                style: TextStyle(
+                                  color: Colors.black, // สีข้อความ
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                     ),
                   ),
                 ],
@@ -1048,7 +1111,8 @@ class TimeframeDropdown extends StatelessWidget {
                 builder: (context) {
                   return AlertDialog(
                     title: const Text('More Info'),
-                    content: const Text('Additional information about timeframes.'),
+                    content:
+                        const Text('Additional information about timeframes.'),
                     actions: [
                       TextButton(
                         child: const Text('OK'),
@@ -1151,7 +1215,8 @@ class EMADropdown extends StatelessWidget {
                 builder: (context) {
                   return AlertDialog(
                     title: const Text('More Info'),
-                    content: const Text('Additional information about timeframes.'),
+                    content:
+                        const Text('Additional information about timeframes.'),
                     actions: [
                       TextButton(
                         child: const Text('OK'),
