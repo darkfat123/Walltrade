@@ -251,7 +251,9 @@ class _NotifyActivity extends State<NotifyActivity> {
                             ),
                           ),
                           Chip(
-                            backgroundColor: order['side'] == 'buy' ? Colors.green : Colors.red,
+                            backgroundColor: order['side'] == 'buy'
+                                ? Colors.green
+                                : Colors.red,
                             label: Text(
                               order['side'] == 'buy' ? 'ซื้อ' : 'ขาย',
                               style: TextStyle(
@@ -305,18 +307,42 @@ class _NotifyActivity extends State<NotifyActivity> {
                                 color: Colors.black,
                               ),
                             ),
-                            Row(
+                            order['status'] == 'completed'
+                                ? Row(
+                                    children: [
+                                      Icon(
+                                        Icons.circle,
+                                        size: 14,
+                                        color: Colors.green,
+                                      ),
+                                      SizedBox(
+                                        width: 8,
+                                      ),
+                                      Text(
+                                        "สำเร็จแล้ว",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 8,
+                                      ),
+                                    ],
+                                  )
+                                : Row(
                               children: [
                                 Icon(
                                   Icons.circle,
                                   size: 14,
-                                  color: Colors.green,
+                                  color: Colors.red,
                                 ),
                                 SizedBox(
                                   width: 8,
                                 ),
                                 Text(
-                                  "สำเร็จแล้ว",
+                                  "ยกเลิก",
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w500,

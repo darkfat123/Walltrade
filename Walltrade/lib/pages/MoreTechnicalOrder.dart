@@ -68,7 +68,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
       'cross_sto': crossupSTOController.text,
       'zone_macd': zoneMACDController.text,
       'cross_macd': macd_crossupIsChecked,
-      'day': dayController.text == '' ?  int.parse('0') : int.parse(dayController.text) ,
+      'day': selectedDay,
     };
 
     var response =
@@ -849,7 +849,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                                 0, 3), // changes the position of the shadow
                           ),
                         ],
-                        shape: BoxShape.circle, // กำหนดให้รูปร่างเป็นวงกลม
+                        borderRadius: BorderRadius.circular(10),
                         color: const Color(0xFFABC270), // สีพื้นหลังของปุ่ม
                       ),
                       child: const Center(

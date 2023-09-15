@@ -643,15 +643,10 @@ def autotradeRSI():
     
     if side == 'buy':
         while True:
-            # Check the status in localhost and break the loop if it's 'completed'
-            query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
-            cursor2 = conn.cursor()
-            cursor2.execute("RESET QUERY CACHE;")
-            cursor2.execute(query2)
-            result2 = cursor2.fetchone()
-            print(result2[0])
             print(handler.get_analysis().indicators["RSI"])
-            if result2[0] == 'completed':
+            checkStatus = checkStatusOrder(username=username,order_number=order_number)
+            print(checkStatus)
+            if checkStatus == 'cancelled':
                 return jsonify('autotrade buy rsi cancelled')
             
             elif handler.get_analysis().indicators["RSI"] <= lowerRSI:
@@ -663,6 +658,7 @@ def autotradeRSI():
                     type=type,
                     time_in_force=time_in_force           
                 )                
+                    completeOrder(username=username,orderID=order_number)
                     return jsonify('autotrade buy success')
                 except Exception as e:
                     return jsonify(f'error: {str(e)}')
@@ -670,6 +666,7 @@ def autotradeRSI():
     else:
         while True:
              # Check the status in localhost and break the loop if it's 'completed'
+            print("เข้าเงื่อนไขขาย RSI")
             query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
             cursor2 = conn.cursor()
             cursor2.execute("RESET QUERY CACHE;")
@@ -677,7 +674,7 @@ def autotradeRSI():
             result2 = cursor2.fetchone()
             print(result2[0])
             print(handler.get_analysis().indicators["RSI"])
-            if result2[0] == 'completed':
+            if result2[0] == 'cancelled':
                 return jsonify('autotrade sell rsi cancelled')
             
             elif handler.get_analysis().indicators["RSI"] >= lowerRSI:
@@ -689,7 +686,7 @@ def autotradeRSI():
                     type=type,
                     time_in_force=time_in_force           
                 )
-                
+                    completeOrder(username=username,orderID=order_number)
                     return jsonify('autotrade sell success')
                 except Exception as e:
                     return jsonify(f'error: {str(e)}')
@@ -772,7 +769,7 @@ def autotradeMACD():
                 cursor2.execute(query2)
                 result2 = cursor2.fetchone()
                 print(result2[0])
-                if result2[0] == 'completed':
+                if result2[0] == 'cancelled':
                     return jsonify('autotrade buy macd cancelled')
                 
                 elif (last_macd < last_signal and macd > signal) and (macd and signal < 0):
@@ -810,7 +807,7 @@ def autotradeMACD():
                 cursor2.execute(query2)
                 result2 = cursor2.fetchone()
                 print(result2[0])
-                if result2[0] == 'completed':
+                if result2[0] == 'cancelled':
                     return jsonify('autotrade buy macd cancelled')
                 
                 elif macd and signal < zone:
@@ -849,7 +846,7 @@ def autotradeMACD():
                 cursor2.execute(query2)
                 result2 = cursor2.fetchone()
                 print(result2[0])
-                if result2[0] == 'completed':
+                if result2[0] == 'cancelled':
                     return jsonify('autotrade sell macd cancelled')
                 
                 elif (last_macd > last_signal and macd < signal) and (macd and signal > 0):
@@ -882,7 +879,7 @@ def autotradeMACD():
                 cursor2.execute(query2)
                 result2 = cursor2.fetchone()
                 print(result2[0])
-                if result2[0] == 'completed':
+                if result2[0] == 'cancelled':
                     return jsonify('autotrade sell macd cancelled')
                 
                 elif macd and signal > zone:
@@ -979,7 +976,7 @@ def autotradeSTO():
                 cursor2.execute(query2)
                 result2 = cursor2.fetchone()
                 print(result2[0])
-                if result2[0] == 'completed':
+                if result2[0] == 'cancelled':
                     return jsonify('autotrade sell sto cancelled')
                 
                 elif sto_k < cross_sto and sto_d < cross_sto and sto_k > sto_d and last_sto_k < last_sto_d:
@@ -1015,7 +1012,7 @@ def autotradeSTO():
                 cursor2.execute(query2)
                 result2 = cursor2.fetchone()
                 print(result2[0])
-                if result2[0] == 'completed':
+                if result2[0] == 'cancelled':
                     return jsonify('autotrade sell sto cancelled')
                 
                 elif sto_k <= zone_sto and sto_d <= zone_sto:
@@ -1051,7 +1048,7 @@ def autotradeSTO():
                 cursor2.execute(query2)
                 result2 = cursor2.fetchone()
                 print(result2[0])
-                if result2[0] == 'completed':
+                if result2[0] == 'cancelled':
                     return jsonify('autotrade sell sto cancelled')
                 
                 elif sto_k > cross_sto and sto_d > cross_sto and sto_k < sto_d and last_sto_k > last_sto_d:
@@ -1087,7 +1084,7 @@ def autotradeSTO():
                 cursor2.execute(query2)
                 result2 = cursor2.fetchone()
                 print(result2[0])
-                if result2[0] == 'completed':
+                if result2[0] == 'cancelled':
                     return jsonify('autotrade sell sto cancelled')
                 
                 elif sto_k >= zone_sto and sto_d >= zone_sto:
@@ -1166,7 +1163,7 @@ def autotradeEMA():
             cursor2.execute(query2)
             result2 = cursor2.fetchone()
             print(result2[0])
-            if result2[0] == 'completed':
+            if result2[0] == 'cancelled':
                 return jsonify('autotrade buy ema cancelled')
                 
             elif close <= ema and last_close > last_ema:
@@ -1195,7 +1192,7 @@ def autotradeEMA():
             cursor2.execute(query2)
             result2 = cursor2.fetchone()
             print(result2[0])
-            if result2[0] == 'completed':
+            if result2[0] == 'cancelled':
                 return jsonify('autotrade sell ema cancelled')
                 
             elif close >= ema and last_close < last_ema:
@@ -1428,7 +1425,8 @@ def cancelOrder():
     result = cursor.fetchone()
     print(orderID,username,result)
     if(result[0]=='pending' and isCancel):
-        cancel = f"UPDATE auto_order SET status = 'completed' WHERE username = '{username}' AND OrderID ='{orderID}'"
+        print("cancel")
+        cancel = f"UPDATE auto_order SET status = 'cancelled' WHERE username = '{username}' AND OrderID ='{orderID}'"
         cursor = conn.cursor()
         cursor.execute(cancel)
         conn.commit()  # ต้องมีการ commit เพื่อบันทึกการเปลี่ยนแปลงในฐานข้อมูล
@@ -1439,6 +1437,20 @@ def cancelOrder():
         cursor.execute(cancel)
         conn.commit()  # ต้องมีการ commit เพื่อบันทึกการเปลี่ยนแปลงในฐานข้อมูล
         return jsonify('add for undo success')
+    
+def completeOrder(username,orderID):
+    conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
+    query = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID ='{orderID}'"
+    cursor = conn.cursor()
+    cursor.execute(query)
+    result = cursor.fetchone()
+    if(result[0]=='pending'):
+        print("completed")
+        complete = f"UPDATE auto_order SET status = 'completed' WHERE username = '{username}' AND OrderID ='{orderID}'"
+        cursor = conn.cursor()
+        cursor.execute(complete)
+        conn.commit()  
+        return jsonify('completed')
 
 @app.route('/multiAutotrade', methods=['POST'])
 def multiAutotrade():
@@ -1533,7 +1545,7 @@ def multiAutotrade():
                     print("เข้าเงื่อนไขซื้อ cross RSI STO")
                     while True:
                         checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                        if checkStatus == 'completed':
+                        if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
                             analysis = getSymbolHandler(symbol=symbol)
@@ -1544,12 +1556,13 @@ def multiAutotrade():
                             last_stoD = analysis.indicators["Stoch.D[1]"]
                             if rsi < rsi_value and stoK < cross_sto and stoD < cross_sto and stoK > stoD and last_stoK < last_stoD:
                                 placeOrderAutoTrade(symbol,username,qty,side)
+                                completeOrder(username=username,orderID=order_number)
                                 return jsonify(f"ซื้อ cross RSI STO สำเร็จ")
                 else:
                     print("เข้าเงื่อนไขซื้อ zone RSI STO")
                     while True:
                         checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                        if checkStatus == 'completed':
+                        if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi zone sto cancelled')
                         else:
                             analysis = getSymbolHandler(symbol=symbol)
@@ -1560,13 +1573,14 @@ def multiAutotrade():
                             last_stoD = analysis.indicators["Stoch.D[1]"]
                             if rsi < rsi_value and stoK <= zone_sto and stoD <= zone_sto:
                                 placeOrderAutoTrade(symbol,username,qty,side)
+                                completeOrder(username=username,orderID=order_number)
                                 return jsonify(f"ซื้อ zone RSI STO สำเร็จ")
             else:
                 if cross_sto > 0:
                     print("เข้าเงื่อนไขขาย cross RSI STO")
                     while True:
                         checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                        if checkStatus == 'completed':
+                        if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
                             analysis = getSymbolHandler(symbol=symbol)
@@ -1577,12 +1591,13 @@ def multiAutotrade():
                             last_stoD = analysis.indicators["Stoch.D[1]"]
                             if rsi > rsi_value and stoK > cross_sto and stoD > cross_sto and stoK < stoD and last_stoK > last_stoD:
                                 placeOrderAutoTrade(symbol,username,qty,side)
+                                completeOrder(username=username,orderID=order_number)
                                 return jsonify(f"ขาย cross RSI STO สำเร็จ")
                 else:
                     print("เข้าเงื่อนไขขาย zone RSI STO")
                     while True:
                         checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                        if checkStatus == 'completed':
+                        if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
                             analysis = getSymbolHandler(symbol=symbol)
@@ -1593,6 +1608,7 @@ def multiAutotrade():
                             last_stoD = analysis.indicators["Stoch.D[1]"]
                             if rsi > rsi_value and stoK >= zone_sto and stoD >= zone_sto:
                                 placeOrderAutoTrade(symbol,username,qty,side)
+                                completeOrder(username=username,orderID=order_number)
                                 return jsonify(f"ขาย zone RSI STO สำเร็จ")
                 
 
@@ -1607,7 +1623,7 @@ def multiAutotrade():
                     print("เข้าเงื่อนไขซื้อ cross RSI MACD")
                     while True:
                         checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                        if checkStatus == 'completed':
+                        if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
                             analysis = getSymbolHandler(symbol=symbol)
@@ -1616,6 +1632,7 @@ def multiAutotrade():
                             signal = analysis.indicators["MACD.signal"]
                             if rsi < rsi_value and (last_macd < last_signal and macd > signal) and (macd and signal < 0):
                                 placeOrderAutoTrade(symbol,username,qty,side)
+                                completeOrder(username=username,orderID=order_number)
                                 return jsonify(f"ซื้อ cross RSI MACD สำเร็จ")
                             last_macd = macd
                             last_signal = signal
@@ -1623,7 +1640,7 @@ def multiAutotrade():
                     print("เข้าเงื่อนไขซื้อ zone RSI MACD")
                     while True:
                         checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                        if checkStatus == 'completed':
+                        if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
                             analysis = getSymbolHandler(symbol=symbol)
@@ -1632,6 +1649,7 @@ def multiAutotrade():
                             signal = analysis.indicators["MACD.signal"]
                             if rsi < rsi_value and (macd and signal < zone):
                                 placeOrderAutoTrade(symbol,username,qty,side)
+                                completeOrder(username=username,orderID=order_number)
                                 return jsonify(f"ซื้อ zone RSI MACD สำเร็จ")
                             last_macd = macd
                             last_signal = signal
@@ -1640,7 +1658,7 @@ def multiAutotrade():
                     print("เข้าเงื่อนไขขาย cross RSI MACD")
                     while True:
                         checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                        if checkStatus == 'completed':
+                        if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
                             analysis = getSymbolHandler(symbol=symbol)
@@ -1649,6 +1667,7 @@ def multiAutotrade():
                             signal = analysis.indicators["MACD.signal"]
                             if rsi > rsi_value and (last_macd > last_signal and macd < signal) and (macd and signal > 0):
                                 placeOrderAutoTrade(symbol,username,qty,side)
+                                completeOrder(username=username,orderID=order_number)
                                 return jsonify(f"ขาย cross RSI MACD สำเร็จ")
                             last_macd = macd
                             last_signal = signal
@@ -1656,7 +1675,7 @@ def multiAutotrade():
                     print("เข้าเงื่อนไขขาย zone RSI MACD")
                     while True:
                         checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                        if checkStatus == 'completed':
+                        if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
                             analysis = getSymbolHandler(symbol=symbol)
@@ -1665,6 +1684,7 @@ def multiAutotrade():
                             signal = analysis.indicators["MACD.signal"]
                             if rsi < rsi_value and (macd and signal > zone):
                                 placeOrderAutoTrade(symbol,username,qty,side)
+                                completeOrder(username=username,orderID=order_number)
                                 return jsonify(f"ขาย zone RSI MACD สำเร็จ")
                             last_macd = macd
                             last_signal = signal
@@ -1678,7 +1698,7 @@ def multiAutotrade():
                 print("เข้าเงื่อนไขซื้อ RSI EMA")
                 while True:      
                     checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                    if checkStatus == 'completed':
+                    if checkStatus == 'cancelled':
                         return jsonify('autotrade buy rsi cross sto cancelled')
                     else:
                         analysis = getSymbolHandler(symbol=symbol)     
@@ -1687,6 +1707,7 @@ def multiAutotrade():
                         close = analysis.indicators["close"]
                         if rsi < rsi_value and close <= ema and last_close > last_ema:
                             placeOrderAutoTrade(symbol=symbol,username=username,qty=qty,side=side)
+                            completeOrder(username=username,orderID=order_number)
                             return jsonify("ซื้อ RSI EMA สำเร็จ")
                         last_ema = ema
                         last_close = close
@@ -1695,7 +1716,7 @@ def multiAutotrade():
                 print("เข้าเงื่อนไขขาย RSI EMA")
                 while True:      
                     checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                    if checkStatus == 'completed':
+                    if checkStatus == 'cancelled':
                         return jsonify('autotrade buy rsi cross sto cancelled')
                     else:
                         analysis = getSymbolHandler(symbol=symbol)     
@@ -1704,6 +1725,7 @@ def multiAutotrade():
                         close = analysis.indicators["close"]
                         if rsi > rsi_value and close >= ema and last_close < last_ema:
                             placeOrderAutoTrade(symbol=symbol,username=username,qty=qty,side=side)
+                            completeOrder(username=username,orderID=order_number)
                             return jsonify("ขาย RSI EMA สำเร็จ")
                         last_ema = ema
                         last_close = close
@@ -1719,7 +1741,7 @@ def multiAutotrade():
                     if cross:
                         while True:
                             checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                            if checkStatus == 'completed':
+                            if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
                                 analysis = getSymbolHandler(symbol=symbol)    
@@ -1731,13 +1753,14 @@ def multiAutotrade():
                                 signal = analysis.indicators["MACD.signal"]
                                 if (stoK < cross_sto and stoD < cross_sto and stoK > stoD and last_stoK < last_stoD) and (last_macd < last_signal and macd > signal) and (macd and signal < 0):
                                     placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
                                     return jsonify("ซื้อ cross STO cross 0 MACD สำเร็จ")
                                 last_macd = macd
                                 last_signal = signal
                     else:
                         while True:
                             checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                            if checkStatus == 'completed':
+                            if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
                                 analysis = getSymbolHandler(symbol=symbol)    
@@ -1749,6 +1772,7 @@ def multiAutotrade():
                                 signal = analysis.indicators["MACD.signal"]
                                 if (stoK < cross_sto and stoD < cross_sto and stoK > stoD and last_stoK < last_stoD) and (macd and signal < zone):
                                     placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
                                     return jsonify("ซื้อ cross STO zone MACD สำเร็จ")
                                 last_macd = macd
                                 last_signal = signal
@@ -1756,7 +1780,7 @@ def multiAutotrade():
                     if cross:
                         while True:
                             checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                            if checkStatus == 'completed':
+                            if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
                                 analysis = getSymbolHandler(symbol=symbol)    
@@ -1768,13 +1792,14 @@ def multiAutotrade():
                                 signal = analysis.indicators["MACD.signal"]
                                 if (stoK <= zone_sto and stoD <= zone_sto) and (last_macd < last_signal and macd > signal) and (macd and signal < 0):
                                     placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
                                     return jsonify("ซื้อ zone STO cross 0 MACD สำเร็จ")
                                 last_macd = macd
                                 last_signal = signal
                     else:
                         while True:
                             checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                            if checkStatus == 'completed':
+                            if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
                                 analysis = getSymbolHandler(symbol=symbol)    
@@ -1786,6 +1811,7 @@ def multiAutotrade():
                                 signal = analysis.indicators["MACD.signal"]
                                 if (stoK <= zone_sto and stoD <= zone_sto) and (macd and signal < zone):
                                     placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
                                     return jsonify("ซื้อ zone STO zone MACD สำเร็จ")
                                 last_macd = macd
                                 last_signal = signal
@@ -1796,7 +1822,7 @@ def multiAutotrade():
                     if cross:
                         while True:
                             checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                            if checkStatus == 'completed':
+                            if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
                                 analysis = getSymbolHandler(symbol=symbol)    
@@ -1808,13 +1834,14 @@ def multiAutotrade():
                                 signal = analysis.indicators["MACD.signal"]
                                 if (stoK > cross_sto and stoD > cross_sto and stoK < stoD and last_stoK > last_stoD) and (last_macd > last_signal and macd < signal) and (macd and signal > 0):
                                     placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
                                     return jsonify("ขาย cross STO cross > 0 MACD สำเร็จ")
                                 last_macd = macd
                                 last_signal = signal
                     else:
                         while True:
                             checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                            if checkStatus == 'completed':
+                            if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
                                 analysis = getSymbolHandler(symbol=symbol)    
@@ -1826,6 +1853,7 @@ def multiAutotrade():
                                 signal = analysis.indicators["MACD.signal"]
                                 if (stoK > cross_sto and stoD > cross_sto and stoK < stoD and last_stoK > last_stoD) and  (macd and signal > zone):
                                     placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
                                     return jsonify("ขาย cross STO zone MACD สำเร็จ")
                                 last_macd = macd
                                 last_signal = signal
@@ -1833,7 +1861,7 @@ def multiAutotrade():
                     if cross:
                         while True:
                             checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                            if checkStatus == 'completed':
+                            if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
                                 analysis = getSymbolHandler(symbol=symbol)    
@@ -1845,13 +1873,14 @@ def multiAutotrade():
                                 signal = analysis.indicators["MACD.signal"]
                                 if (stoK >= zone_sto and stoD >= zone_sto) and (last_macd > last_signal and macd < signal) and (macd and signal > 0):
                                     placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
                                     return jsonify("ขาย zone STO cross > 0 MACD สำเร็จ")
                                 last_macd = macd
                                 last_signal = signal
                     else:
                         while True:
                             checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                            if checkStatus == 'completed':
+                            if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
                                 analysis = getSymbolHandler(symbol=symbol)    
@@ -1863,6 +1892,7 @@ def multiAutotrade():
                                 signal = analysis.indicators["MACD.signal"]
                                 if (stoK >= zone_sto and stoD >= zone_sto) and  (macd and signal > zone):
                                     placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
                                     return jsonify("ขาย zone STO zone MACD สำเร็จ")
                                 last_macd = macd
                                 last_signal = signal
@@ -1876,7 +1906,7 @@ def multiAutotrade():
                 if cross_sto>0:
                     while True:
                         checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                        if checkStatus == 'completed':
+                        if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
                             analysis = getSymbolHandler(symbol=symbol)    
@@ -1888,13 +1918,14 @@ def multiAutotrade():
                             close = analysis.indicators["close"]
                             if (stoK < cross_sto and stoD < cross_sto and stoK > stoD and last_stoK < last_stoD) and (close <= ema and last_close > last_ema):
                                 placeOrderAutoTrade(symbol,username,qty,side)
+                                completeOrder(username=username,orderID=order_number)
                                 return jsonify("ซื้อ cross STO EMA สำเร็จ")
                             last_ema = ema
                             last_close = last_close
                 else:
                     while True:
                         checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                        if checkStatus == 'completed':
+                        if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
                             analysis = getSymbolHandler(symbol=symbol)    
@@ -1906,6 +1937,7 @@ def multiAutotrade():
                             close = analysis.indicators["close"]
                             if (stoK <= zone_sto and stoD <= zone_sto) and (close <= ema and last_close > last_ema):
                                 placeOrderAutoTrade(symbol,username,qty,side)
+                                completeOrder(username=username,orderID=order_number)
                                 return jsonify("ซื้อ zone STO EMA สำเร็จ")
                             last_ema = ema
                             last_close = last_close
@@ -1914,7 +1946,7 @@ def multiAutotrade():
                 if cross_sto>0:
                     while True:
                         checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                        if checkStatus == 'completed':
+                        if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
                             analysis = getSymbolHandler(symbol=symbol)    
@@ -1926,13 +1958,14 @@ def multiAutotrade():
                             close = analysis.indicators["close"]
                             if (stoK > cross_sto and stoD > cross_sto and stoK < stoD and last_stoK > last_stoD) and (close >= ema and last_close < last_ema):
                                 placeOrderAutoTrade(symbol,username,qty,side)
+                                completeOrder(username=username,orderID=order_number)
                                 return jsonify("ขาย cross STO EMA สำเร็จ")
                             last_ema = ema
                             last_close = last_close
                 else:
                     while True:
                         checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                        if checkStatus == 'completed':
+                        if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
                             analysis = getSymbolHandler(symbol=symbol)    
@@ -1944,6 +1977,7 @@ def multiAutotrade():
                             close = analysis.indicators["close"]
                             if (stoK >= zone_sto and stoD >= zone_sto) and (close >= ema and last_close < last_ema):
                                 placeOrderAutoTrade(symbol,username,qty,side)
+                                completeOrder(username=username,orderID=order_number)
                                 return jsonify("ขาย zone STO EMA สำเร็จ")
                             last_ema = ema
                             last_close = last_close
@@ -1957,7 +1991,7 @@ def multiAutotrade():
                 if cross:
                     while True:
                         checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                        if checkStatus == 'completed':
+                        if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
                             analysis = getSymbolHandler(symbol=symbol)    
@@ -1967,6 +2001,7 @@ def multiAutotrade():
                             close = analysis.indicators["close"]
                             if ((last_macd < last_signal and macd > signal) and (macd and signal < 0)) and (close <= ema and last_close > last_ema):
                                 placeOrderAutoTrade(symbol,username,qty,side)
+                                completeOrder(username=username,orderID=order_number)
                                 return jsonify("ซื้อ cross < 0 MACD EMA สำเร็จ")
                             last_macd = macd
                             last_signal = signal
@@ -1975,7 +2010,7 @@ def multiAutotrade():
                 else:
                     while True:
                         checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                        if checkStatus == 'completed':
+                        if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
                             analysis = getSymbolHandler(symbol=symbol)    
@@ -1985,6 +2020,7 @@ def multiAutotrade():
                             close = analysis.indicators["close"]
                             if (macd and signal < zone) and (close <= ema and last_close > last_ema):
                                 placeOrderAutoTrade(symbol,username,qty,side)
+                                completeOrder(username=username,orderID=order_number)
                                 return jsonify("ซื้อ zone MACD EMA สำเร็จ")
                             last_macd = macd
                             last_signal = signal
@@ -1995,7 +2031,7 @@ def multiAutotrade():
                 if cross:
                     while True:
                         checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                        if checkStatus == 'completed':
+                        if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
                             analysis = getSymbolHandler(symbol=symbol)    
@@ -2005,6 +2041,7 @@ def multiAutotrade():
                             close = analysis.indicators["close"]
                             if ((last_macd > last_signal and macd < signal) and (macd and signal > 0)) and (close >= ema and last_close < last_ema):
                                 placeOrderAutoTrade(symbol,username,qty,side)
+                                completeOrder(username=username,orderID=order_number)
                                 return jsonify("ขาย cross > 0 MACD EMA สำเร็จ")
                             last_macd = macd
                             last_signal = signal
@@ -2013,7 +2050,7 @@ def multiAutotrade():
                 else:
                     while True:
                         checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                        if checkStatus == 'completed':
+                        if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
                             analysis = getSymbolHandler(symbol=symbol)    
@@ -2023,6 +2060,7 @@ def multiAutotrade():
                             close = analysis.indicators["close"]
                             if (macd and signal > zone) and (close >= ema and last_close < last_ema):
                                 placeOrderAutoTrade(symbol,username,qty,side)
+                                completeOrder(username=username,orderID=order_number)
                                 return jsonify("ขาย zone MACD EMA สำเร็จ")
                             last_macd = macd
                             last_signal = signal
@@ -2041,7 +2079,7 @@ def multiAutotrade():
                     if cross:
                         while True:
                             checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                            if checkStatus == 'completed':
+                            if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
                                 analysis = getSymbolHandler(symbol=symbol)    
@@ -2054,6 +2092,7 @@ def multiAutotrade():
                                 signal = analysis.indicators["MACD.signal"]
                                 if (rsi < rsi_value) and (stoK < cross_sto and stoD < cross_sto and stoK > stoD and last_stoK < last_stoD) and (last_macd < last_signal and macd > signal) and (macd and signal < 0):
                                     placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
                                     return jsonify("ซื้อ RSI cross STO cross 0 MACD สำเร็จ")
                                 last_macd = macd
                                 last_signal = signal
@@ -2061,7 +2100,7 @@ def multiAutotrade():
                     else:
                         while True:
                             checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                            if checkStatus == 'completed':
+                            if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
                                 analysis = getSymbolHandler(symbol=symbol)    
@@ -2074,6 +2113,7 @@ def multiAutotrade():
                                 signal = analysis.indicators["MACD.signal"]
                                 if (rsi < rsi_value) and (stoK < cross_sto and stoD < cross_sto and stoK > stoD and last_stoK < last_stoD) and (macd and signal < zone):
                                     placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
                                     return jsonify("ซื้อ RSI cross STO zone MACD สำเร็จ")
                                 last_macd = macd
                                 last_signal = signal
@@ -2081,7 +2121,7 @@ def multiAutotrade():
                     if cross:
                         while True:
                             checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                            if checkStatus == 'completed':
+                            if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
                                 analysis = getSymbolHandler(symbol=symbol)  
@@ -2094,13 +2134,14 @@ def multiAutotrade():
                                 signal = analysis.indicators["MACD.signal"]
                                 if (rsi < rsi_value) and (stoK <= zone_sto and stoD <= zone_sto) and (last_macd < last_signal and macd > signal) and (macd and signal < 0):
                                     placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
                                     return jsonify("ซื้อ RSI zone STO cross 0 MACD สำเร็จ")
                                 last_macd = macd
                                 last_signal = signal
                     else:
                         while True:
                             checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                            if checkStatus == 'completed':
+                            if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
                                 analysis = getSymbolHandler(symbol=symbol)  
@@ -2113,6 +2154,7 @@ def multiAutotrade():
                                 signal = analysis.indicators["MACD.signal"]
                                 if (rsi < rsi_value) and (stoK <= zone_sto and stoD <= zone_sto) and (macd and signal < zone):
                                     placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
                                     return jsonify("ซื้อ RSI zone STO zone MACD สำเร็จ")
                                 last_macd = macd
                                 last_signal = signal
@@ -2123,7 +2165,7 @@ def multiAutotrade():
                     if cross:
                         while True:
                             checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                            if checkStatus == 'completed':
+                            if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
                                 analysis = getSymbolHandler(symbol=symbol) 
@@ -2136,13 +2178,14 @@ def multiAutotrade():
                                 signal = analysis.indicators["MACD.signal"]
                                 if (rsi > rsi_value) and (stoK > cross_sto and stoD > cross_sto and stoK < stoD and last_stoK > last_stoD) and (last_macd > last_signal and macd < signal) and (macd and signal > 0):
                                     placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
                                     return jsonify("ขาย RSI cross STO cross > 0 MACD สำเร็จ")
                                 last_macd = macd
                                 last_signal = signal
                     else:
                         while True:
                             checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                            if checkStatus == 'completed':
+                            if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
                                 analysis = getSymbolHandler(symbol=symbol) 
@@ -2155,6 +2198,7 @@ def multiAutotrade():
                                 signal = analysis.indicators["MACD.signal"]
                                 if (rsi > rsi_value) and (stoK > cross_sto and stoD > cross_sto and stoK < stoD and last_stoK > last_stoD) and  (macd and signal > zone):
                                     placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
                                     return jsonify("ขาย RSI cross STO zone MACD สำเร็จ")
                                 last_macd = macd
                                 last_signal = signal
@@ -2162,7 +2206,7 @@ def multiAutotrade():
                     if cross:
                         while True:
                             checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                            if checkStatus == 'completed':
+                            if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
                                 analysis = getSymbolHandler(symbol=symbol)    
@@ -2175,13 +2219,14 @@ def multiAutotrade():
                                 signal = analysis.indicators["MACD.signal"]
                                 if (rsi > rsi_value) and (stoK >= zone_sto and stoD >= zone_sto) and (last_macd > last_signal and macd < signal) and (macd and signal > 0):
                                     placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
                                     return jsonify("ขาย RSI zone STO cross > 0 MACD สำเร็จ")
                                 last_macd = macd
                                 last_signal = signal
                     else:
                         while True:
                             checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                            if checkStatus == 'completed':
+                            if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
                                 analysis = getSymbolHandler(symbol=symbol)    
@@ -2194,6 +2239,7 @@ def multiAutotrade():
                                 signal = analysis.indicators["MACD.signal"]
                                 if (rsi > rsi_value) and (stoK >= zone_sto and stoD >= zone_sto) and  (macd and signal > zone):
                                     placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
                                     return jsonify("ขาย RSI zone STO zone MACD สำเร็จ")
                                 last_macd = macd
                                 last_signal = signal
@@ -2208,7 +2254,7 @@ def multiAutotrade():
                 if cross_sto>0:
                     while True:
                         checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                        if checkStatus == 'completed':
+                        if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
                             analysis = getSymbolHandler(symbol=symbol)   
@@ -2221,13 +2267,14 @@ def multiAutotrade():
                             close = analysis.indicators["close"]
                             if (rsi < rsi_value) and (stoK < cross_sto and stoD < cross_sto and stoK > stoD and last_stoK < last_stoD) and (close <= ema and last_close > last_ema):
                                 placeOrderAutoTrade(symbol,username,qty,side)
+                                completeOrder(username=username,orderID=order_number)
                                 return jsonify("ซื้อ cross STO EMA สำเร็จ")
                             last_ema = ema
                             last_close = last_close
                 else:
                     while True:
                         checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                        if checkStatus == 'completed':
+                        if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
                             analysis = getSymbolHandler(symbol=symbol)  
@@ -2240,6 +2287,7 @@ def multiAutotrade():
                             close = analysis.indicators["close"]
                             if (rsi < rsi_value) and (stoK <= zone_sto and stoD <= zone_sto) and (close <= ema and last_close > last_ema):
                                 placeOrderAutoTrade(symbol,username,qty,side)
+                                completeOrder(username=username,orderID=order_number)
                                 return jsonify("ซื้อ zone STO EMA สำเร็จ")
                             last_ema = ema
                             last_close = last_close
@@ -2248,7 +2296,7 @@ def multiAutotrade():
                 if cross_sto>0:
                     while True:
                         checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                        if checkStatus == 'completed':
+                        if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
                             analysis = getSymbolHandler(symbol=symbol)  
@@ -2261,13 +2309,14 @@ def multiAutotrade():
                             close = analysis.indicators["close"]
                             if (rsi > rsi_value) and (stoK > cross_sto and stoD > cross_sto and stoK < stoD and last_stoK > last_stoD) and (close >= ema and last_close < last_ema):
                                 placeOrderAutoTrade(symbol,username,qty,side)
+                                completeOrder(username=username,orderID=order_number)
                                 return jsonify("ขาย cross STO EMA สำเร็จ")
                             last_ema = ema
                             last_close = last_close
                 else:
                     while True:
                         checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                        if checkStatus == 'completed':
+                        if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
                             analysis = getSymbolHandler(symbol=symbol) 
@@ -2280,6 +2329,7 @@ def multiAutotrade():
                             close = analysis.indicators["close"]
                             if (rsi > rsi_value) and (stoK >= zone_sto and stoD >= zone_sto) and (close >= ema and last_close < last_ema):
                                 placeOrderAutoTrade(symbol,username,qty,side)
+                                completeOrder(username=username,orderID=order_number)
                                 return jsonify("ขาย zone STO EMA สำเร็จ")
                             last_ema = ema
                             last_close = last_close
@@ -2294,7 +2344,7 @@ def multiAutotrade():
                 if cross:
                     while True:
                         checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                        if checkStatus == 'completed':
+                        if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
                             analysis = getSymbolHandler(symbol=symbol)    
@@ -2305,6 +2355,7 @@ def multiAutotrade():
                             close = analysis.indicators["close"]
                             if (rsi < rsi_value) and ((last_macd < last_signal and macd > signal) and (macd and signal < 0)) and (close <= ema and last_close > last_ema):
                                 placeOrderAutoTrade(symbol,username,qty,side)
+                                completeOrder(username=username,orderID=order_number)
                                 return jsonify("ซื้อ cross < 0 MACD EMA สำเร็จ")
                             last_macd = macd
                             last_signal = signal
@@ -2313,7 +2364,7 @@ def multiAutotrade():
                 else:
                     while True:
                         checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                        if checkStatus == 'completed':
+                        if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
                             analysis = getSymbolHandler(symbol=symbol) 
@@ -2324,6 +2375,7 @@ def multiAutotrade():
                             close = analysis.indicators["close"]
                             if (rsi < rsi_value) and (macd and signal < zone) and (close <= ema and last_close > last_ema):
                                 placeOrderAutoTrade(symbol,username,qty,side)
+                                completeOrder(username=username,orderID=order_number)
                                 return jsonify("ซื้อ zone MACD EMA สำเร็จ")
                             last_macd = macd
                             last_signal = signal
@@ -2334,7 +2386,7 @@ def multiAutotrade():
                 if cross:
                     while True:
                         checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                        if checkStatus == 'completed':
+                        if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
                             analysis = getSymbolHandler(symbol=symbol)    
@@ -2345,6 +2397,7 @@ def multiAutotrade():
                             close = analysis.indicators["close"]
                             if (rsi > rsi_value) and ((last_macd > last_signal and macd < signal) and (macd and signal > 0)) and (close >= ema and last_close < last_ema):
                                 placeOrderAutoTrade(symbol,username,qty,side)
+                                completeOrder(username=username,orderID=order_number)
                                 return jsonify("ขาย RSI cross > 0 MACD EMA สำเร็จ")
                             last_macd = macd
                             last_signal = signal
@@ -2353,7 +2406,7 @@ def multiAutotrade():
                 else:
                     while True:
                         checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                        if checkStatus == 'completed':
+                        if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
                             analysis = getSymbolHandler(symbol=symbol)
@@ -2364,6 +2417,7 @@ def multiAutotrade():
                             close = analysis.indicators["close"]
                             if (rsi > rsi_value) and (macd and signal > zone) and (close >= ema and last_close < last_ema):
                                 placeOrderAutoTrade(symbol,username,qty,side)
+                                completeOrder(username=username,orderID=order_number)
                                 return jsonify("ขาย RSI zone MACD EMA สำเร็จ")
                             last_macd = macd
                             last_signal = signal
@@ -2382,7 +2436,7 @@ def multiAutotrade():
                     if cross:
                         while True:
                             checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                            if checkStatus == 'completed':
+                            if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
                                 analysis = getSymbolHandler(symbol=symbol)    
@@ -2396,6 +2450,7 @@ def multiAutotrade():
                                 close = analysis.indicators["close"]
                                 if (stoK < cross_sto and stoD < cross_sto and stoK > stoD and last_stoK < last_stoD) and (last_macd < last_signal and macd > signal) and (macd and signal < 0) and (close <= ema and last_close > last_ema):
                                     placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
                                     return jsonify("ซื้อ cross STO cross 0 MACD สำเร็จ")
                                 last_macd = macd
                                 last_signal = signal
@@ -2404,7 +2459,7 @@ def multiAutotrade():
                     else:
                         while True:
                             checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                            if checkStatus == 'completed':
+                            if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
                                 analysis = getSymbolHandler(symbol=symbol)    
@@ -2418,6 +2473,7 @@ def multiAutotrade():
                                 close = analysis.indicators["close"]
                                 if (stoK < cross_sto and stoD < cross_sto and stoK > stoD and last_stoK < last_stoD) and (macd and signal < zone) and (close <= ema and last_close > last_ema):
                                     placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
                                     return jsonify("ซื้อ cross STO zone MACD สำเร็จ")
                                 last_macd = macd
                                 last_signal = signal
@@ -2427,7 +2483,7 @@ def multiAutotrade():
                     if cross:
                         while True:
                             checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                            if checkStatus == 'completed':
+                            if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
                                 analysis = getSymbolHandler(symbol=symbol)    
@@ -2441,6 +2497,7 @@ def multiAutotrade():
                                 close = analysis.indicators["close"]
                                 if (stoK <= zone_sto and stoD <= zone_sto) and (last_macd < last_signal and macd > signal) and (macd and signal < 0) and (close <= ema and last_close > last_ema):
                                     placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
                                     return jsonify("ซื้อ zone STO cross 0 MACD สำเร็จ")
                                 last_macd = macd
                                 last_signal = signal
@@ -2449,7 +2506,7 @@ def multiAutotrade():
                     else:
                         while True:
                             checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                            if checkStatus == 'completed':
+                            if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
                                 analysis = getSymbolHandler(symbol=symbol)    
@@ -2463,6 +2520,7 @@ def multiAutotrade():
                                 close = analysis.indicators["close"]
                                 if (stoK <= zone_sto and stoD <= zone_sto) and (macd and signal < zone) and (close <= ema and last_close > last_ema):
                                     placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
                                     return jsonify("ซื้อ zone STO zone MACD สำเร็จ")
                                 last_macd = macd
                                 last_signal = signal
@@ -2475,7 +2533,7 @@ def multiAutotrade():
                     if cross:
                         while True:
                             checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                            if checkStatus == 'completed':
+                            if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
                                 analysis = getSymbolHandler(symbol=symbol)    
@@ -2489,6 +2547,7 @@ def multiAutotrade():
                                 close = analysis.indicators["close"]
                                 if (stoK > cross_sto and stoD > cross_sto and stoK < stoD and last_stoK > last_stoD) and (last_macd > last_signal and macd < signal) and (macd and signal > 0) and (close >= ema and last_close < last_ema):
                                     placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
                                     return jsonify("ขาย cross STO cross > 0 MACD สำเร็จ")
                                 last_macd = macd
                                 last_signal = signal
@@ -2497,7 +2556,7 @@ def multiAutotrade():
                     else:
                         while True:
                             checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                            if checkStatus == 'completed':
+                            if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
                                 analysis = getSymbolHandler(symbol=symbol)    
@@ -2511,6 +2570,7 @@ def multiAutotrade():
                                 close = analysis.indicators["close"]
                                 if (stoK > cross_sto and stoD > cross_sto and stoK < stoD and last_stoK > last_stoD) and  (macd and signal > zone) and (close >= ema and last_close < last_ema):
                                     placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
                                     return jsonify("ขาย cross STO zone MACD สำเร็จ")
                                 last_macd = macd
                                 last_signal = signal
@@ -2521,7 +2581,7 @@ def multiAutotrade():
                     if cross:
                         while True:
                             checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                            if checkStatus == 'completed':
+                            if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
                                 analysis = getSymbolHandler(symbol=symbol)    
@@ -2535,6 +2595,7 @@ def multiAutotrade():
                                 close = analysis.indicators["close"]
                                 if (stoK >= zone_sto and stoD >= zone_sto) and (last_macd > last_signal and macd < signal) and (macd and signal > 0) and (close >= ema and last_close < last_ema):
                                     placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
                                     return jsonify("ขาย zone STO cross > 0 MACD สำเร็จ")
                                 last_macd = macd
                                 last_signal = signal
@@ -2543,7 +2604,7 @@ def multiAutotrade():
                     else:
                         while True:
                             checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                            if checkStatus == 'completed':
+                            if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
                                 analysis = getSymbolHandler(symbol=symbol)    
@@ -2557,6 +2618,7 @@ def multiAutotrade():
                                 close = analysis.indicators["close"]
                                 if (stoK >= zone_sto and stoD >= zone_sto) and  (macd and signal > zone) and (close >= ema and last_close < last_ema):
                                     placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
                                     return jsonify("ขาย zone STO zone MACD สำเร็จ")
                                 last_macd = macd
                                 last_signal = signal
@@ -2572,29 +2634,204 @@ def multiAutotrade():
             day = request.json.get('day')
 
             if side == "buy":
-                while True:
-                    checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                    if checkStatus == 'completed':
-                        return jsonify('autotrade buy rsi cross sto cancelled')
+                if cross_sto > 0:
+                    if cross:
+                        while True:
+                            checkStatus = checkStatusOrder(username=username,order_number=order_number)
+                            if checkStatus == 'cancelled':
+                                return jsonify('autotrade buy rsi cross sto cancelled')
+                            else:
+                                analysis = getSymbolHandler(symbol=symbol)    
+                                rsi = analysis.indicators["RSI"]
+                                stoK = analysis.indicators["Stoch.K"]
+                                stoD = analysis.indicators["Stoch.D"] 
+                                last_stoK = analysis.indicators["Stoch.K[1]"]
+                                last_stoD = analysis.indicators["Stoch.D[1]"]
+                                macd = analysis.indicators["MACD.macd"]
+                                signal = analysis.indicators["MACD.signal"]
+                                ema = analysis.indicators[f"EMA{day}"]
+                                close = analysis.indicators["close"]
+                                if (rsi < rsi_value) and (stoK < cross_sto and stoD < cross_sto and stoK > stoD and last_stoK < last_stoD) and (last_macd < last_signal and macd > signal) and (macd and signal < 0) and (close <= ema and last_close > last_ema):
+                                    placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
+                                    return jsonify("ซื้อ RSI cross STO cross MACD EMA สำเร็จ")
+                                last_macd = macd
+                                last_signal = signal
+                                last_ema = ema
+                                last_close = close
                     else:
-                        rsi_result = RSI(symbol=symbol,rsi_value=rsi_value,side=side)
-                        sto_result = STO(symbol=symbol,zone_sto=zone_sto,cross_sto=cross_sto,side=side)
-                        macd_result = MACD(symbol=symbol,zone=zone,cross=cross,side=side)
-                        ema_result = EMA(symbol=symbol,day=day,side=side)
-                        if rsi_result == "buy" and sto_result=="buy" and macd_result == "buy" and ema_result == "buy":
-                            placeOrderAutoTrade(symbol,username,qty,side)
+                        while True:
+                            checkStatus = checkStatusOrder(username=username,order_number=order_number)
+                            if checkStatus == 'cancelled':
+                                return jsonify('autotrade buy rsi cross sto cancelled')
+                            else:
+                                analysis = getSymbolHandler(symbol=symbol)    
+                                rsi = analysis.indicators["RSI"]
+                                stoK = analysis.indicators["Stoch.K"]
+                                stoD = analysis.indicators["Stoch.D"] 
+                                last_stoK = analysis.indicators["Stoch.K[1]"]
+                                last_stoD = analysis.indicators["Stoch.D[1]"]
+                                macd = analysis.indicators["MACD.macd"]
+                                signal = analysis.indicators["MACD.signal"]
+                                ema = analysis.indicators[f"EMA{day}"]
+                                close = analysis.indicators["close"]
+                                if (rsi < rsi_value) and (stoK < cross_sto and stoD < cross_sto and stoK > stoD and last_stoK < last_stoD) and (macd and signal > zone) and (close <= ema and last_close > last_ema):
+                                    placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
+                                    return jsonify("ซื้อ RSI cross STO zone MACD EMA สำเร็จ")
+                                last_macd = macd
+                                last_signal = signal
+                                last_ema = ema
+                                last_close = close
+                else:
+                    if cross:
+                        while True:
+                            checkStatus = checkStatusOrder(username=username,order_number=order_number)
+                            if checkStatus == 'cancelled':
+                                return jsonify('autotrade all true cancelled')
+                            else:
+                                analysis = getSymbolHandler(symbol=symbol)    
+                                rsi = analysis.indicators["RSI"]
+                                stoK = analysis.indicators["Stoch.K"]
+                                stoD = analysis.indicators["Stoch.D"] 
+                                last_stoK = analysis.indicators["Stoch.K[1]"]
+                                last_stoD = analysis.indicators["Stoch.D[1]"]
+                                macd = analysis.indicators["MACD.macd"]
+                                signal = analysis.indicators["MACD.signal"]
+                                ema = analysis.indicators[f"EMA{day}"]
+                                close = analysis.indicators["close"]
+                                if (rsi < rsi_value) and (stoK <= zone_sto and stoD <= zone_sto) and (last_macd < last_signal and macd > signal) and (macd and signal < 0) and (close <= ema and last_close > last_ema):
+                                    placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
+                                    return jsonify("ซื้อ RSI zone STO cross MACD EMA สำเร็จ")
+                                last_macd = macd
+                                last_signal = signal
+                                last_ema = ema
+                                last_close = close
+                    else:
+                        if checkStatus == 'cancelled':
+                            return jsonify('autotrade buy rsi cross sto cancelled')
+                        else:
+                            analysis = getSymbolHandler(symbol=symbol)    
+                            rsi = analysis.indicators["RSI"]
+                            stoK = analysis.indicators["Stoch.K"]
+                            stoD = analysis.indicators["Stoch.D"] 
+                            last_stoK = analysis.indicators["Stoch.K[1]"]
+                            last_stoD = analysis.indicators["Stoch.D[1]"]
+                            macd = analysis.indicators["MACD.macd"]
+                            signal = analysis.indicators["MACD.signal"]
+                            ema = analysis.indicators[f"EMA{day}"]
+                            close = analysis.indicators["close"]
+                            if (rsi < rsi_value) and (stoK <= zone_sto and stoD <= zone_sto) and (macd and signal > zone) and (close <= ema and last_close > last_ema):
+                                placeOrderAutoTrade(symbol,username,qty,side)
+                                completeOrder(username=username,orderID=order_number)
+                                return jsonify("ซื้อ RSI zone STO zone MACD EMA สำเร็จ")
+                            last_macd = macd
+                            last_signal = signal
+                            last_ema = ema
+                            last_close = close
+            #sell
             else:
-                while True:
-                    checkStatus = checkStatusOrder(username=username,order_number=order_number)
-                    if checkStatus == 'completed':
-                        return jsonify('autotrade buy rsi cross sto cancelled')
+                if cross_sto>0:
+                    if cross:
+                        while True:
+                            print("เข้าเงื่อไข autotrade")
+                            checkStatus = checkStatusOrder(username=username,order_number=order_number)
+                            if checkStatus == 'cancelled':
+                                return jsonify('autotrade buy rsi cross sto cancelled')
+                            else:
+                                analysis = getSymbolHandler(symbol=symbol)    
+                                rsi = analysis.indicators["RSI"]
+                                stoK = analysis.indicators["Stoch.K"]
+                                stoD = analysis.indicators["Stoch.D"] 
+                                last_stoK = analysis.indicators["Stoch.K[1]"]
+                                last_stoD = analysis.indicators["Stoch.D[1]"]
+                                macd = analysis.indicators["MACD.macd"]
+                                signal = analysis.indicators["MACD.signal"]
+                                ema = analysis.indicators[f"EMA{day}"]
+                                close = analysis.indicators["close"]
+                                if (rsi > rsi_value) and (stoK > cross_sto and stoD > cross_sto and stoK < stoD and last_stoK > last_stoD) and (last_macd > last_signal and macd < signal) and (macd and signal > 0) and (close >= ema and last_close < last_ema):
+                                    placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
+                                    return jsonify("ขาย RSI cross STO cross MACD EMA สำเร็จ")
+                                last_macd = macd
+                                last_signal = signal
+                                last_ema = ema
+                                last_close = close
                     else:
-                        rsi_result = RSI(symbol=symbol,rsi_value=rsi_value,side=side)
-                        sto_result = STO(symbol=symbol,zone_sto=zone_sto,cross_sto=cross_sto,side=side)
-                        macd_result = MACD(symbol=symbol,zone=zone,cross=cross,side=side)
-                        ema_result = EMA(symbol=symbol,day=day,side=side)
-                        if rsi_result == "sell" and sto_result=="sell" and macd_result == "sell" and ema_result == "sell":
-                            placeOrderAutoTrade(symbol,username,qty,side)
+                        while True:
+                            checkStatus = checkStatusOrder(username=username,order_number=order_number)
+                            if checkStatus == 'cancelled':
+                                return jsonify('autotrade buy rsi cross sto cancelled')
+                            else:
+                                analysis = getSymbolHandler(symbol=symbol)  
+                                rsi = analysis.indicators["RSI"]  
+                                stoK = analysis.indicators["Stoch.K"]
+                                stoD = analysis.indicators["Stoch.D"] 
+                                last_stoK = analysis.indicators["Stoch.K[1]"]
+                                last_stoD = analysis.indicators["Stoch.D[1]"]
+                                macd = analysis.indicators["MACD.macd"]
+                                signal = analysis.indicators["MACD.signal"]
+                                ema = analysis.indicators[f"EMA{day}"]
+                                close = analysis.indicators["close"]
+                                if (rsi > rsi_value) and (stoK > cross_sto and stoD > cross_sto and stoK < stoD and last_stoK > last_stoD) and  (macd and signal > zone) and (close >= ema and last_close < last_ema):
+                                    placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
+                                    return jsonify("ขาย RSI cross STO zone MACD EMA สำเร็จ")
+                                last_macd = macd
+                                last_signal = signal
+                                last_ema = ema
+                                last_close = close
+                            
+                else:
+                    if cross:
+                        while True:
+                            checkStatus = checkStatusOrder(username=username,order_number=order_number)
+                            if checkStatus == 'cancelled':
+                                return jsonify('autotrade buy rsi cross sto cancelled')
+                            else:
+                                analysis = getSymbolHandler(symbol=symbol)   
+                                rsi = analysis.indicators["RSI"] 
+                                stoK = analysis.indicators["Stoch.K"]
+                                stoD = analysis.indicators["Stoch.D"] 
+                                last_stoK = analysis.indicators["Stoch.K[1]"]
+                                last_stoD = analysis.indicators["Stoch.D[1]"]
+                                macd = analysis.indicators["MACD.macd"]
+                                signal = analysis.indicators["MACD.signal"]
+                                ema = analysis.indicators[f"EMA{day}"]
+                                close = analysis.indicators["close"]
+                                if (rsi > rsi_value) and (stoK >= zone_sto and stoD >= zone_sto) and (last_macd > last_signal and macd < signal) and (macd and signal > 0) and (close >= ema and last_close < last_ema):
+                                    placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
+                                    return jsonify("ขาย RSI zone STO cross MACD EMA สำเร็จ")
+                                last_macd = macd
+                                last_signal = signal
+                                last_ema = ema
+                                last_close = close
+                    else:
+                        while True:
+                            checkStatus = checkStatusOrder(username=username,order_number=order_number)
+                            if checkStatus == 'cancelled':
+                                return jsonify('autotrade buy rsi cross sto cancelled')
+                            else:
+                                analysis = getSymbolHandler(symbol=symbol)    
+                                rsi = analysis.indicators["RSI"]
+                                stoK = analysis.indicators["Stoch.K"]
+                                stoD = analysis.indicators["Stoch.D"] 
+                                last_stoK = analysis.indicators["Stoch.K[1]"]
+                                last_stoD = analysis.indicators["Stoch.D[1]"]
+                                macd = analysis.indicators["MACD.macd"]
+                                signal = analysis.indicators["MACD.signal"]
+                                ema = analysis.indicators[f"EMA{day}"]
+                                close = analysis.indicators["close"]
+                                if (rsi > rsi_value) and (stoK >= zone_sto and stoD >= zone_sto) and  (macd and signal > zone) and (close >= ema and last_close < last_ema):
+                                    placeOrderAutoTrade(symbol,username,qty,side)
+                                    completeOrder(username=username,orderID=order_number)
+                                    return jsonify("ขาย RSI zone STO cross zone EMA สำเร็จ")
+                                last_macd = macd
+                                last_signal = signal
+                                last_ema = ema
+                                last_close = close
                         
     except Exception as e:
         print(f'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ: {str(e)}')
