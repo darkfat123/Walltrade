@@ -151,6 +151,7 @@ class _NotifyActivity extends State<NotifyActivity> {
                                   cancelOrder(order['OrderID'], true);
                                   setState(() {
                                     autoOrdersPending.remove(order);
+                                    autoOrdersCompleted.add(order);
                                   });
                                   print(autoOrdersPending);
                                   final snackBar = SnackBar(
