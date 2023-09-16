@@ -33,6 +33,7 @@ class _TradePageOptionsState extends State<TradePageOptions>
   int _selectedIndex = 0;
   String _walletBalance = "";
   bool isLoading = true;
+  TextEditingController symbolController = TextEditingController();
   _TradePageOptionsState({required this.username});
 
   Future<void> getAutoOrders() async {
@@ -374,8 +375,8 @@ class _TradePageOptionsState extends State<TradePageOptions>
                                               EdgeInsets.symmetric(vertical: 2),
                                           decoration: BoxDecoration(
                                               color: order['side'] == 'buy'
-                                                  ? Colors.green
-                                                  : Colors.red,
+                                                  ? Color(0xFF82CD47)
+                                                  : Color(0xFFBB2525),
                                               borderRadius:
                                                   BorderRadius.circular(10)),
                                           child: Text(
@@ -385,7 +386,7 @@ class _TradePageOptionsState extends State<TradePageOptions>
                                             style: TextStyle(
                                               fontSize: 14,
                                               fontWeight: FontWeight.w500,
-                                              color: Colors.black,
+                                              color: Colors.white,
                                             ),
                                           ),
                                         ),
@@ -416,29 +417,32 @@ class _TradePageOptionsState extends State<TradePageOptions>
                   margin: EdgeInsets.all(20),
                   height: 50,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: [
-                      Color(0xFFE55807),
-                      Color(0xFF7E1717),
-                    ], begin: Alignment.topCenter, end: Alignment.bottomCenter),
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color.fromARGB(128, 0, 0, 0),
-                        offset: Offset(0, 2),
-                        blurRadius: 4,
-                        spreadRadius: 0,
-                      ),
-                    ],
-                  ),
+                      color: const Color(0xFF2A3547),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 5,
+                          offset: Offset(
+                              0, 3), // changes the position of the shadow
+                        ),
+                      ],
+                      border: Border.all(
+                        strokeAlign: BorderSide.strokeAlignOutside,
+                        width: 2,
+                        color: Colors.blueGrey,
+                      ),),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         'สร้างคำสั่งแบบหลายเทคนิค',
                         style: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            color: Colors.white,
-                            fontSize: 18),
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                          fontSize: 18,
+                        ),
                       ),
                       Icon(
                         Icons.arrow_circle_right_outlined,
@@ -485,6 +489,84 @@ class _TradePageOptionsState extends State<TradePageOptions>
                   ),
                 ],
               ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 20),
+                      padding: EdgeInsets.only(top: 10, bottom: 10),
+                      child: TextField(
+                        controller: symbolController,
+                        style: TextStyle(
+                            color: Colors.black, fontWeight: FontWeight.w500),
+                        decoration: const InputDecoration(
+                          labelText: 'พิมพ์สัญลักษณ์หุ้น...',
+                          labelStyle:
+                              TextStyle(fontSize: 14, color: Colors.black),
+
+                          filled: true, // กำหนดให้มีสีพื้นหลัง
+                          fillColor: Colors.white,
+                          contentPadding: EdgeInsets.symmetric(
+                              vertical: 18.0,
+                              horizontal:
+                                  10.0), // ปรับความสูงและความยาวของช่องพิมพ์ที่นี่
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                            borderSide: BorderSide(
+                              color: Color.fromARGB(255, 211, 205,
+                                  205), // สีเส้นโครงรอบช่องพิมพ์ในสถานะปกติ
+                              width:
+                                  2.0, // ความหนาของเส้นโครงรอบช่องพิมพ์ในสถานะปกติ
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                            borderSide: BorderSide(
+                              color: Colors
+                                  .black, // สีเส้นโครงรอบช่องพิมพ์เมื่อมีการเน้น
+                              width:
+                                  2.0, // ความหนาของเส้นโครงรอบช่องพิมพ์เมื่อมีการเน้น
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 20),
+                    child: Container(
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // เมื่อปุ่มถูกกด
+                          showDialog(
+                            context:
+                                context, // BuildContext จำเป็นต้องใช้ในการสร้าง AlertDialog
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text(
+                                    "ค่าเทคนิค"), // ข้อความหัวเรื่องของ AlertDialog
+                                content: Text(
+                                    "เนื้อหาของค่าเทคนิคที่คุณต้องการแสดงในนี้"), // เนื้อหาของ AlertDialog
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context)
+                                          .pop(); // ปิด AlertDialog เมื่อปุ่มถูกกด
+                                    },
+                                    child: Text("ปิด"), // ปุ่มปิด AlertDialog
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        child: Text("ค่าเทคนิค"),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               SizedBox(height: 10),
               Container(
                 height: 800,
@@ -494,13 +576,23 @@ class _TradePageOptionsState extends State<TradePageOptions>
                       height: 45,
                       margin: EdgeInsets.symmetric(horizontal: 20),
                       decoration: BoxDecoration(
-                          color: primary,
-                          borderRadius: BorderRadius.circular(10)),
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: Offset(
+                                0, 3), // changes the position of the shadow
+                          ),
+                        ],
+                      ),
                       child: Padding(
                         padding: EdgeInsets.all(4),
                         child: Container(
                           child: TabBar(
-                            unselectedLabelColor: Colors.white,
+                            unselectedLabelColor: Colors.black,
                             labelColor: Colors.black,
                             indicatorWeight: 2,
                             controller: tabController,
@@ -521,8 +613,8 @@ class _TradePageOptionsState extends State<TradePageOptions>
                             indicator: BoxDecoration(
                               borderRadius: BorderRadius.circular(10),
                               color: tabController.index == 0
-                                  ? Colors.green
-                                  : Colors.red, // สีค่าตัวบอกสถานะเริ่มต้น
+                                  ? Color(0xFF82CD47)
+                                  : Color(0xFFBB2525), // สีค่าตัวบอกสถานะเริ่มต้น
                             ),
                           ),
                         ),
@@ -536,11 +628,11 @@ class _TradePageOptionsState extends State<TradePageOptions>
                         controller: tabController,
                         children: [
                           TradePageBuy(
-                            username: username,
-                          ),
+                              username: username,
+                              symbol: symbolController.text),
                           TradePageSell(
-                            username: username,
-                          ),
+                              username: username,
+                              symbol: symbolController.text),
                         ],
                       ),
                     ),

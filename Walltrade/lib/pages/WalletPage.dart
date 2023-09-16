@@ -60,6 +60,12 @@ class _WalletPageState extends State<WalletPage> {
     });
   }
 
+  @override
+  void dispose() {
+    // ยกเลิก timer หรือ animation ที่ใช้งาน
+    super.dispose();
+  }
+
   Future<void> fetchPositionData() async {
     try {
       final url = Uri.parse('${Constants.serverUrl}/position');
@@ -138,93 +144,89 @@ class _WalletPageState extends State<WalletPage> {
   }
 
   Future<void> getBalances() async {
-    try {
-      var commonUrl = Uri.parse('${Constants.serverUrl}/th_portfolio');
-      var headers = {'Content-Type': 'application/json'};
-      var body = {'username': username};
+    var commonUrl = Uri.parse('${Constants.serverUrl}/th_portfolio');
+    var headers = {'Content-Type': 'application/json'};
+    var body = {'username': username};
 
-      var response1 =
-          await http.post(commonUrl, headers: headers, body: jsonEncode(body));
-      var response2 = await http.post(
-          Uri.parse('${Constants.serverUrl}/get_balance_change'),
-          headers: headers,
-          body: jsonEncode({'username': username}));
-      var response3 = await http.post(
-          Uri.parse('${Constants.serverUrl}/getBalance'),
-          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-          body: {'username': username});
+    var response1 =
+        await http.post(commonUrl, headers: headers, body: jsonEncode(body));
+    var response2 = await http.post(
+        Uri.parse('${Constants.serverUrl}/get_balance_change'),
+        headers: headers,
+        body: jsonEncode({'username': username}));
+    var response3 = await http.post(
+        Uri.parse('${Constants.serverUrl}/getBalance'),
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: {'username': username});
 
-      var response4 =
-          await http.post(commonUrl, headers: headers, body: jsonEncode(body));
+    var response4 =
+        await http.post(commonUrl, headers: headers, body: jsonEncode(body));
 
-      if (response1.statusCode == 200) {
-        var data1 = jsonDecode(response1.body);
+    if (response1.statusCode == 200) {
+      var data1 = jsonDecode(response1.body);
 
-        setState(() {
-          TH_percentage = data1['percentageChange'];
-          TH_totalProfit = double.parse(data1['balanceProfitChange']);
-          USDtoTHB = data1['USDtoTHB'];
-        });
-      } else {
-        throw Exception(
-            'Failed to retrieve TH balance. Error: ${response1.body}');
-      }
-
-      if (response2.statusCode == 200) {
-        var data2 = jsonDecode(response2.body);
-        var balanceChange = data2['balance_change'];
-        var percentageChange = data2['percentage_change'];
-
-        setState(() {
-          _balanceChange = balanceChange;
-          _percentageChange = percentageChange;
-        });
-        totalProfit = TH_totalProfit + _balanceChange;
-        formattedProfit = NumberFormat('#,###.##', 'en_US').format(totalProfit);
-        totalPercentage = TH_percentage + _percentageChange;
-      } else {
-        throw Exception(
-            'Failed to retrieve balance change. Error: ${response2.body}');
-      }
-
-      if (response3.statusCode == 200) {
-        var data3 = jsonDecode(response3.body);
-        var walletBalance = data3['wallet_balance'];
-
-        setState(() {
-          _walletBalance =
-              double.parse(double.parse(walletBalance).toStringAsFixed(2));
-          US_cash = _walletBalance;
-        });
-      } else {
-        throw Exception(
-            'Failed to retrieve wallet balance. Error: ${response3.body}');
-      }
-
-      if (response4.statusCode == 200) {
-        var data4 = jsonDecode(response4.body);
-        var th_cash = data4['balance'];
-        var th_fiat = data4['lineAvailable'];
-        var th_marketValue = data4['marketValue'];
-        setState(() {
-          TH_balance = double.parse(th_cash);
-          TH_Fiat = double.parse(th_fiat);
-          TH_marketValue = double.parse(th_marketValue);
-        });
-      } else {
-        throw Exception(
-            'Failed to retrieve TH portfolio. Error: ${response4.body}');
-      }
-
-      TH_chartMarketValue =
-          TH_marketValue <= 0 ? 0 : (TH_marketValue / TH_Fiat) * 100;
-      US_chartMarketValue =
-          US_marketValue <= 0 ? 0 : (US_marketValue / US_cash) * 100;
-      totalFiat = US_cash / TH_Fiat;
-      totalBalance = _walletBalance + TH_balance;
-    } catch (e) {
-      throw Exception('Error: $e');
+      setState(() {
+        TH_percentage = data1['percentageChange'];
+        TH_totalProfit = double.parse(data1['balanceProfitChange']);
+        USDtoTHB = data1['USDtoTHB'];
+      });
+    } else {
+      throw Exception(
+          'Failed to retrieve TH balance. Error: ${response1.body}');
     }
+
+    if (response2.statusCode == 200) {
+      var data2 = jsonDecode(response2.body);
+      var balanceChange = data2['balance_change'];
+      var percentageChange = data2['percentage_change'];
+
+      setState(() {
+        _balanceChange = balanceChange;
+        _percentageChange = percentageChange;
+      });
+      totalProfit = TH_totalProfit + _balanceChange;
+      formattedProfit = NumberFormat('#,###.##', 'en_US').format(totalProfit);
+      totalPercentage = TH_percentage + _percentageChange;
+    } else {
+      throw Exception(
+          'Failed to retrieve balance change. Error: ${response2.body}');
+    }
+
+    if (response3.statusCode == 200) {
+      var data3 = jsonDecode(response3.body);
+      var walletBalance = data3['wallet_balance'];
+
+      setState(() {
+        _walletBalance =
+            double.parse(double.parse(walletBalance).toStringAsFixed(2));
+        US_cash = _walletBalance;
+      });
+    } else {
+      throw Exception(
+          'Failed to retrieve wallet balance. Error: ${response3.body}');
+    }
+
+    if (response4.statusCode == 200) {
+      var data4 = jsonDecode(response4.body);
+      var th_cash = data4['balance'];
+      var th_fiat = data4['lineAvailable'];
+      var th_marketValue = data4['marketValue'];
+      setState(() {
+        TH_balance = double.parse(th_cash);
+        TH_Fiat = double.parse(th_fiat);
+        TH_marketValue = double.parse(th_marketValue);
+      });
+    } else {
+      throw Exception(
+          'Failed to retrieve TH portfolio. Error: ${response4.body}');
+    }
+
+    TH_chartMarketValue =
+        TH_marketValue <= 0 ? 0 : (TH_marketValue / TH_Fiat) * 100;
+    US_chartMarketValue =
+        US_marketValue <= 0 ? 0 : (US_marketValue / US_cash) * 100;
+    totalFiat = US_cash / TH_Fiat;
+    totalBalance = _walletBalance + TH_balance;
   }
 
   @override

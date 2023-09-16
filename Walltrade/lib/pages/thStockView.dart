@@ -183,13 +183,14 @@ class _AssetTHListScreenState extends State<AssetTHListScreen>
                                 ),
                                 subtitle: Text(
                                   fullname,
+                                  style: TextStyle(fontWeight: FontWeight.w500),
                                 ),
                                 onTap: () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) =>
-                                          AssetTHDetailsScreen(symbol: symbol),
+                                          AssetTHDetailsScreen(symbol: symbol,fullname: fullname),
                                     ),
                                   );
                                 },

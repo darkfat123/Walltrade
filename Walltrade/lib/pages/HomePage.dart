@@ -303,7 +303,7 @@ class _HomePageState extends State<HomePage> {
                               'ยอดเงินคงเหลือ',
                               style: TextStyle(
                                 color: Colors.black,
-                                fontSize: 18,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
@@ -314,7 +314,7 @@ class _HomePageState extends State<HomePage> {
                             child: Text(
                               '\$${NumberFormat('#,##0.##', 'en_US').format(totalBalance)}',
                               style: TextStyle(
-                                fontSize: 40,
+                                fontSize: 36,
                                 letterSpacing: 1,
                                 fontWeight: FontWeight.w400,
                               ),

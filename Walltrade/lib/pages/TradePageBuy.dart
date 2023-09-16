@@ -5,9 +5,10 @@ import 'package:http/http.dart' as http;
 
 class TradePageBuy extends StatefulWidget {
   final String username;
-  TradePageBuy({required this.username});
+  final String symbol;
+  TradePageBuy({required this.username,required this.symbol});
   @override
-  _TradePageBuyState createState() => _TradePageBuyState(username: username);
+  _TradePageBuyState createState() => _TradePageBuyState(username: username,symbol:symbol);
 }
 
 class _TradePageBuyState extends State<TradePageBuy> {
@@ -27,9 +28,10 @@ class _TradePageBuyState extends State<TradePageBuy> {
   String searchText = '';
   String _walletBalance = '';
   bool showDetails = false;
-  String selectedInterval = '1 hour';
+  String selectedInterval = '1h';
   String result = '';
-  _TradePageBuyState({required this.username});
+  _TradePageBuyState({required this.username, required this.symbol});
+  final String symbol;
   void _handleSubmit() {
     setState(() {
       searchText = _searchController.text;
@@ -42,7 +44,7 @@ class _TradePageBuyState extends State<TradePageBuy> {
     final body = jsonEncode(
       {
         'username': widget.username,
-        'symbol': "BTCUSD",
+        'symbol': symbol,
         'qty': double.parse(qty),
         'side': side,
         'lowerRSI': lowerRSIController.text
@@ -1000,7 +1002,6 @@ class TimeframeDropdown extends StatelessWidget {
     required this.selectedInterval,
     required this.onChanged,
   });
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -1008,37 +1009,50 @@ class TimeframeDropdown extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Text('โปรดเลือก Timeframe'),
+          const Text(
+            'Timeframe',
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+          ),
           DropdownButtonHideUnderline(
             child: DropdownButton<String>(
+              dropdownColor: Colors.white,
+              borderRadius: BorderRadius.circular(10),
               value: selectedInterval,
               onChanged: onChanged,
-              items: [
+              items: const [
                 DropdownMenuItem(
-                  value: '1 hour',
-                  child: Text('1 hour'),
+                  value: '1h',
+                  child: Text(
+                    '1 hour',
+                    style: TextStyle(color: Colors.black),
+                  ),
                 ),
                 DropdownMenuItem(
-                  value: '4 hours',
-                  child: Text('4 hours'),
+                  value: '4h',
+                  child: Text(
+                    '4 hours',
+                    style: TextStyle(color: Colors.black),
+                  ),
                 ),
                 DropdownMenuItem(
-                  value: '1 day',
-                  child: Text('1 day'),
+                  value: '1D',
+                  child: Text(
+                    '1 day',
+                    style: TextStyle(color: Colors.black),
+                  ),
                 ),
                 DropdownMenuItem(
-                  value: '1 week',
-                  child: Text('1 week'),
-                ),
-                DropdownMenuItem(
-                  value: '1 month',
-                  child: Text('1 month'),
+                  value: '1W',
+                  child: Text(
+                    '1 week',
+                    style: TextStyle(color: Colors.black),
+                  ),
                 ),
               ],
             ),
           ),
           IconButton(
-            icon: Icon(
+            icon: const Icon(
               Icons.info,
               size: 24,
             ),
@@ -1047,11 +1061,12 @@ class TimeframeDropdown extends StatelessWidget {
                 context: context,
                 builder: (context) {
                   return AlertDialog(
-                    title: Text('More Info'),
-                    content: Text('Additional information about timeframes.'),
+                    title: const Text('More Info'),
+                    content:
+                        const Text('Additional information about timeframes.'),
                     actions: [
                       TextButton(
-                        child: Text('OK'),
+                        child: const Text('OK'),
                         onPressed: () {
                           Navigator.of(context).pop();
                         },

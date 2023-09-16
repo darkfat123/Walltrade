@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 
 class AssetTHDetailsScreen extends StatelessWidget {
   final String symbol;
+  final String fullname;
 
-  const AssetTHDetailsScreen({required this.symbol});
+  const AssetTHDetailsScreen({required this.symbol,required this.fullname});
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +42,13 @@ class AssetTHDetailsScreen extends StatelessWidget {
                     symbol,
                     style: TextStyle(
                         fontSize: 24,
+                        fontFamily: "IBMPlexSansThai",
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    fullname,
+                    style: TextStyle(
+                        fontSize: 20,
                         fontFamily: "IBMPlexSansThai",
                         fontWeight: FontWeight.bold),
                   ),
