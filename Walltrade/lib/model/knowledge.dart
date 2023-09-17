@@ -10,10 +10,8 @@ class Knowledge {
   });
 }
 
-Future<List<Knowledge>> fetchKnowledge() {
-  return Future.delayed(Duration(seconds: 1), () {
-    return BuildKnowledge().knowledgeList;
-  });
+Future<List<Knowledge>> fetchKnowledge() async {
+  return BuildKnowledge().knowledgeList;
 }
 
 class BuildKnowledge {

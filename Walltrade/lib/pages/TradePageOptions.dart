@@ -35,7 +35,7 @@ class _TradePageOptionsState extends State<TradePageOptions>
   bool isLoading = true;
   TextEditingController symbolController = TextEditingController();
   _TradePageOptionsState({required this.username});
-
+  bool isFetching = true;
   Future<void> getAutoOrders() async {
     final url = '${Constants.serverUrl}/getAutoOrders';
     final headers = {'Content-Type': 'application/json'};
@@ -54,6 +54,26 @@ class _TradePageOptionsState extends State<TradePageOptions>
       isLoading = false;
     } else {
       print("Error");
+    }
+  }
+
+  Map<String, dynamic> technicalInfo = {};
+
+  Future<void> fetchtechnicalInfo(String symbol) async {
+    final url = Uri.parse('${Constants.serverUrl}/technicalVauleOfSymbol');
+    final headers = {'Content-Type': 'application/json'};
+    final body = jsonEncode({'symbol': symbol});
+
+    final response = await http.post(url, headers: headers, body: body);
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      setState(() {
+        technicalInfo = responseData;
+        isFetching = false;
+      });
+    } else {
+      throw Exception('เกิดข้อผิดพลาดในการรับข้อมูล');
     }
   }
 
@@ -417,22 +437,23 @@ class _TradePageOptionsState extends State<TradePageOptions>
                   margin: EdgeInsets.all(20),
                   height: 50,
                   decoration: BoxDecoration(
-                      color: const Color(0xFF2A3547),
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 2,
-                          blurRadius: 5,
-                          offset: Offset(
-                              0, 3), // changes the position of the shadow
-                        ),
-                      ],
-                      border: Border.all(
-                        strokeAlign: BorderSide.strokeAlignOutside,
-                        width: 2,
-                        color: Colors.blueGrey,
-                      ),),
+                    color: const Color(0xFF2A3547),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset:
+                            Offset(0, 3), // changes the position of the shadow
+                      ),
+                    ],
+                    border: Border.all(
+                      strokeAlign: BorderSide.strokeAlignOutside,
+                      width: 2,
+                      color: Colors.blueGrey,
+                    ),
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -534,35 +555,417 @@ class _TradePageOptionsState extends State<TradePageOptions>
                   ),
                   Padding(
                     padding: const EdgeInsets.only(right: 20),
-                    child: Container(
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // เมื่อปุ่มถูกกด
-                          showDialog(
-                            context:
-                                context, // BuildContext จำเป็นต้องใช้ในการสร้าง AlertDialog
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: Text(
-                                    "ค่าเทคนิค"), // ข้อความหัวเรื่องของ AlertDialog
-                                content: Text(
-                                    "เนื้อหาของค่าเทคนิคที่คุณต้องการแสดงในนี้"), // เนื้อหาของ AlertDialog
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context)
-                                          .pop(); // ปิด AlertDialog เมื่อปุ่มถูกกด
-                                    },
-                                    child: Text("ปิด"), // ปุ่มปิด AlertDialog
-                                  ),
-                                ],
+                    child: ElevatedButton(
+                      onPressed: () {
+                        symbolController.text == ''
+                            ? showDialog(
+                                context:
+                                    context, // BuildContext จำเป็นต้องใช้ในการสร้าง AlertDialog
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text(
+                                        "เกิดข้อผิดพลาด"), // ข้อความหัวเรื่องของ AlertDialog
+                                    content: Text(
+                                        "โปรดพิมพ์สัญลักษณ์หุ้นให้ถูกต้อง"), // เนื้อหาของ AlertDialog
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context)
+                                              .pop(); // ปิด AlertDialog เมื่อปุ่มถูกกด
+                                        },
+                                        child:
+                                            Text("ปิด"), // ปุ่มปิด AlertDialog
+                                      ),
+                                    ],
+                                  );
+                                },
+                              )
+                            : showDialog(
+                                context:
+                                    context, // BuildContext จำเป็นต้องใช้ในการสร้าง AlertDialog
+                                builder: (BuildContext context) {
+                                  fetchtechnicalInfo(symbolController.text);
+                                  return AlertDialog(
+                                    title: Center(
+                                      child: Text("ค่าเทคนิค"),
+                                    ), // ข้อความหัวเรื่องของ AlertDialog
+                                    content: isFetching
+                                        ? Text('รอสักครู่')
+                                        : IntrinsicHeight(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Container(
+                                                  padding: EdgeInsets.all(8),
+                                                  margin: EdgeInsets.all(8),
+                                                  decoration: BoxDecoration(
+                                                    color: const Color(0xFF2A3547),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.grey
+                                                            .withOpacity(0.5),
+                                                        spreadRadius: 2,
+                                                        blurRadius: 5,
+                                                        offset: Offset(0,
+                                                            3), // changes the position of the shadow
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Text(
+                                                        "ราคาปิดปัจจุบัน: ",
+                                                        style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            fontSize: 16,color: Colors.white),
+                                                      ),
+                                                      Text(
+                                                        technicalInfo['close']
+                                                            .toStringAsFixed(2),
+                                                        style: TextStyle(
+                                                            fontSize: 14,color: Colors.white),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Container(
+                                                  padding: EdgeInsets.all(8),
+                                                  margin: EdgeInsets.all(8),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.grey.shade200,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.grey
+                                                            .withOpacity(0.5),
+                                                        spreadRadius: 2,
+                                                        blurRadius: 5,
+                                                        offset: Offset(0,
+                                                            3), // changes the position of the shadow
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: Row(
+                                                    children: [
+                                                      Text(
+                                                        "RSI: ",
+                                                        style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            fontSize: 16),
+                                                      ),
+                                                      Text(
+                                                        technicalInfo['rsi']
+                                                            .toStringAsFixed(2),
+                                                        style: TextStyle(
+                                                            fontSize: 14),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Container(
+                                                  padding: EdgeInsets.all(8),
+                                                  margin: EdgeInsets.all(8),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.grey.shade200,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.grey
+                                                            .withOpacity(0.5),
+                                                        spreadRadius: 2,
+                                                        blurRadius: 5,
+                                                        offset: Offset(0,
+                                                            3), // changes the position of the shadow
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: Column(
+                                                    children: [
+                                                      Row(
+                                                        children: [
+                                                          Text(
+                                                            "Stochastic %K: ",
+                                                            style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                fontSize: 16),
+                                                          ),
+                                                          Text(
+                                                            technicalInfo[
+                                                                    'stoK']
+                                                                .toStringAsFixed(
+                                                                    2),
+                                                            style: TextStyle(
+                                                                fontSize: 14),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      Row(
+                                                        children: [
+                                                          Text(
+                                                            "Stochastic %D: ",
+                                                            style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                fontSize: 16),
+                                                          ),
+                                                          Text(
+                                                            technicalInfo[
+                                                                    'stoD']
+                                                                .toStringAsFixed(
+                                                                    2),
+                                                            style: TextStyle(
+                                                                fontSize: 14),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Container(
+                                                  padding: EdgeInsets.all(8),
+                                                  margin: EdgeInsets.all(8),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.grey.shade200,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.grey
+                                                            .withOpacity(0.5),
+                                                        spreadRadius: 2,
+                                                        blurRadius: 5,
+                                                        offset: Offset(0,
+                                                            3), // changes the position of the shadow
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: Column(
+                                                    children: [
+                                                      Row(
+                                                        children: [
+                                                          Text(
+                                                            "MACD: ",
+                                                            style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                fontSize: 16),
+                                                          ),
+                                                          Text(
+                                                            technicalInfo[
+                                                                    'macd']
+                                                                .toStringAsFixed(
+                                                                    2),
+                                                            style: TextStyle(
+                                                                fontSize: 14),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      Row(
+                                                        children: [
+                                                          Text(
+                                                            "Signal: ",
+                                                            style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                fontSize: 16),
+                                                          ),
+                                                          Text(
+                                                            technicalInfo[
+                                                                    'signal']
+                                                                .toStringAsFixed(
+                                                                    2),
+                                                            style: TextStyle(
+                                                                fontSize: 14),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Container(
+                                                  padding: EdgeInsets.all(8),
+                                                  margin: EdgeInsets.all(8),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.grey.shade200,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.grey
+                                                            .withOpacity(0.5),
+                                                        spreadRadius: 2,
+                                                        blurRadius: 5,
+                                                        offset: Offset(0,
+                                                            3), // changes the position of the shadow
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: Column(
+                                                    children: [
+                                                      Row(
+                                                        children: [
+                                                          Text(
+                                                            "EMA5: ",
+                                                            style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                fontSize: 16),
+                                                          ),
+                                                          Text(
+                                                            technicalInfo[
+                                                                    'ema5']
+                                                                .toStringAsFixed(
+                                                                    2),
+                                                            style: TextStyle(
+                                                                fontSize: 14),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      Row(
+                                                        children: [
+                                                          Text(
+                                                            "EMA10: ",
+                                                            style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                fontSize: 16),
+                                                          ),
+                                                          Text(
+                                                            technicalInfo[
+                                                                    'ema10']
+                                                                .toStringAsFixed(
+                                                                    2),
+                                                            style: TextStyle(
+                                                                fontSize: 14),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      Row(
+                                                        children: [
+                                                          Text(
+                                                            "EMA20: ",
+                                                            style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                fontSize: 16),
+                                                          ),
+                                                          Text(
+                                                            technicalInfo[
+                                                                    'ema20']
+                                                                .toStringAsFixed(
+                                                                    2),
+                                                            style: TextStyle(
+                                                                fontSize: 14),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      Row(
+                                                        children: [
+                                                          Text(
+                                                            "EMA50: ",
+                                                            style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                fontSize: 16),
+                                                          ),
+                                                          Text(
+                                                            technicalInfo[
+                                                                    'ema50']
+                                                                .toStringAsFixed(
+                                                                    2),
+                                                            style: TextStyle(
+                                                                fontSize: 14),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      Row(
+                                                        children: [
+                                                          Text(
+                                                            "EMA100: ",
+                                                            style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                fontSize: 16),
+                                                          ),
+                                                          Text(
+                                                            technicalInfo[
+                                                                    'ema100']
+                                                                .toStringAsFixed(
+                                                                    2),
+                                                            style: TextStyle(
+                                                                fontSize: 14),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      Row(
+                                                        children: [
+                                                          Text(
+                                                            "EMA200: ",
+                                                            style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                fontSize: 16),
+                                                          ),
+                                                          Text(
+                                                            technicalInfo[
+                                                                    'ema200']
+                                                                .toStringAsFixed(
+                                                                    2),
+                                                            style: TextStyle(
+                                                                fontSize: 14),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context)
+                                              .pop(); // ปิด AlertDialog เมื่อปุ่มถูกกด
+                                        },
+                                        child:
+                                            Text("ปิด"), // ปุ่มปิด AlertDialog
+                                      ),
+                                    ],
+                                  );
+                                },
                               );
-                            },
-                          );
-                        },
-                        child: Text("ค่าเทคนิค"),
-                      ),
+                      },
+                      child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          color: Color(0xFF212436),
+                          child: Text("ค่าเทคนิค")),
                     ),
                   ),
                 ],
@@ -614,7 +1017,8 @@ class _TradePageOptionsState extends State<TradePageOptions>
                               borderRadius: BorderRadius.circular(10),
                               color: tabController.index == 0
                                   ? Color(0xFF82CD47)
-                                  : Color(0xFFBB2525), // สีค่าตัวบอกสถานะเริ่มต้น
+                                  : Color(
+                                      0xFFBB2525), // สีค่าตัวบอกสถานะเริ่มต้น
                             ),
                           ),
                         ),

@@ -38,10 +38,8 @@ mysql = MySQL(app)
 def predict():
     name = request.json.get('name')
 
-    info = yf.Ticker(name).info
-    start = dt.datetime.now() - dt.timedelta(days=365)
-    end = dt.datetime.now()
-    data = yf.download(name, start, end)
+    data = yf.download(name,period="5y")
+
 
     scaler = MinMaxScaler(feature_range=(0, 1))
     scaled_data = scaler.fit_transform(data['Close'].values.reshape(-1, 1))
@@ -56,7 +54,7 @@ def predict():
     x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
 
     model = Sequential()
-    model.add(LSTM(units=50, return_sequences=True, input_shape=(x_train.shape[1], 1)))
+    model.add(LSTM(units=50, return_sequences=True,input_shape=(x_train.shape[1], 1)))
     model.add(Dropout(0.2))
     model.add(LSTM(units=50, return_sequences=True))
     model.add(Dropout(0.2))
@@ -64,14 +62,16 @@ def predict():
     model.add(Dropout(0.2))
     model.add(Dense(units=1))
     model.compile(optimizer='adam', loss='mean_squared_error')
-    model.fit(x_train, y_train, epochs=25, batch_size=32)
+    
+    model.fit(x_train, y_train, epochs=25, batch_size=256)
 
-    test_start = dt.datetime(2021, 1, 1)
+    test_start = dt.datetime(2020, 1, 1)
     test_end = dt.datetime.now()
     test_data = yf.download(name, test_start, test_end)
     actual_prices = test_data['Close'].values
     total_dataset = pd.concat((data['Close'], test_data['Close']), axis=0)
-    model_inputs = total_dataset[len(total_dataset)-len(test_data) - prediction_day:].values
+    model_inputs = total_dataset[len(
+    total_dataset)-len(test_data) - prediction_day:].values
     model_inputs = model_inputs.reshape(-1, 1)
     model_inputs = scaler.transform(model_inputs)
 
@@ -84,16 +84,24 @@ def predict():
     predicted_prices = model.predict(x_test)
     predicted_prices = scaler.inverse_transform(predicted_prices)
 
+    # + 1 -
     real_data = [
-        model_inputs[len(model_inputs) - prediction_day:len(model_inputs+1), 0]]
+        model_inputs[len(model_inputs) + 1 - prediction_day:len(model_inputs+1), 0]]
     real_data = np.array(real_data)
-    real_data = np.reshape(real_data, (real_data.shape[0], real_data.shape[1], 1))
-
+    real_data = np.reshape(
+        real_data, (real_data.shape[0], real_data.shape[1], 1))
+    
+    
     prediction = model.predict(real_data)
     prediction = scaler.inverse_transform(prediction)
-    prediction_text = f"Prediction: {prediction}"
 
-    return jsonify({'prediction': prediction_text})
+    print(f"Predicted {name} Price for the next day:", prediction[0][0])
+    result_dict = {
+        #'symbol': i,
+        'prediction': "{:.2f}".format(prediction[0][0]),
+    }
+
+    return jsonify(result_dict)
 
 
 @app.route('/getAccount', methods=['GET'])
@@ -560,7 +568,7 @@ def get_positions():
     
     return jsonify(positions)
 
-"""@app.route('/streamPriceUS', methods=['POST'])
+'''@app.route('/streamPriceUS', methods=['POST'])
 async def connect_to_alpaca():
     symbol = request.json.get('symbol')
     api = "PK8NXGV44WWTJA356CDG"
@@ -592,7 +600,7 @@ async def connect_to_alpaca():
                 print("Connection closed")
                 break
             print("Received data:", data)
-    asyncio.get_event_loop().run_until_complete(connect_to_alpaca())"""
+    asyncio.get_event_loop().run_until_complete(connect_to_alpaca())'''
 
 @app.route('/autotradeRSI', methods=['POST'])
 def autotradeRSI():
@@ -2837,151 +2845,7 @@ def multiAutotrade():
         print(f'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ: {str(e)}')
         return jsonify(f'error: {str(e)}')
 
-
-
-def RSI(symbol,rsi_value,side):
-    analysis = getSymbolHandler(symbol)
-    rsi = analysis.indicators["RSI"]
-    if side == "buy":
-        if rsi < rsi_value:
-            return 'buy'
-        else:
-            return 'neutral'
-    else:
-        if rsi > rsi_value:
-            return 'sell'
-        else:
-            return 'neutral'
-
-def STO(symbol,zone_sto,cross_sto,side):
-
-    analysis = getSymbolHandler(symbol)
-
-    stoK = analysis.indicators["Stoch.K"]
-    stoD =analysis.indicators["Stoch.D"] 
-    last_stoK = analysis.indicators["Stoch.K[1]"]
-    last_stoD =analysis.indicators["Stoch.D[1]"]
-
-    if side == 'buy':
-        if cross_sto>0:
-            if stoK < cross_sto and stoD < cross_sto and stoK > stoD and last_stoK < last_stoD:
-                return "buy"        
-        elif stoK <= zone_sto and stoD <= zone_sto:
-                return "buy"
-    else:
-        if cross_sto>0:
-            if stoK > cross_sto and stoD > cross_sto and stoK < stoD and last_stoK > last_stoD:
-                return "sell"  
-            elif stoK >= zone_sto and stoD >= zone_sto:
-                return "sell"
-    return "neutral"
-
-    
-def MACD(symbol,cross,zone,side):
-
-    analysis = getSymbolHandler(symbol)
-
-    if side == 'buy':
-        if cross:
-            while True:
-                macd = analysis.indicators["MACD.macd"]
-                signal = analysis.indicators["MACD.signal"]
-
-                print("Last MACD: ", last_macd)
-                print("Last Signal: ", last_signal)
-                print("MACD: ", macd)
-                print("Signal: ", signal)
-                    
-                if (last_macd < last_signal and macd > signal) and (macd and signal < 0): 
-                    print(f'Buy at MACD: {macd},Signal: {signal}')
-                    return "buy"
-                
-                last_macd = macd
-                last_signal = signal
-                print()
-                time.sleep(5)
-        else:
-            while True:
-                macd = analysis.indicators["MACD.macd"]
-                signal = analysis.indicators["MACD.signal"]
-
-                print("Last MACD: ", last_macd)
-                print("Last Signal: ", last_signal)
-                print("MACD: ", macd)
-                print("Signal: ", signal)
-                if macd and signal < zone:
-                    return 'buy'
-                last_macd = macd
-                last_signal = signal
-                print()
-                time.sleep(5)
-            
-    else:
-        if cross:
-            while True:
-                macd = analysis.indicators["MACD.macd"]
-                signal = analysis.indicators["MACD.signal"]
-
-                print("Last MACD: ", last_macd)
-                print("Last Signal: ", last_signal)
-                print("MACD: ", macd)
-                print("Signal: ", signal)
-
-                if (last_macd > last_signal and macd < signal) and (macd and signal > 0):
-                    return "sell"
-        else:
-            while True:
-                macd = analysis.indicators["MACD.macd"]
-                signal = analysis.indicators["MACD.signal"]
-
-                print("Last MACD: ", last_macd)
-                print("Last Signal: ", last_signal)
-                print("MACD: ", macd)
-                print("Signal: ", signal)
-
-                if macd and signal > zone:     
-                    return "sell" 
-                else:
-                    'macd neutral' 
-                                   
-                last_macd = macd
-                last_signal = signal
-                print()
-                time.sleep(5) 
-
-def EMA(symbol,day,side):
-    analysis = getSymbolHandler(symbol)
-    last_ema = 0
-    last_close = 0
-    if side == 'buy':
-        while True:
-            ema = analysis.indicators[f"EMA{day}"]
-            close = analysis.indicators["close"]
-            if close <= ema and last_close > last_ema:
-                return "buy"        
-            else:
-                print("ema: " ,ema)
-                print("close: " ,close) 
-                print("last ema: " ,last_ema) 
-                print("last close: " ,last_close)  
-                print()  
-            last_ema = ema
-            last_close = close
-                
-            
-    else:
-         while True:
-            ema = analysis.indicators[f"EMA{day}"]
-            close = analysis.indicators["close"]
-            if close >= ema and last_close < last_ema:
-                return "sell"
-            else:
-                last_ema = ema
-                last_close = close
-           
-                return 'ema neutral'       
         
-
 def getSymbolHandler(symbol):
     exchanges_to_try = [
         {"screener": "america", "exchange": "NASDAQ"},
@@ -3066,6 +2930,39 @@ def checkStatusOrder(username,order_number):
     cursor.execute(query)
     result = cursor.fetchone()
     return result[0]
+
+@app.route('/technicalVauleOfSymbol', methods=['POST'])
+def technicalVauleOfSymbol():
+    symbol = request.json.get('symbol')
+    analysis = getSymbolHandler(symbol=symbol)
+    rsi = analysis.indicators['RSI']
+    stoK = analysis.indicators['Stoch.K']
+    stoD = analysis.indicators['Stoch.D']
+    macd = analysis.indicators['MACD.macd']
+    signal = analysis.indicators['MACD.signal']
+    ema5 = analysis.indicators[f'EMA5']
+    ema10 = analysis.indicators[f'EMA10']
+    ema20 = analysis.indicators[f'EMA20']
+    ema50 = analysis.indicators[f'EMA50']
+    ema100 = analysis.indicators[f'EMA100']
+    ema200 = analysis.indicators[f'EMA200']
+    close = analysis.indicators['close']
+
+    data = {
+        'rsi': rsi,
+        'stoK': stoK,
+        'stoD': stoD,
+        'macd': macd,
+        'signal': signal,
+        'ema5': ema5,
+        'ema10': ema10,
+        'ema20': ema20,
+        'ema50': ema50,
+        'ema100': ema100,
+        'ema200': ema200,
+        'close': close
+    }
+    return jsonify(data)
 
 
 if __name__ == '__main__':
