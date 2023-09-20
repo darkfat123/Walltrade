@@ -1,5 +1,5 @@
 import 'package:Walltrade/pages/usAssetDetail.dart';
-import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:Walltrade/widget/snackBar/DeleteWatchlistSuccess.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -7,6 +7,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../variables/serverURL.dart';
+import '../widget/snackBar/UpdateWatchlistSuccess.dart';
 
 class AssetListScreen extends StatefulWidget {
   final String username;
@@ -47,19 +48,7 @@ class _AssetListScreenState extends State<AssetListScreen>
     if (response.statusCode == 200) {
       print('Watchlist updated successfully');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          /// need to set following properties for best effect of awesome_snackbar_content
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'เพิ่มสำเร็จ!',
-            message: 'เพิ่มรายการ $stockName ลงในรายการเฝ้าดูเรียบร้อยแล้ว!',
-
-            /// change contentType to ContentType.success, ContentType.warning or ContentType.help for variants
-            contentType: ContentType.success,
-          ),
-        ),
+        UpdateWatchlistSnackBar(symbol: stockName),
       );
     } else {
       print('Failed to update watchlist');
@@ -116,6 +105,9 @@ class _AssetListScreenState extends State<AssetListScreen>
     );
     if (response.statusCode == 200) {
       print(response.body);
+      ScaffoldMessenger.of(context).showSnackBar(
+        DeleteWatchlistSnackBar(symbol: symbol),
+      );
     } else {
       print(
           'Failed to delete watchlist item. Status code: ${response.statusCode}');

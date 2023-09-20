@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:Walltrade/pages/thAssetDetail.dart';
-import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:Walltrade/widget/snackBar/DeleteWatchlistSuccess.dart';
+import 'package:Walltrade/widget/snackBar/UpdateWatchlistSuccess.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -67,6 +68,9 @@ class _AssetTHListScreenState extends State<AssetTHListScreen>
     );
     if (response.statusCode == 200) {
       print(response.body);
+      ScaffoldMessenger.of(context).showSnackBar(
+        DeleteWatchlistSnackBar(symbol: symbol),
+      );
     } else {
       print(
           'Failed to delete watchlist item. Status code: ${response.statusCode}');
@@ -109,21 +113,7 @@ class _AssetTHListScreenState extends State<AssetTHListScreen>
     if (response.statusCode == 200) {
       print('Watchlist updated successfully');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          /// need to set following properties for best effect of awesome_snackbar_content
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'เพิ่มสำเร็จ!',
-            message: 'เพิ่มรายการ $stockName ลงในรายการเฝ้าดูเรียบร้อยแล้ว!',
-            titleFontSize: 18,
-            messageFontSize: 14,
-
-            /// change contentType to ContentType.success, ContentType.warning or ContentType.help for variants
-            contentType: ContentType.success,
-          ),
-        ),
+        UpdateWatchlistSnackBar(symbol: stockName),
       );
     } else {
       print('Failed to update watchlist');
@@ -198,7 +188,9 @@ class _AssetTHListScreenState extends State<AssetTHListScreen>
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) =>
-                                          AssetTHDetailsScreen(symbol: symbol,fullname: fullname),
+                                          AssetTHDetailsScreen(
+                                              symbol: symbol,
+                                              fullname: fullname),
                                     ),
                                   );
                                 },

@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:Walltrade/pages/FAQpage.dart';
 import 'package:Walltrade/pages/HistoryAutoTrade.dart';
-import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -587,7 +586,7 @@ class _HomePageState extends State<HomePage> {
                                                         ScaffoldMessenger.of(
                                                                 context)
                                                             .showSnackBar(
-                                                          CustomSnackBar(symbol: symbol),
+                                                          DeleteWatchlistSnackBar(symbol: symbol),
                                                         );
                                                       },
                                                       child: Chip(

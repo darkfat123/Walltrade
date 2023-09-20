@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
-class DeleteWatchlistSnackBar extends SnackBar {
-   DeleteWatchlistSnackBar({required String symbol})
+class UpdateWatchlistSnackBar extends SnackBar {
+  UpdateWatchlistSnackBar({required String symbol})
       : super(
           elevation: 0,
           behavior: SnackBarBehavior.floating,
@@ -13,7 +13,7 @@ class DeleteWatchlistSnackBar extends SnackBar {
                 padding: EdgeInsets.all(12),
                 height: 90,
                 decoration: BoxDecoration(
-                  color: Color(0xFFBB2525),
+                  color: Color(0xFF5F8D4E),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
@@ -24,7 +24,7 @@ class DeleteWatchlistSnackBar extends SnackBar {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'ลบสำเร็จ!',
+                            'เพิ่มสำเร็จ!',
                             style: TextStyle(
                               fontFamily: 'IBMPlexSansThai',
                               fontWeight: FontWeight.w500,
@@ -32,7 +32,7 @@ class DeleteWatchlistSnackBar extends SnackBar {
                             ),
                           ),
                           Text(
-                            'ลบ $symbol ออกจากรายการเฝ้าดูเรียบร้อยแล้ว',
+                            'เพิ่มหุ้น $symbol ลงในรายการเฝ้าดูเรียบร้อยแล้ว',
                             style: TextStyle(
                               fontFamily: 'IBMPlexSansThai',
                               fontSize: 14,
@@ -57,7 +57,7 @@ class DeleteWatchlistSnackBar extends SnackBar {
                     'assets/img/bubble.svg',
                     height: 50,
                     width: 36,
-                    color: Color(0xFF952323),
+                    color: Color(0xFF285430),
                   ),
                 ),
               ),
@@ -72,7 +72,7 @@ class DeleteWatchlistSnackBar extends SnackBar {
                     'assets/img/success.svg',
                     height: 100,
                     width: 70,
-                    color: Color(0xFF952323),
+                    color: Color(0xFF285430),
                   ),
                 ),
               ),

@@ -28,8 +28,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: primary,
         fontFamily: "IBMPlexSansThai",
+        
       ),
-      home: Home(username: "foczz123",initialIndex:0),
+      home: Home(username: "foczz123",initialIndex:2),
     );
   }
 }
