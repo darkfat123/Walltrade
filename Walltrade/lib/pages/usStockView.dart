@@ -1,4 +1,5 @@
 import 'package:Walltrade/pages/usAssetDetail.dart';
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -47,21 +48,17 @@ class _AssetListScreenState extends State<AssetListScreen>
       print('Watchlist updated successfully');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          behavior: SnackBarBehavior.floating,
-          content: Container(
-            padding: EdgeInsets.all(16),
-            height: 60,
-            decoration: BoxDecoration(
-              color: Colors.green,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              'เพิ่มลงรายการเรียบร้อยแล้ว!',
-              style: TextStyle(fontSize: 18),
-            ),
-          ),
-          backgroundColor: Colors.transparent,
+          /// need to set following properties for best effect of awesome_snackbar_content
           elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'เพิ่มสำเร็จ!',
+            message: 'เพิ่มรายการ $stockName ลงในรายการเฝ้าดูเรียบร้อยแล้ว!',
+
+            /// change contentType to ContentType.success, ContentType.warning or ContentType.help for variants
+            contentType: ContentType.success,
+          ),
         ),
       );
     } else {

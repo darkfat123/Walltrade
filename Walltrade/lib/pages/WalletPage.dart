@@ -300,7 +300,7 @@ class _WalletPageState extends State<WalletPage> {
                         child: Text(
                           "กระเป๋า",
                           style: TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.w600),
+                              fontSize: 20, fontWeight: FontWeight.w600),
                         ),
                       ),
                     ),
@@ -348,7 +348,7 @@ class _WalletPageState extends State<WalletPage> {
                 height: 160,
                 decoration: BoxDecoration(
                   color: Color(0xFF2A3547),
-                  borderRadius: BorderRadius.circular(15),
+                  borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.grey.withOpacity(0.5),

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:Walltrade/pages/thAssetDetail.dart';
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -109,12 +110,19 @@ class _AssetTHListScreenState extends State<AssetTHListScreen>
       print('Watchlist updated successfully');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'เพิ่มลงรายการเรียบร้อยแล้ว!',
-            style: TextStyle(fontSize: 16),
+          /// need to set following properties for best effect of awesome_snackbar_content
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'เพิ่มสำเร็จ!',
+            message: 'เพิ่มรายการ $stockName ลงในรายการเฝ้าดูเรียบร้อยแล้ว!',
+            titleFontSize: 18,
+            messageFontSize: 14,
+
+            /// change contentType to ContentType.success, ContentType.warning or ContentType.help for variants
+            contentType: ContentType.success,
           ),
-          // กำหนดให้ความกว้างเต็มพื้นที่ของจอแสดงผล
-          backgroundColor: Colors.green, // ทำให้ Snackbar ลอยเหนือเนื้อหา
         ),
       );
     } else {

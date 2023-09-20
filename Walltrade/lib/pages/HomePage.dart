@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:Walltrade/pages/FAQpage.dart';
 import 'package:Walltrade/pages/HistoryAutoTrade.dart';
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:Walltrade/pages/SettingsPage.dart';
@@ -11,6 +13,8 @@ import '../main.dart';
 import '../model/news.dart';
 import '../variables/serverURL.dart';
 import 'package:intl/intl.dart';
+
+import '../widget/snackBar/DeleteWatchlistSuccess.dart';
 
 class HomePage extends StatefulWidget {
   final String username;
@@ -583,12 +587,7 @@ class _HomePageState extends State<HomePage> {
                                                         ScaffoldMessenger.of(
                                                                 context)
                                                             .showSnackBar(
-                                                          SnackBar(
-                                                            content: Text(
-                                                                'ลบรายการ $symbol ออกจาก Watchlist'),
-                                                            duration: Duration(
-                                                                seconds: 3),
-                                                          ),
+                                                          CustomSnackBar(symbol: symbol),
                                                         );
                                                       },
                                                       child: Chip(
@@ -638,7 +637,7 @@ class _HomePageState extends State<HomePage> {
                           SizedBox(
                             height: 10,
                           ),
-                          Container(     
+                          Container(
                             height: 110,
                             child: ans == '{error: Empty}'
                                 ? Center(
@@ -892,7 +891,10 @@ class _HomePageState extends State<HomePage> {
                                                             style: TextStyle(
                                                                 color: Colors
                                                                     .white,
-                                                                fontSize: 10,fontWeight: FontWeight.w500),
+                                                                fontSize: 10,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500),
                                                           ),
                                                         )
                                                       : Container(

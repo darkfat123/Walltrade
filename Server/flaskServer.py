@@ -33,6 +33,7 @@ app.config['MYSQL_DB'] = 'walltrade'  # ชื่อฐานข้อมูล
 CORS(app)
 mysql = MySQL(app)
 
+ratesTHBtoUSD = 0.028
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -1252,12 +1253,13 @@ def getStockPriceUS():
 
                 close_price = round(analysis.indicators["close"], 2)
                 percentage_change = round(analysis.indicators["change"], 2)
-
+                
                 prices.append({
                     'symbol': symbol,
                     'price': close_price,
                     'percentage': percentage_change
                 })
+                print(prices)
                 
             return jsonify(prices)
 
@@ -1349,10 +1351,10 @@ def th_portfolio():
     portfolio_profit = portfolio['totalPortfolio']['profit']
     percentageChange = (portfolio_profit / cashBalance) * 100
         
-    cash = CurrencyRates().get_rate('THB', 'USD')
-    USDtoTHB = CurrencyRates().get_rate('USD', 'THB')
-    print(type(USDtoTHB))
+    cash = getSymbolHandler("THBUSD").indicators['close']
+    USDtoTHB = getSymbolHandler("USDTHB").indicators['close']
     balance = f"{cashBalance * cash:.2f}"
+
     balanceProfitChange = f"{portfolio_profit * cash:.2f}"
     lineAvailable = f"{account_info.get('lineAvailable') * cash:.2f}"
     marketValue = f"{portfolio['totalPortfolio']['marketValue'] * cash:.2f}"
@@ -2852,6 +2854,7 @@ def getSymbolHandler(symbol):
         {"screener": "america", "exchange": "NYSE"},
         {"screener": "thailand", "exchange": "SET"},
         {"screener": "Crypto", "exchange": "Binance"},
+        {"screener": "forex", "exchange": "FX_IDC"}
     ]
 
     for exchange_info in exchanges_to_try:

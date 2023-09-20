@@ -2,13 +2,16 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../variables/serverURL.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+
+import '../variables/symbolInput.dart';
 
 class TradePageSell extends StatefulWidget {
   final String username;
-  final String symbol;
-  TradePageSell({required this.username,required this.symbol});
+
+  TradePageSell({required this.username});
   @override
-  _TradePageSellState createState() => _TradePageSellState(username: username,symbol:symbol);
+  _TradePageSellState createState() => _TradePageSellState(username: username);
 }
 
 class _TradePageSellState extends State<TradePageSell> {
@@ -27,24 +30,26 @@ class _TradePageSellState extends State<TradePageSell> {
   bool macd_crossupIsChecked = false;
   String searchText = '';
   String _walletBalance = '';
+  String selectedDay = '5';
   bool showDetails = false;
   String selectedInterval = '1h';
   String result = '';
-  final String symbol;
-  _TradePageSellState({required this.username, required this.symbol});
+
+  _TradePageSellState({required this.username});
   void _handleSubmit() {
     setState(() {
       searchText = _searchController.text;
     });
   }
 
-  Future<void> placeOrderRSI(String qty, String side) async {
+  Future<void> placeOrderRSI(
+      String qty, String side, String symbol, String interval) async {
     final url = Uri.parse('${Constants.serverUrl}/autotradeRSI');
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode(
       {
         'username': widget.username,
-        'symbol': "BTCUSD",
+        'symbol': symbol,
         'qty': double.parse(qty),
         'side': side,
         'lowerRSI': higherRSIController.text
@@ -65,7 +70,8 @@ class _TradePageSellState extends State<TradePageSell> {
     }
   }
 
-  Future<void> placeOrderMACD(String qty, String side) async {
+  Future<void> placeOrderMACD(
+      String qty, String side, String symbol, String interval) async {
     final url = Uri.parse('${Constants.serverUrl}/autotradeMACD');
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode(
@@ -93,7 +99,8 @@ class _TradePageSellState extends State<TradePageSell> {
     }
   }
 
-  Future<void> placeOrderSTO(String qty, String side) async {
+  Future<void> placeOrderSTO(
+      String qty, String side, String symbol, String interval) async {
     final url = Uri.parse('${Constants.serverUrl}/autotradeSTO');
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode(
@@ -121,7 +128,8 @@ class _TradePageSellState extends State<TradePageSell> {
     }
   }
 
-  Future<void> placeOrderEMA(String qty, String side) async {
+  Future<void> placeOrderEMA(
+      String qty, String side, String symbol, String interval) async {
     final url = Uri.parse('${Constants.serverUrl}/autotradeEMA');
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode(
@@ -153,23 +161,19 @@ class _TradePageSellState extends State<TradePageSell> {
     var headers = {'Content-Type': 'application/x-www-form-urlencoded'};
     var body = {'username': username};
 
-    try {
-      var response = await http.post(url, headers: headers, body: body);
+    var response = await http.post(url, headers: headers, body: body);
 
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
-        var walletBalance = data['wallet_balance'];
-        setState(
-          () {
-            _walletBalance = walletBalance.toString();
-          },
-        );
-      } else {
-        throw Exception(
-            'Failed to retrieve wallet balance. Error: ${response.body}');
-      }
-    } catch (e) {
-      throw Exception('Error: $e');
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      var walletBalance = data['wallet_balance'];
+      setState(
+        () {
+          _walletBalance = walletBalance.toString();
+        },
+      );
+    } else {
+      throw Exception(
+          'Failed to retrieve wallet balance. Error: ${response.body}');
     }
   }
 
@@ -187,736 +191,600 @@ class _TradePageSellState extends State<TradePageSell> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Container(
-        margin: EdgeInsets.all(12),
-        padding: EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5), // Shadow color
-              spreadRadius: 2, // Spread radius
-              blurRadius: 5, // Blur radius
-              offset: Offset(0, 3), // Offset in x and y direction
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            ExpansionTile(
-              title: Row(
-                children: [
-                  Text(
-                    'RSI',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 5,
-                  ),
-                  Text(
-                    '(Relative Strength Index)',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ],
+    return Consumer<Data>(builder: (context, data, child) {
+      return SingleChildScrollView(
+        child: Container(
+          margin: EdgeInsets.all(12),
+          padding: EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5), // Shadow color
+                spreadRadius: 2, // Spread radius
+                blurRadius: 5, // Blur radius
+                offset: Offset(0, 3), // Offset in x and y direction
               ),
-              children: [
-                TimeframeDropdown(
-                  selectedInterval: selectedInterval,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      selectedInterval = newValue!;
-                    });
-                  },
-                ),
-                SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Text('ระบุค่า RSI ที่ต้องการขาย'),
-                      SizedBox(width: 5),
-                      Expanded(
-                        child: TextField(
-                          controller: higherRSIController,
-                          decoration: InputDecoration(
-                            labelText: '0-100',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
+            ],
+          ),
+          child: Column(
+            children: [
+              ExpansionTile(
+                title: Row(
+                  children: [
+                    Text(
+                      'RSI',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
                       ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.info,
-                          size: 24,
-                        ),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: Text('More Info'),
-                                content: Text(
-                                    'Additional information about timeframes.'),
-                                actions: [
-                                  TextButton(
-                                    child: Text('OK'),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
+                    ),
+                    SizedBox(
+                      width: 5,
+                    ),
+                    Text(
+                      '(Relative Strength Index)',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Text('จำนวน'),
-                      SizedBox(width: 5),
-                      Expanded(
-                        child: TextField(
-                          controller: qtyController,
-                          decoration: InputDecoration(
-                            labelText: 'จำนวน',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.info,
-                          size: 24,
-                        ),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: Text('More Info'),
-                                content: Text(
-                                    'Additional information about timeframes.'),
-                                actions: [
-                                  TextButton(
-                                    child: Text('OK'),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    placeOrderRSI(qtyController.text, "sell");
-                  },
-                  child: Text('ยืนยัน'),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-              ],
-            ),
-            ExpansionTile(
-              title: Row(
                 children: [
-                  Text(
-                    'STO',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                    ),
+                  TimeframeDropdown(
+                    selectedInterval: selectedInterval,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        selectedInterval = newValue!;
+                      });
+                    },
                   ),
-                  SizedBox(
-                    width: 5,
-                  ),
-                  Text(
-                    '(Stochastic Oscillator)',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ],
-              ),
-              children: [
-                TimeframeDropdown(
-                  selectedInterval: selectedInterval,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      selectedInterval = newValue!;
-                    });
-                  },
-                ),
-                SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Text('ระบุค่า STO %K และ %D ที่ต้องการขาย'),
-                      SizedBox(width: 5),
-                      Expanded(
-                        child: TextField(
-                          controller: zoneSTOController,
-                          enabled: isZoneTextFieldEnabled,
-                          decoration: InputDecoration(
-                            labelText: '0-100',
-                            border: OutlineInputBorder(),
-                          ),
-                          onChanged: (text) {
-                            if (text.isNotEmpty) {
-                              setState(() {
-                                crossdownSTOController.text = "0";
-                                isCrossTextFieldEnabled = false;
-                              });
-                            } else {
-                              setState(() {
-                                isCrossTextFieldEnabled = true;
-                                crossdownSTOController.clear();
-                              });
-                            }
-                          },
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.info,
-                          size: 24,
-                        ),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: Text('More Info'),
-                                content: Text(
-                                    'Additional information about timeframes.'),
-                                actions: [
-                                  TextButton(
-                                    child: Text('OK'),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Text('STO %K ตัดขึ้น %D และมีโซนที่สูงกว่า'),
-                      SizedBox(width: 5),
-                      Expanded(
-                        child: TextField(
-                          enabled: isCrossTextFieldEnabled,
-                          controller: crossdownSTOController,
-                          decoration: InputDecoration(
-                            labelText: '0-100',
-                            border: OutlineInputBorder(),
-                          ),
-                          onChanged: (text) {
-                            if (text.isNotEmpty) {
-                              setState(() {
-                                zoneSTOController.text = "0";
-                                isZoneTextFieldEnabled = false;
-                              });
-                            } else {
-                              setState(() {
-                                isZoneTextFieldEnabled = true;
-                                zoneSTOController.clear();
-                              });
-                            }
-                          },
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.info,
-                          size: 24,
-                        ),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: Text('More Info'),
-                                content: Text(
-                                    'Additional information about timeframes.'),
-                                actions: [
-                                  TextButton(
-                                    child: Text('OK'),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Text('จำนวน'),
-                      SizedBox(width: 5),
-                      Expanded(
-                        child: TextField(
-                          controller: qtyController,
-                          decoration: InputDecoration(
-                            labelText: 'จำนวน',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.info,
-                          size: 24,
-                        ),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: Text('More Info'),
-                                content: Text(
-                                    'Additional information about timeframes.'),
-                                actions: [
-                                  TextButton(
-                                    child: Text('OK'),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: Text('ยืนยัน'),
-                          content: Text('Submit button pressed!'),
-                          actions: [
-                            TextButton(
-                              child: Text('OK'),
-                              onPressed: () {
-                                placeOrderSTO(qtyController.text, 'sell');
-                                Navigator.of(context).pop();
-                              },
+                  SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Text('ระบุค่า RSI ที่ต้องการขาย'),
+                        SizedBox(width: 5),
+                        Expanded(
+                          child: TextField(
+                            controller: higherRSIController,
+                            keyboardType:
+                                TextInputType.numberWithOptions(decimal: true),
+                            decoration: InputDecoration(
+                              labelText: '0-100',
+                              border: OutlineInputBorder(),
                             ),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                  child: Text('Submit'),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-              ],
-            ),
-            ExpansionTile(
-              title: Row(
-                children: [
-                  Text(
-                    'MACD',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.info,
+                            size: 20,
+                          ),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return InfoAlertDialog(
+                                  title: 'RSI คืออะไร?',
+                                  content:
+                                      'RSI สร้างขึ้นโดยวิธีการคำนวณค่าเฉลี่ยของการเปรียบเทียบราคาที่ขึ้นและลงของสินทรัพย์ในระยะเวลาที่กำหนด ช่วงค่าที่อยู่ระหว่าง 0 ถึง 100 จะสร้างคำสั่งขายเมื่อมีค่ามากกว่าหรือเท่ากับที่พิมพ์',
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ),
-                  SizedBox(width: 5),
-                  Text(
-                    '(MA Convergence Divergence)',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w400,
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Text('จำนวน'),
+                        SizedBox(width: 5),
+                        Expanded(
+                          child: TextField(
+                            controller: qtyController,
+                            keyboardType:
+                                TextInputType.numberWithOptions(decimal: true),
+                            decoration: InputDecoration(
+                              labelText: 'จำนวน',
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return OrderConfirmationDialog(
+                            symbol: data.text,
+                            qty: qtyController.text,
+                            technicalText: higherRSIController.text == ''
+                                ? ''
+                                : 'RSI มากกว่า ${higherRSIController.text}',
+                            interval: selectedInterval,
+                            onPlaceOrder: (qty, type, symbol, interval) {
+                              placeOrderRSI(qty, type, symbol, interval);
+                              print(
+                                  'Placing order: $qty $type $symbol $interval');
+                            },
+                          );
+                        },
+                      );
+                    },
+                    child: Text('ยืนยัน'),
+                  ),
+                  SizedBox(
+                    height: 20,
                   ),
                 ],
               ),
-              children: [
-                TimeframeDropdown(
-                  selectedInterval: selectedInterval,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      selectedInterval = newValue!;
-                    });
-                  },
+              ExpansionTile(
+                title: Row(
+                  children: [
+                    Text(
+                      'STO',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 5,
+                    ),
+                    Text(
+                      '(Stochastic Oscillator)',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Text('MACD ตัดขึ้น Signal และมีโซนที่สูงกว่า 0'),
-                      SizedBox(width: 5),
-                      Checkbox(
-                        value: macd_crossupIsChecked,
-                        onChanged: (bool? newValue) {
-                          setState(() {
-                            macd_crossupIsChecked = newValue ?? false;
-                            print(macd_crossupIsChecked);
-                            if (macd_crossupIsChecked) {
-                              zoneMACDController.text = fixedZoneValue;
-                            } else {
-                              zoneMACDController.text =
-                                  ''; // ไม่ต้องใส่ค่าเมื่อ Checkbox ไม่ถูกติ๊ก
-                            }
+                children: [
+                  TimeframeDropdown(
+                    selectedInterval: selectedInterval,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        selectedInterval = newValue!;
+                      });
+                    },
+                  ),
+                  SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Text('โซน STO %K และ %D'),
+                        SizedBox(width: 5),
+                        Expanded(
+                          child: TextField(
+                            controller: zoneSTOController,
+                            keyboardType:
+                                TextInputType.numberWithOptions(decimal: true),
+                            enabled: isZoneTextFieldEnabled,
+                            decoration: InputDecoration(
+                              labelText: '0-100',
+                              border: OutlineInputBorder(),
+                            ),
+                            onChanged: (text) {
+                              if (text.isNotEmpty) {
+                                setState(() {
+                                  crossdownSTOController.text = "0";
+                                  isCrossTextFieldEnabled = false;
+                                });
+                              } else {
+                                setState(() {
+                                  isCrossTextFieldEnabled = true;
+                                  crossdownSTOController.clear();
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.info,
+                            size: 20,
+                          ),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return InfoAlertDialog(
+                                  title: 'โซน STO %K และ %D คืออะไร',
+                                  content:
+                                      'จะสร้างคำสั่งขายทันทีเมื่อเส้น %K และ %D มีค่ามากกว่าหรือเท่ากับโซนที่พิมพ์ โดยจะมีค่าตั้งแต่ 0-100',
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Text('%K ตัดลง %D และมีโซนสูงกว่า'),
+                        SizedBox(width: 5),
+                        Expanded(
+                          child: TextField(
+                            enabled: isCrossTextFieldEnabled,
+                            keyboardType:
+                                TextInputType.numberWithOptions(decimal: true),
+                            controller: crossdownSTOController,
+                            decoration: InputDecoration(
+                              labelText: '0-100',
+                              border: OutlineInputBorder(),
+                            ),
+                            onChanged: (text) {
+                              if (text.isNotEmpty) {
+                                setState(() {
+                                  zoneSTOController.text = "0";
+                                  isZoneTextFieldEnabled = false;
+                                });
+                              } else {
+                                setState(() {
+                                  isZoneTextFieldEnabled = true;
+                                  zoneSTOController.clear();
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.info,
+                            size: 20,
+                          ),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return InfoAlertDialog(
+                                    title:
+                                        "%K ตัดขึ้น %D และมีโซนสูงกว่า คืออะไร?",
+                                    content:
+                                        "จะสร้างคำสั่งขายทันทีเมื่อเส้น %K ตัดลงกับเส้น %D และมีค่าที่สูงกว่าโซนที่พิมพ์ โดยจะมีค่าตั้งแต่ 0-100");
+                              },
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Text('จำนวน'),
+                        SizedBox(width: 5),
+                        Expanded(
+                          child: TextField(
+                            controller: qtyController,
+                            keyboardType:
+                                TextInputType.numberWithOptions(decimal: true),
+                            decoration: InputDecoration(
+                              labelText: 'จำนวน',
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (context) {
+                            return OrderConfirmationDialog(
+                              symbol: data.text,
+                              qty: qtyController.text,
+                              technicalText: zoneSTOController.text == '' &&
+                                      crossdownSTOController.text == ''
+                                  ? ''
+                                  : zoneSTOController.text == '0'
+                                      ? "%K ตัดลง %D และมีโซนสูงกว่า ${crossdownSTOController.text}"
+                                      : "%K และ %D มากกว่าหรือเท่ากับ ${zoneSTOController.text}",
+                              interval: selectedInterval,
+                              onPlaceOrder: (qty, type, symbol, interval) {
+                                placeOrderSTO(qty, type, symbol, interval);
+                                print(
+                                    'Placing order: $qty $type $symbol $interval');
+                              },
+                            );
                           });
-                        },
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.info,
-                          size: 24,
-                        ),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: Text('More Info'),
-                                content: Text(
-                                    'Additional information about timeframes.'),
-                                actions: [
-                                  TextButton(
-                                    child: Text('OK'),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Text('ระบุโซน MACD & Signal ที่ต้องการขาย'),
-                      SizedBox(width: 5),
-                      Expanded(
-                        child: TextField(
-                          controller: zoneMACDController,
-                          enabled: !macd_crossupIsChecked,
-                          decoration: InputDecoration(
-                            labelText: 'ค่าที่ต้องการซื้อ',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.info,
-                          size: 24,
-                        ),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: Text('More Info'),
-                                content: Text(
-                                    'Additional information about timeframes.'),
-                                actions: [
-                                  TextButton(
-                                    child: Text('OK'),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Text('จำนวน'),
-                      SizedBox(width: 5),
-                      Expanded(
-                        child: TextField(
-                          controller: qtyController,
-                          decoration: InputDecoration(
-                            labelText: 'จำนวน',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.info,
-                          size: 24,
-                        ),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: Text('More Info'),
-                                content: Text(
-                                    'Additional information about timeframes.'),
-                                actions: [
-                                  TextButton(
-                                    child: Text('OK'),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: Text('ยืนยัน'),
-                          content: Text('กด OK เพื่อยืนยันการสั่งซื้อ'),
-                          actions: [
-                            TextButton(
-                              child: Text('OK'),
-                              onPressed: () {
-                                placeOrderMACD(qtyController.text, "sell");
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                  child: Text('Submit'),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-              ],
-            ),
-            ExpansionTile(
-              title: Row(
-                children: [
-                  Text(
-                    'EMA',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                    ),
+                    },
+                    child: Text('Submit'),
                   ),
                   SizedBox(
-                    width: 5,
-                  ),
-                  Text(
-                    '(Exponential MA)',
-                    style: TextStyle(fontWeight: FontWeight.w400),
+                    height: 20,
                   ),
                 ],
               ),
-              children: [
-                TimeframeDropdown(
-                  selectedInterval: selectedInterval,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      selectedInterval = newValue!;
-                    });
-                  },
+              ExpansionTile(
+                title: Row(
+                  children: [
+                    Text(
+                      'MACD',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(width: 5),
+                    Text(
+                      '(MA Convergence Divergence)',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Text('ระบุวันของ EMA'),
-                      SizedBox(width: 5),
-                      Expanded(
-                        child: TextField(
-                          controller: dayController,
-                          decoration: InputDecoration(
-                            labelText: 'จำนวนวันที่ต้องการใช้',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.info,
-                          size: 24,
-                        ),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: Text('More Info'),
-                                content: Text(
-                                    'Additional information about timeframes.'),
-                                actions: [
-                                  TextButton(
-                                    child: Text('OK'),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ],
+                children: [
+                  TimeframeDropdown(
+                    selectedInterval: selectedInterval,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        selectedInterval = newValue!;
+                      });
+                    },
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Text('จำนวน'),
-                      SizedBox(width: 5),
-                      Expanded(
-                        child: TextField(
-                          controller: qtyController,
-                          decoration: InputDecoration(
-                            labelText: 'จำนวน',
-                            border: OutlineInputBorder(),
+                  SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Text('MACD ตัดลง Signal และมีโซนที่สูงกว่า 0'),
+                        SizedBox(width: 5),
+                        Checkbox(
+                          value: macd_crossupIsChecked,
+                          onChanged: (bool? newValue) {
+                            setState(() {
+                              macd_crossupIsChecked = newValue ?? false;
+                              print(macd_crossupIsChecked);
+                              if (macd_crossupIsChecked) {
+                                zoneMACDController.text = fixedZoneValue;
+                              } else {
+                                zoneMACDController.text =
+                                    ''; // ไม่ต้องใส่ค่าเมื่อ Checkbox ไม่ถูกติ๊ก
+                              }
+                            });
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.info,
+                            size: 20,
                           ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.info,
-                          size: 24,
-                        ),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: Text('More Info'),
-                                content: Text(
-                                    'Additional information about timeframes.'),
-                                actions: [
-                                  TextButton(
-                                    child: Text('OK'),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: Text('ยืนยัน'),
-                          content: Text('Submit button pressed!'),
-                          actions: [
-                            TextButton(
-                              child: Text('OK'),
-                              onPressed: () {
-                                placeOrderEMA(qtyController.text, "sell");
-                                Navigator.of(context).pop();
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return InfoAlertDialog(
+                                  title:
+                                      'MACD ตัดลง Signal และมีโซนสูงกว่า 0 คืออะไร?',
+                                  content:
+                                      'เป็นสัญญาณการขายพื้นฐานของ MACD ที่จะขายเมื่อเส้น MACD ตัดลงกับเส้น Signal และเส้นทั้งสองจะต้องมีค่าที่สูงกว่า 0',
+                                );
                               },
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Text('โซน MACD & Signal'),
+                        SizedBox(width: 5),
+                        Expanded(
+                          child: TextField(
+                            controller: zoneMACDController,
+                            keyboardType:
+                                TextInputType.numberWithOptions(decimal: true),
+                            enabled: !macd_crossupIsChecked,
+                            decoration: InputDecoration(
+                              labelText: 'ค่าที่ต้องการซื้อ',
+                              border: OutlineInputBorder(),
                             ),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                  child: Text('Submit'),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.info,
+                            size: 20,
+                          ),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return InfoAlertDialog(
+                                    title: "โซน MACD & Signal คืออะไร?",
+                                    content:
+                                        "จะสร้างคำสั่งขายทันทีเมื่อค่าของเส้น MACD และเส้น Signal มีค่าเท่ากับมากกว่าค่าที่พิมพ์");
+                              },
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Text('จำนวน'),
+                        SizedBox(width: 5),
+                        Expanded(
+                          child: TextField(
+                            controller: qtyController,
+                            keyboardType:
+                                TextInputType.numberWithOptions(decimal: true),
+                            decoration: InputDecoration(
+                              labelText: 'จำนวน',
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (context) {
+                            return OrderConfirmationDialog(
+                              symbol: data.text,
+                              qty: qtyController.text,
+                              technicalText: !macd_crossupIsChecked &&
+                                      zoneMACDController.text == ''
+                                  ? ''
+                                  : macd_crossupIsChecked
+                                      ? "MACD & Signal ตัดลงและมีค่ามากกว่า 0"
+                                      : "MACD & Signal มากกว่าหรือเท่ากับ ${zoneMACDController.text}",
+                              interval: selectedInterval,
+                              onPlaceOrder: (qty, type, symbol, interval) {
+                                placeOrderMACD(qty, type, symbol, interval);
+                                print(
+                                    'Placing order: $qty $type $symbol $interval');
+                              },
+                            );
+                          });
+                    },
+                    child: Text('Submit'),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                ],
+              ),
+              ExpansionTile(
+                title: Row(
+                  children: [
+                    Text(
+                      'EMA',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 5,
+                    ),
+                    Text(
+                      '(Exponential MA)',
+                      style: TextStyle(fontWeight: FontWeight.w400),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            SizedBox(
-              height: 20,
-            ),
-          ],
+                children: [
+                  TimeframeDropdown(
+                    selectedInterval: selectedInterval,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        selectedInterval = newValue!;
+                      });
+                    },
+                  ),
+                  SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: EMADropdown(
+                      selectedDay: selectedDay,
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedDay = newValue!;
+                        });
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Text('จำนวน'),
+                        SizedBox(width: 5),
+                        Expanded(
+                          child: TextField(
+                            controller: qtyController,
+                            keyboardType:
+                                TextInputType.numberWithOptions(decimal: true),
+                            decoration: InputDecoration(
+                              labelText: 'เช่น 0.001, 5, 100',
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.symmetric(
+                                  vertical: 12.0, horizontal: 10.0),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (context) {
+                            return OrderConfirmationDialog(
+                              symbol: data.text,
+                              qty: qtyController.text,
+                              technicalText:
+                                  "ซื้อเมื่อราคามากกว่าหรือเท่ากับ EMA$selectedDay",
+                              interval: selectedInterval,
+                              onPlaceOrder: (qty, type, symbol, interval) {
+                                placeOrderEMA(qty, type, symbol, interval);
+                                print(
+                                    'Placing order: $qty $type $symbol $interval');
+                              },
+                            );
+                          });
+                    },
+                    child: Text('ยืนยัน'),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 20,
+              ),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 }
 
@@ -937,7 +805,7 @@ class TimeframeDropdown extends StatelessWidget {
         children: [
           const Text(
             'Timeframe',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
           ),
           DropdownButtonHideUnderline(
             child: DropdownButton<String>(
@@ -980,16 +848,21 @@ class TimeframeDropdown extends StatelessWidget {
           IconButton(
             icon: const Icon(
               Icons.info,
-              size: 24,
+              size: 20,
             ),
             onPressed: () {
               showDialog(
                 context: context,
                 builder: (context) {
                   return AlertDialog(
-                    title: const Text('More Info'),
-                    content:
-                        const Text('Additional information about timeframes.'),
+                    title: const Text(
+                      'Timeframe คืออะไร?',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    content: const Text(
+                      'ระยะเวลาที่ใช้ในการวิเคราะห์และตัดสินใจในการซื้อหรือขายสินทรัพย์ทางการเงิน เช่น หุ้นหรือสกุลเงิน ระยะเวลาในการเทรดมักถูกแบ่งออกเป็นหลายช่วง โดยที่แต่ละช่วงมีลักษณะและค่าทางเทคนิคในการเทรดต่างกัน',
+                      style: TextStyle(fontSize: 14),
+                    ),
                     actions: [
                       TextButton(
                         child: const Text('OK'),
@@ -1005,6 +878,291 @@ class TimeframeDropdown extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class EMADropdown extends StatelessWidget {
+  final String selectedDay;
+  final Function(String?) onChanged;
+
+  const EMADropdown({
+    required this.selectedDay,
+    required this.onChanged,
+  });
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          const Text(
+            'จำนวนวันของ EMA',
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+          ),
+          DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              borderRadius: BorderRadius.circular(10),
+              value: selectedDay,
+              onChanged: onChanged,
+              icon: const Icon(Icons.arrow_drop_down_circle,
+                  color: Colors.black, size: 20),
+              items: const [
+                DropdownMenuItem(
+                  value: '5',
+                  child: Text(
+                    'EMA5',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: '10',
+                  child: Text(
+                    'EMA10',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: '20',
+                  child: Text(
+                    'EMA20',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: '50',
+                  child: Text(
+                    'EMA50',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: '100',
+                  child: Text(
+                    'EMA100',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: '200',
+                  child: Text(
+                    'EMA200',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(
+              Icons.info,
+              size: 20,
+            ),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return InfoAlertDialog(
+                    title: 'จำนวนวันของ EMA คืออะไร?',
+                    content:
+                        'ระยะเวลาที่ใช้ในการคำนวณค่าเฉลี่ยเคลื่อนที่ของข้อมูลราคาหรือสถิติในช่วงเวลานั้น ค่า EMA ที่มีจำนวนวันน้อยจะมีการผันผวนที่เร็วขึ้น ในขณะที่ค่า EMA ที่มีจำนวนวันมากขึ้นจะมีการผันผวนที่ช้าลง',
+                  );
+                },
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class OrderConfirmationDialog extends StatelessWidget {
+  final String symbol;
+  final String qty;
+  final String technicalText;
+  final String interval;
+  final Function(String, String, String, String) onPlaceOrder;
+
+  OrderConfirmationDialog({
+    required this.symbol,
+    required this.qty,
+    required this.technicalText,
+    required this.interval,
+    required this.onPlaceOrder,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return symbol == '' || qty == '' || technicalText == ''
+        ? AlertDialog(
+            title: Text(
+              'ข้อมูลผิดพลาด',
+              style: TextStyle(fontSize: 16),
+            ),
+            content: Text(
+              'โปรดใส่ข้อมูลให้ครบถ้วน',
+              style: TextStyle(fontSize: 14),
+            ),
+            actions: [
+              TextButton(
+                child: Text(
+                  'ตกลง',
+                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          )
+        : AlertDialog(
+            title: Text(
+              'ยืนยันคำสั่งซื้อ',
+              style: TextStyle(fontSize: 16),
+            ),
+            content: IntrinsicHeight(
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'Symbol: ',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600, fontSize: 14),
+                      ),
+                      Text(
+                        symbol,
+                        style: TextStyle(fontSize: 14),
+                      )
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        "ประเภทคำสั่ง: ",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600, fontSize: 14),
+                      ),
+                      Chip(
+                        backgroundColor: Color(0xFFBB2525),
+                        label: Text(
+                          "ขาย",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w400,
+                              color: Colors.white,
+                              fontSize: 14),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        'Timeframe: ',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600, fontSize: 14),
+                      ),
+                      Text(
+                        interval == '1h'
+                            ? '1 ชั่วโมง'
+                            : interval == '4h'
+                                ? '4 ชั่วโมง'
+                                : interval == '1D'
+                                    ? '1 วัน'
+                                    : '1 สัปดาห์',
+                        style: TextStyle(fontSize: 14),
+                      )
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        'จำนวน: ',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600, fontSize: 14),
+                      ),
+                      Text(
+                        '$qty หน่วย',
+                        style: TextStyle(fontSize: 14),
+                      )
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        'เทคนิคที่ใช้: ',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600, fontSize: 14),
+                      ),
+                      Text(
+                        technicalText,
+                        style: TextStyle(fontSize: 14),
+                      )
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                child: Text('ยกเลิก',
+                    style: TextStyle(color: Colors.black87, fontSize: 14)),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: Text(
+                  'ตกลง',
+                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+                ),
+                onPressed: () {
+                  onPlaceOrder(qty, 'sell', symbol, interval);
+                  Navigator.of(context).pop();
+
+                  // แสดง Snackbar
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                          'สร้างคำสั่งเพื่อซื้อเรียบร้อยแล้ว!'), // ข้อความที่ต้องการแสดงใน Snackbar
+                      duration:
+                          Duration(seconds: 2), // ระยะเวลาในการแสดง Snackbar
+                    ),
+                  );
+                },
+              ),
+            ],
+          );
+  }
+}
+
+class InfoAlertDialog extends StatelessWidget {
+  final String title;
+  final String content;
+
+  InfoAlertDialog({required this.title, required this.content});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(
+        title,
+        style: TextStyle(fontSize: 16),
+      ),
+      content: Text(
+        content,
+        style: TextStyle(fontSize: 14),
+      ),
+      actions: [
+        TextButton(
+          child: Text('OK'),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
     );
   }
 }

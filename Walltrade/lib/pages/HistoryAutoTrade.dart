@@ -81,9 +81,9 @@ class _NotifyActivity extends State<NotifyActivity> {
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: Color(0xFF212436),
-          title: Text('คำสั่งเทรดอัตโนมัติ'),
-          bottom: TabBar(
+          backgroundColor: const Color(0xFF212436),
+          title: const Text('คำสั่งเทรดอัตโนมัติ'),
+          bottom: const TabBar(
             tabs: [
               Tab(text: 'กำลังดำเนินการ'),
               Tab(text: 'สำเร็จแล้ว'),
@@ -98,13 +98,13 @@ class _NotifyActivity extends State<NotifyActivity> {
               itemBuilder: (context, index) {
                 final order = autoOrdersPending[index];
                 return Container(
-                  padding: EdgeInsets.all(16),
-                  margin: EdgeInsets.all(14),
+                  padding: const EdgeInsets.all(16),
+                  margin: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: Color(0xFFFFFFFF),
+                    color: const Color(0xFFFFFFFF),
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
-                      BoxShadow(
+                      const BoxShadow(
                         color: Color.fromARGB(128, 0, 0, 0),
                         offset: Offset(0, 2),
                         blurRadius: 4,
@@ -119,7 +119,7 @@ class _NotifyActivity extends State<NotifyActivity> {
                         children: [
                           Text(
                             order['symbol'],
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
                               color: Colors.black,
@@ -132,10 +132,10 @@ class _NotifyActivity extends State<NotifyActivity> {
                                 size: 14,
                                 color: Colors.yellow.shade800,
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 width: 8,
                               ),
-                              Text(
+                              const Text(
                                 "กำลังดำเนินการ",
                                 style: TextStyle(
                                   fontSize: 16,
@@ -143,7 +143,7 @@ class _NotifyActivity extends State<NotifyActivity> {
                                   color: Colors.black,
                                 ),
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 width: 8,
                               ),
                               GestureDetector(
@@ -154,13 +154,13 @@ class _NotifyActivity extends State<NotifyActivity> {
                                     autoOrdersCompleted.add(order);
                                   });
                                   print(autoOrdersPending);
-                                  final snackBar = SnackBar(
+                                  final snackBar = const SnackBar(
                                     content: Text('Order removed'),
                                   );
                                   ScaffoldMessenger.of(context)
                                       .showSnackBar(snackBar);
                                 },
-                                child: Icon(
+                                child: const Icon(
                                   Icons.cancel,
                                   color: Colors.red,
                                   size: 18,
@@ -170,12 +170,12 @@ class _NotifyActivity extends State<NotifyActivity> {
                           ),
                         ],
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 10,
                       ),
                       Row(
                         children: [
-                          Text(
+                          const Text(
                             "เทคนิคชี้วัดที่ใช้: ",
                             style: TextStyle(
                               fontSize: 14,
@@ -183,26 +183,32 @@ class _NotifyActivity extends State<NotifyActivity> {
                               color: Colors.black,
                             ),
                           ),
-                          Chip(
-                            backgroundColor: Color(0xFF212436),
-                            label: Wrap(
-                              children: [
-                                Text(
-                                  "${order['techniques']}",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
                         ],
+                      ),
+                      Wrap(
+                        spacing: 2,
+                        // ระยะห่างระหว่าง Chip ในแนวนอน
+                        runSpacing: 8,
+                        children: order['techniques']
+                            .split(',')
+                            .map((technique) {
+                              return Chip(
+                                label: Text(
+                                  technique.trim(),
+                                  style: TextStyle(fontSize: 12),
+                                ),
+                                backgroundColor: const Color(
+                                    0xFF212436), // เลือกสีพื้นหลังตามความต้องการ
+                                labelStyle: TextStyle(color: Colors.white),
+                              );
+                            })
+                            .toList()
+                            .cast<
+                                Widget>(), // แปลง List<dynamic> เป็น List<Widget>
                       ),
                       Row(
                         children: [
-                          Text(
+                          const Text(
                             "หมายเลขคำสั่ง: ",
                             style: TextStyle(
                               fontSize: 14,
@@ -212,7 +218,7 @@ class _NotifyActivity extends State<NotifyActivity> {
                           ),
                           Text(
                             "${order['OrderID'].toString()}",
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                               color: Colors.black,
@@ -222,7 +228,7 @@ class _NotifyActivity extends State<NotifyActivity> {
                       ),
                       Row(
                         children: [
-                          Text(
+                          const Text(
                             "จำนวน: ",
                             style: TextStyle(
                               fontSize: 14,
@@ -232,7 +238,7 @@ class _NotifyActivity extends State<NotifyActivity> {
                           ),
                           Text(
                             "${order['quantity'].toString()} หน่วย",
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                               color: Colors.black,
@@ -242,7 +248,7 @@ class _NotifyActivity extends State<NotifyActivity> {
                       ),
                       Row(
                         children: [
-                          Text(
+                          const Text(
                             "ประเภท: ",
                             style: TextStyle(
                               fontSize: 14,
@@ -252,11 +258,11 @@ class _NotifyActivity extends State<NotifyActivity> {
                           ),
                           Chip(
                             backgroundColor: order['side'] == 'buy'
-                                ? Colors.green
-                                : Colors.red,
+                                ? const Color(0xFF82CD47)
+                                : const Color(0xFFBB2525),
                             label: Text(
                               order['side'] == 'buy' ? 'ซื้อ' : 'ขาย',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
                                 color: Colors.black,
@@ -272,184 +278,199 @@ class _NotifyActivity extends State<NotifyActivity> {
                 );
               },
             ),
-            Center(
-              child: ListView.builder(
-                scrollDirection: Axis.vertical,
-                itemCount: autoOrdersCompleted.length,
-                itemBuilder: (context, index) {
-                  final order = autoOrdersCompleted[index];
+            ListView.builder(
+              scrollDirection: Axis.vertical,
+              itemCount: autoOrdersCompleted.length,
+              itemBuilder: (context, index) {
+                final order = autoOrdersCompleted[index];
 
-                  return Container(
-                    padding: EdgeInsets.all(16),
-                    margin: EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: Color(0xFFFFFFFF),
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color.fromARGB(128, 0, 0, 0),
-                          offset: Offset(0, 2),
-                          blurRadius: 4,
-                          spreadRadius: 0,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              order['symbol'],
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black,
-                              ),
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  margin: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFFFFF),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      const BoxShadow(
+                        color: Color.fromARGB(128, 0, 0, 0),
+                        offset: Offset(0, 2),
+                        blurRadius: 4,
+                        spreadRadius: 0,
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            order['symbol'],
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black,
                             ),
-                            order['status'] == 'completed'
-                                ? Row(
-                                    children: [
-                                      Icon(
-                                        Icons.circle,
-                                        size: 14,
-                                        color: Colors.green,
+                          ),
+                          order['status'] == 'completed'
+                              ? const Row(
+                                  children: [
+                                    Icon(
+                                      Icons.circle,
+                                      size: 14,
+                                      color: Colors.green,
+                                    ),
+                                    SizedBox(
+                                      width: 8,
+                                    ),
+                                    Text(
+                                      "สำเร็จแล้ว",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.black,
                                       ),
-                                      SizedBox(
-                                        width: 8,
+                                    ),
+                                    SizedBox(
+                                      width: 8,
+                                    ),
+                                  ],
+                                )
+                              : const Row(
+                                  children: [
+                                    Icon(
+                                      Icons.circle,
+                                      size: 14,
+                                      color: Colors.red,
+                                    ),
+                                    SizedBox(
+                                      width: 8,
+                                    ),
+                                    Text(
+                                      "ยกเลิก",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.black,
                                       ),
-                                      Text(
-                                        "สำเร็จแล้ว",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        width: 8,
-                                      ),
-                                    ],
-                                  )
-                                : Row(
-                              children: [
-                                Icon(
-                                  Icons.circle,
-                                  size: 14,
-                                  color: Colors.red,
+                                    ),
+                                    SizedBox(
+                                      width: 8,
+                                    ),
+                                  ],
                                 ),
-                                SizedBox(
-                                  width: 8,
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        children: [
+                          const Text(
+                            "เทคนิคชี้วัดที่ใช้: ",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      Wrap(
+                        spacing: 2,
+                        runSpacing: 8,
+
+                        children: order['techniques']
+                            .split(',')
+                            .map((technique) {
+                              return Chip(
+                                label: Text(
+                                  technique.trim(),
+                                  style: TextStyle(fontSize: 12),
                                 ),
-                                Text(
-                                  "ยกเลิก",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 8,
-                                ),
-                              ],
+                                backgroundColor: const Color(
+                                    0xFF212436), // เลือกสีพื้นหลังตามความต้องการ
+                                labelStyle: TextStyle(color: Colors.white),
+                              );
+                            })
+                            .toList()
+                            .cast<
+                                Widget>(), // แปลง List<dynamic> เป็น List<Widget>
+                      ),
+
+                      Row(
+                        children: [
+                          const Text(
+                            "หมายเลขคำสั่ง: ",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black,
                             ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              "เทคนิคชี้วัดที่ใช้: ",
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black,
-                              ),
+                          ),
+                          Text(
+                            "${order['OrderID'].toString()}",
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black,
                             ),
-                            Chip(
-                              backgroundColor: Color(0xFF212436),
-                              label: Text(
-                                order['techniques'],
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.white,
-                                ),
-                              ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          const Text(
+                            "จำนวน: ",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black,
                             ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              "หมายเลขคำสั่ง: ",
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black,
-                              ),
+                          ),
+                          Text(
+                            "${order['quantity'].toString()} หน่วย",
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black,
                             ),
-                            Text(
-                              "${order['OrderID'].toString()}",
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black,
-                              ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          const Text(
+                            "ประเภท: ",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black,
                             ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              "จำนวน: ",
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black,
-                              ),
-                            ),
-                            Text(
-                              "${order['quantity'].toString()} หน่วย",
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              "ประเภท: ",
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black,
-                              ),
-                            ),
-                            Text(
+                          ),
+                          Chip(
+                            backgroundColor: order['side'] == 'buy'
+                                ? const Color(0xFF82CD47)
+                                : const Color(0xFFBB2525),
+                            label: Text(
                               order['side'] == 'buy' ? 'ซื้อ' : 'ขาย',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
                                 color: Colors.black,
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
+                      ),
 
-                        // Add additional information or widgets related to the stock here
-                      ],
-                    ),
-                  );
-                },
-              ),
-            )
+                      // Add additional information or widgets related to the stock here
+                    ],
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
