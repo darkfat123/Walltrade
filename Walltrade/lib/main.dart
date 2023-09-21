@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
         fontFamily: "IBMPlexSansThai",
         
       ),
-      home: Home(username: "foczz123",initialIndex:2),
+      home: Home(username: "foczz123",initialIndex:3),
     );
   }
 }

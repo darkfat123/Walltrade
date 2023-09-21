@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:Walltrade/widget/alertDialog/InfoDialog.dart';
-import 'package:Walltrade/widget/alertDialog/OrderConfirmBuy.dart';
 import 'package:Walltrade/widget/alertDialog/OrderConfirmation.dart';
 import 'package:flutter/material.dart';
 import '../variables/serverURL.dart';
@@ -193,7 +192,6 @@ class _TradePageBuyState extends State<TradePageBuy> {
     // ยกเลิก timer หรือ animation ที่ใช้งาน
     super.dispose();
   }
-  
 
   @override
   Widget build(BuildContext context) {
@@ -506,26 +504,24 @@ class _TradePageBuyState extends State<TradePageBuy> {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) {
-                            return OrderConfirmationBuyDialog(
-                              symbol: data.text,
-                              qty: qtyController.text,
-                              technicalText: zoneSTOController.text == '' &&
-                                      crossupSTOController.text == ''
-                                  ? ''
-                                  : zoneSTOController.text == '0'
-                                      ? "%K ตัดขึ้น %D และมีโซนต่ำกว่า ${crossupSTOController.text}"
-                                      : "%K และ %D น้อยกว่าหรือเท่ากับ ${zoneSTOController.text}",
-                              interval: selectedInterval,
-                              onPlaceOrder: (qty, type, symbol, interval) {
-                                placeOrderSTO(qty, type, symbol, interval);
-                                print(
-                                    'Placing order: $qty $type $symbol $interval');
-                              },
-                            );
-                          });
+                      quickAlert(
+                        context,
+                        data.text,
+                        qtyController.text,
+                        zoneSTOController.text == '' &&
+                                crossupSTOController.text == ''
+                            ? ''
+                            : zoneSTOController.text == '0'
+                                ? "%K ตัดขึ้น %D และมีโซนต่ำกว่า ${crossupSTOController.text}"
+                                : "%K และ %D น้อยกว่าหรือเท่ากับ ${zoneSTOController.text}",
+                        selectedInterval,
+                        'buy',
+                        (qty, type, symbol, interval, side) {
+                          placeOrderRSI(qty, type, symbol, interval);
+                          print(
+                              'Placing order: $qty $type $symbol $interval $side');
+                        },
+                      );
                     },
                     child: Text('ยืนยัน'),
                   ),
@@ -675,26 +671,23 @@ class _TradePageBuyState extends State<TradePageBuy> {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) {
-                            return OrderConfirmationBuyDialog(
-                              symbol: data.text,
-                              qty: qtyController.text,
-                              technicalText: !macd_crossupIsChecked &&
-                                      zoneMACDController.text == ''
-                                  ? ''
-                                  : macd_crossupIsChecked
-                                      ? "MACD & Signal ตัดขึ้นและมีค่าน้อยกว่า 0"
-                                      : "MACD & Signal น้อยกว่าหรือเท่ากับ ${zoneMACDController.text}",
-                              interval: selectedInterval,
-                              onPlaceOrder: (qty, type, symbol, interval) {
-                                placeOrderMACD(qty, type, symbol, interval);
-                                print(
-                                    'Placing order: $qty $type $symbol $interval');
-                              },
-                            );
-                          });
+                      quickAlert(
+                        context,
+                        data.text,
+                        qtyController.text,
+                        !macd_crossupIsChecked && zoneMACDController.text == ''
+                            ? ''
+                            : macd_crossupIsChecked
+                                ? "MACD & Signal ตัดขึ้นและมีค่าน้อยกว่า 0"
+                                : "MACD & Signal น้อยกว่าหรือเท่ากับ ${zoneMACDController.text}",
+                        selectedInterval,
+                        'buy',
+                        (qty, type, symbol, interval, side) {
+                          placeOrderRSI(qty, type, symbol, interval);
+                          print(
+                              'Placing order: $qty $type $symbol $interval $side');
+                        },
+                      );
                     },
                     child: Text('ยืนยัน'),
                   ),
@@ -770,22 +763,19 @@ class _TradePageBuyState extends State<TradePageBuy> {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) {
-                            return OrderConfirmationBuyDialog(
-                              symbol: data.text,
-                              qty: qtyController.text,
-                              technicalText:
-                                  "ซื้อเมื่อราคาน้อยกว่าหรือเท่ากับ EMA$selectedDay",
-                              interval: selectedInterval,
-                              onPlaceOrder: (qty, type, symbol, interval) {
-                                placeOrderEMA(qty, type, symbol, interval);
-                                print(
-                                    'Placing order: $qty $type $symbol $interval');
-                              },
-                            );
-                          });
+                      quickAlert(
+                        context,
+                        data.text,
+                        qtyController.text,
+                        "ซื้อเมื่อราคาน้อยกว่าหรือเท่ากับ EMA$selectedDay",
+                        selectedInterval,
+                        'buy',
+                        (qty, type, symbol, interval, side) {
+                          placeOrderRSI(qty, type, symbol, interval);
+                          print(
+                              'Placing order: $qty $type $symbol $interval $side');
+                        },
+                      );
                     },
                     child: Text('ยืนยัน'),
                   ),
@@ -868,23 +858,62 @@ class TimeframeDropdown extends StatelessWidget {
               showDialog(
                 context: context,
                 builder: (context) {
-                  return AlertDialog(
-                    title: const Text(
-                      'Timeframe คืออะไร?',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    content: const Text(
-                      'ระยะเวลาที่ใช้ในการวิเคราะห์และตัดสินใจในการซื้อหรือขายสินทรัพย์ทางการเงิน เช่น หุ้นหรือสกุลเงิน ระยะเวลาในการเทรดมักถูกแบ่งออกเป็นหลายช่วง โดยที่แต่ละช่วงมีลักษณะและค่าทางเทคนิคในการเทรดต่างกัน',
-                      style: TextStyle(fontSize: 14),
-                    ),
-                    actions: [
-                      TextButton(
-                        child: const Text('OK'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
+                  return Dialog(
+                    backgroundColor: Colors.transparent,
+                    child: Container(
+                      padding: EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20)),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.timeline_sharp,
+                            color: Colors.amber,
+                            size: 72,
+                          ),
+                          SizedBox(
+                            height: 24,
+                          ),
+                          Text(
+                            'Timeframe คืออะไร?',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w600),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                            'ระยะเวลาที่ใช้ในการวิเคราะห์และตัดสินใจในการซื้อหรือขายสินทรัพย์ทางการเงิน เช่น หุ้นหรือสกุลเงิน ระยะเวลาในการเทรดมักถูกแบ่งออกเป็นหลายช่วง โดยที่แต่ละช่วงมีลักษณะและค่าทางเทคนิคในการเทรดต่างกัน',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          SizedBox(
+                            height: 24,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              OutlinedButton(
+                                style: ButtonStyle(
+                                    backgroundColor: MaterialStatePropertyAll(
+                                        Color(0xFFEC5B5B)),
+                                    padding: MaterialStatePropertyAll(
+                                        EdgeInsets.all(12))),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text(
+                                  'ออก',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 16),
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
                       ),
-                    ],
+                    ),
                   );
                 },
               );

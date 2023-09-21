@@ -24,8 +24,10 @@ void quickAlert(
           context: context,
           type: QuickAlertType.info,
           title: 'ยืนยันคำสั่งซื้อ',
-          width: 0,
+          width: 350,
           widget: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
@@ -39,6 +41,9 @@ void quickAlert(
                   )
                 ],
               ),
+              SizedBox(
+                height: 2,
+              ),
               Row(
                 children: [
                   Text(
@@ -46,9 +51,13 @@ void quickAlert(
                     style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                   ),
                   side == 'buy'
-                      ? Chip(
-                          backgroundColor: Color(0xFF82CD47),
-                          label: Text(
+                      ? Container(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 12, vertical: 1),
+                          decoration: BoxDecoration(
+                              color: Color(0xFF82CD47),
+                              borderRadius: BorderRadius.circular(15)),
+                          child: Text(
                             "ซื้อ",
                             style: TextStyle(
                                 fontWeight: FontWeight.w400,
@@ -56,17 +65,24 @@ void quickAlert(
                                 fontSize: 14),
                           ),
                         )
-                      : Chip(
-                          backgroundColor: Color(0xFFBB2525),
-                          label: Text(
+                      : Container(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 12, vertical: 1),
+                          decoration: BoxDecoration(
+                              color: Color(0xFFBB2525),
+                              borderRadius: BorderRadius.circular(15)),
+                          child: Text(
                             "ขาย",
                             style: TextStyle(
                                 fontWeight: FontWeight.w400,
                                 color: Colors.white,
                                 fontSize: 14),
                           ),
-                        ),
+                        )
                 ],
+              ),
+              SizedBox(
+                height: 2,
               ),
               Row(
                 children: [
@@ -86,6 +102,9 @@ void quickAlert(
                   )
                 ],
               ),
+              SizedBox(
+                height: 2,
+              ),
               Row(
                 children: [
                   Text(
@@ -98,15 +117,19 @@ void quickAlert(
                   )
                 ],
               ),
+              SizedBox(
+                height: 2,
+              ),
               Row(
                 children: [
                   Text(
-                    'เทคนิคที่ใช้: ',
+                    'เทคนิค: ',
                     style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                   ),
                   Text(
                     technicalText,
                     style: TextStyle(fontSize: 14),
+                    overflow: TextOverflow.clip,
                   )
                 ],
               ),
@@ -125,7 +148,8 @@ void quickAlert(
             fontSize: 14,
           ),
           confirmBtnText: 'ยืนยัน',
-          confirmBtnColor: Color(0xFF82CD47),
+          confirmBtnColor:
+              side == 'buy' ? Color(0xFF82CD47) : Color(0xFFBB2525),
           confirmBtnTextStyle: TextStyle(fontSize: 14, color: Colors.white),
         );
 }

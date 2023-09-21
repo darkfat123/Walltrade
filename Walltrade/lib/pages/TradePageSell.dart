@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:Walltrade/widget/alertDialog/InfoDialog.dart';
-import 'package:Walltrade/widget/alertDialog/OrderConfirmSell.dart';
+import 'package:Walltrade/widget/alertDialog/OrderConfirmation.dart';
 import 'package:flutter/material.dart';
 import '../variables/serverURL.dart';
 import 'package:http/http.dart' as http;
@@ -307,22 +307,19 @@ class _TradePageSellState extends State<TradePageSell> {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return OrderConfirmationSellDialog(
-                            symbol: data.text,
-                            qty: qtyController.text,
-                            technicalText: higherRSIController.text == ''
-                                ? ''
-                                : 'RSI มากกว่า ${higherRSIController.text}',
-                            interval: selectedInterval,
-                            onPlaceOrder: (qty, type, symbol, interval) {
-                              placeOrderRSI(qty, type, symbol, interval);
-                              print(
-                                  'Placing order: $qty $type $symbol $interval');
-                            },
-                          );
+                      quickAlert(
+                        context,
+                        data.text,
+                        qtyController.text,
+                        higherRSIController.text == ''
+                            ? ''
+                            : 'RSI มากกว่า ${higherRSIController.text}',
+                        selectedInterval,
+                        'sell',
+                        (qty, type, symbol, interval, side) {
+                          placeOrderRSI(qty, type, symbol, interval);
+                          print(
+                              'Placing order: $qty $type $symbol $interval $side');
                         },
                       );
                     },
@@ -459,7 +456,7 @@ class _TradePageSellState extends State<TradePageSell> {
                               builder: (context) {
                                 return InfoAlertDialog(
                                     title:
-                                        "%K ตัดขึ้น %D และมีโซนสูงกว่า คืออะไร?",
+                                        "%K ตัดลง %D และมีโซนสูงกว่า คืออะไร?",
                                     content:
                                         "จะสร้างคำสั่งขายทันทีเมื่อเส้น %K ตัดลงกับเส้น %D และมีค่าที่สูงกว่าโซนที่พิมพ์ โดยจะมีค่าตั้งแต่ 0-100");
                               },
@@ -495,26 +492,24 @@ class _TradePageSellState extends State<TradePageSell> {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) {
-                            return OrderConfirmationSellDialog(
-                              symbol: data.text,
-                              qty: qtyController.text,
-                              technicalText: zoneSTOController.text == '' &&
-                                      crossdownSTOController.text == ''
-                                  ? ''
-                                  : zoneSTOController.text == '0'
-                                      ? "%K ตัดลง %D และมีโซนสูงกว่า ${crossdownSTOController.text}"
-                                      : "%K และ %D มากกว่าหรือเท่ากับ ${zoneSTOController.text}",
-                              interval: selectedInterval,
-                              onPlaceOrder: (qty, type, symbol, interval) {
-                                placeOrderSTO(qty, type, symbol, interval);
-                                print(
-                                    'Placing order: $qty $type $symbol $interval');
-                              },
-                            );
-                          });
+                      quickAlert(
+                        context,
+                        data.text,
+                        qtyController.text,
+                        zoneSTOController.text == '' &&
+                                crossdownSTOController.text == ''
+                            ? ''
+                            : zoneSTOController.text == '0'
+                                ? "%K ตัดลง %D และมีโซนสูงกว่า ${crossdownSTOController.text}"
+                                : "%K และ %D มากกว่าหรือเท่ากับ ${zoneSTOController.text}",
+                        selectedInterval,
+                        'sell',
+                        (qty, type, symbol, interval, side) {
+                          placeOrderRSI(qty, type, symbol, interval);
+                          print(
+                              'Placing order: $qty $type $symbol $interval $side');
+                        },
+                      );
                     },
                     child: Text('Submit'),
                   ),
@@ -660,26 +655,23 @@ class _TradePageSellState extends State<TradePageSell> {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) {
-                            return OrderConfirmationSellDialog(
-                              symbol: data.text,
-                              qty: qtyController.text,
-                              technicalText: !macd_crossupIsChecked &&
-                                      zoneMACDController.text == ''
-                                  ? ''
-                                  : macd_crossupIsChecked
-                                      ? "MACD & Signal ตัดลงและมีค่ามากกว่า 0"
-                                      : "MACD & Signal มากกว่าหรือเท่ากับ ${zoneMACDController.text}",
-                              interval: selectedInterval,
-                              onPlaceOrder: (qty, type, symbol, interval) {
-                                placeOrderMACD(qty, type, symbol, interval);
-                                print(
-                                    'Placing order: $qty $type $symbol $interval');
-                              },
-                            );
-                          });
+                      quickAlert(
+                        context,
+                        data.text,
+                        qtyController.text,
+                        !macd_crossupIsChecked && zoneMACDController.text == ''
+                            ? ''
+                            : macd_crossupIsChecked
+                                ? "MACD & Signal ตัดลงและมีค่ามากกว่า 0"
+                                : "MACD & Signal มากกว่าหรือเท่ากับ ${zoneMACDController.text}",
+                        selectedInterval,
+                        'sell',
+                        (qty, type, symbol, interval, side) {
+                          placeOrderRSI(qty, type, symbol, interval);
+                          print(
+                              'Placing order: $qty $type $symbol $interval $side');
+                        },
+                      );
                     },
                     child: Text('Submit'),
                   ),
@@ -755,22 +747,19 @@ class _TradePageSellState extends State<TradePageSell> {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) {
-                            return OrderConfirmationSellDialog(
-                              symbol: data.text,
-                              qty: qtyController.text,
-                              technicalText:
-                                  "ซื้อเมื่อราคามากกว่าหรือเท่ากับ EMA$selectedDay",
-                              interval: selectedInterval,
-                              onPlaceOrder: (qty, type, symbol, interval) {
-                                placeOrderEMA(qty, type, symbol, interval);
-                                print(
-                                    'Placing order: $qty $type $symbol $interval');
-                              },
-                            );
-                          });
+                      quickAlert(
+                        context,
+                        data.text,
+                        qtyController.text,
+                        "ซื้อเมื่อราคามากกว่าหรือเท่ากับ EMA$selectedDay",
+                        selectedInterval,
+                        'sell',
+                        (qty, type, symbol, interval, side) {
+                          placeOrderRSI(qty, type, symbol, interval);
+                          print(
+                              'Placing order: $qty $type $symbol $interval $side');
+                        },
+                      );
                     },
                     child: Text('ยืนยัน'),
                   ),
@@ -979,4 +968,3 @@ class EMADropdown extends StatelessWidget {
     );
   }
 }
-

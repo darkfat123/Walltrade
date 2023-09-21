@@ -1,19 +1,17 @@
 import 'dart:convert';
 import 'package:Walltrade/pages/TradePageSell.dart';
 import 'package:Walltrade/pages/MoreTechnicalOrder.dart';
+import 'package:Walltrade/widget/bottomSheet/KnowledgeSheet.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:http/http.dart' as http;
 import 'package:Walltrade/pages/TradePageBuy.dart';
-import 'package:Walltrade/primary.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:quickalert/quickalert.dart';
 import '../model/knowledge.dart';
-import '../model/news.dart';
 import '../variables/serverURL.dart';
 import '../variables/symbolInput.dart';
-import 'KnowledgeDetailPage.dart';
 import 'SettingsPage.dart';
 import 'HistoryAutoTrade.dart';
 
@@ -32,7 +30,7 @@ class _TradePageOptionsState extends State<TradePageOptions>
   late TabController tabController;
   final String username;
   List<dynamic> autoOrders = [];
-  int _selectedIndex = 0;
+
   double _walletBalance = 0;
   bool isLoading = true;
   double TH_Fiat = 0;
@@ -260,15 +258,14 @@ class _TradePageOptionsState extends State<TradePageOptions>
                                 builder: (BuildContext context) {
                                   return GestureDetector(
                                     onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              KnowledgeDetailPage(
-                                            title: knowledge.title,
-                                            description: knowledge.description,
-                                            imageUrl: knowledge.image,
-                                          ),
+                                      showModalBottomSheet(
+                                        isScrollControlled: true,
+                                        backgroundColor: Colors.transparent,
+                                        context: context,
+                                        builder: (context) => buildSheet(
+                                          title: knowledge.title,
+                                          description: knowledge.description,
+                                          imageUrl: knowledge.image, context: context,
                                         ),
                                       );
                                     },
