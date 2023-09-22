@@ -805,18 +805,18 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text("สร้างคำสั่งซื้อแบบหลายเทคนิค"),
+            const Text("สร้างคำสั่งซื้อแบบหลายเทคนิค",style: TextStyle(fontSize: 18),),
             Row(
               children: [
                 IconButton(
-                  iconSize: 24,
+                  iconSize: 20,
                   icon: const Icon(Icons.access_time),
                   onPressed: () {
                     // Handle settings button press here
                   },
                 ),
                 IconButton(
-                  iconSize: 24,
+                  iconSize: 20,
                   icon: const Icon(Icons.settings),
                   onPressed: () {
                     // Handle settings button press here

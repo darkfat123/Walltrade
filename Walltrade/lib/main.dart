@@ -126,7 +126,7 @@ class HomeState extends State<Home> {
         widget = TradePageOptions(username: username);
         break;
       case 3:
-        widget = PredictPage();
+        widget = PredictPage(username: username,);
         break;
       case 4:
         widget = WalletPage(username: username);

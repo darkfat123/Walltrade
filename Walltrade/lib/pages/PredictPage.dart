@@ -1,48 +1,76 @@
 import 'package:Walltrade/model/pricePoints.dart';
 import 'package:Walltrade/widget/bottomSheet/PredictResultSheet.dart';
+import 'package:Walltrade/widget/snackBar/AddPredictListFail.dart';
+import 'package:Walltrade/widget/snackBar/AddPredictListSuccess.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:fl_chart/fl_chart.dart';
-import '../model/technicalAnaylyze.dart';
+import 'package:quickalert/quickalert.dart';
+import '../model/technicalAnalyze.dart';
 import '../variables/serverURL.dart';
 import 'HistoryAutoTrade.dart';
 import 'SettingsPage.dart';
 
 class PredictPage extends StatefulWidget {
+  final String username;
+  PredictPage({required this.username});
   @override
-  _PredictPageState createState() => _PredictPageState();
+  _PredictPageState createState() => _PredictPageState(username: username);
 }
 
 class _PredictPageState extends State<PredictPage> {
+  final String username;
+  _PredictPageState({required this.username});
   TextEditingController _textEditingController = TextEditingController();
   String _prediction = '';
+  String selectedStockNation = 'US';
   String selectedInterval = '1D';
   bool isPredicting = true;
+
   late final List<PricePoint> points;
 
-  Future<void> _predictStock() async {
-    isPredicting = true;
-    String stockName = _textEditingController.text;
-    if (stockName.isEmpty) {
-      setState(() {
-        _prediction = 'Please enter a stock name.';
-      });
-      return;
-    }
+  List<String> dataList = ["META", "AAPL", "TSLA"];
+  List<Map<String, dynamic>> symbolStockPrices = [];
 
+  List<Map<String, dynamic>> predictdata = [
+    {
+      'symbol': "META",
+      'prediction': "256.89",
+    },
+    {
+      'symbol': "AAPL",
+      'prediction': "171.92",
+    },
+    {
+      'symbol': "TSLA",
+      'prediction': "359.21",
+    },
+    {
+      'symbol': "PTT.BK",
+      'prediction': "31.75",
+    },
+  ];
+  Future<void> _predictStock() async {
     var url = Uri.parse('${Constants.serverUrl}/predict');
     final headers = {'Content-Type': 'application/json'};
-    String body = jsonEncode({'name': stockName});
+    final body = jsonEncode({'dataList': dataList});
 
     try {
       http.Response response =
           await http.post(url, headers: headers, body: body);
       if (response.statusCode == 200) {
-        Map<String, dynamic> data = jsonDecode(response.body);
+        var data = jsonDecode(response.body);
+        for (var item in data) {
+          setState(() {
+            predictdata.add({
+              'symbol': item['symbol'],
+              'prediction': item['prediction'],
+            });
+          });
+        }
         setState(() {
-          _prediction = data['prediction'];
           isPredicting = false;
         });
       } else {
@@ -55,6 +83,68 @@ class _PredictPageState extends State<PredictPage> {
     }
   }
 
+  Future<void> getPricePredictList() async {
+    var url = Uri.parse('${Constants.serverUrl}/getPricePredictList');
+    final headers = {'Content-Type': 'application/json'};
+
+    final List<Map<String, dynamic>> symbolList = predictdata.map((item) {
+      return {
+        'symbol': item['symbol'],
+      };
+    }).toList();
+
+    final body = jsonEncode({'symbolPredictList': symbolList});
+
+    try {
+      http.Response response =
+          await http.post(url, headers: headers, body: body);
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        for (var item in data) {
+          setState(() {
+            symbolStockPrices.add({
+              'symbol': item['symbol'],
+              'price': item['price'],
+            });
+          });
+        }
+      } else {
+        throw Exception('Get Stock Price Failed.');
+      }
+    } catch (e) {
+      setState(() {
+        _prediction = 'error caught: $e';
+      });
+    }
+  }
+
+  String ans = '';
+  List<String> stockSymbols = [];
+  Map<String, double> stockPrices = {};
+  Map<String, double> stockPercentage = {};
+
+  Future<void> getStockPrices() async {
+    var url = '${Constants.serverUrl}/getStockPriceUS';
+    var body = jsonEncode({'username': username});
+
+    var response = await http.post(Uri.parse(url),
+        body: body, headers: {'Content-Type': 'application/json'});
+    var data = jsonDecode(response.body);
+    ans = data.toString();
+    if (data != null && data is List<dynamic>) {
+      for (var item in data) {
+        var symbol = item['symbol'];
+        var price = item['price'];
+        var percentage = item['percentage'];
+        setState(() {
+          stockSymbols.add(symbol);
+          stockPrices[symbol] = price.toDouble();
+          stockPercentage[symbol] = percentage.toDouble();
+        });
+      }
+    }
+  }
+
   String editPredictLength(String text) {
     text = text == '1D'
         ? 'วันถัดไป'
@@ -62,6 +152,12 @@ class _PredictPageState extends State<PredictPage> {
             ? '2 วันถัดไป'
             : '3 วันถัดไป';
     return text;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getStockPrices();
   }
 
   @override
@@ -86,7 +182,7 @@ class _PredictPageState extends State<PredictPage> {
                           child: CircleAvatar(
                             radius: 25,
                             backgroundImage:
-                                AssetImage('assets/img/profile.png'),
+                                const AssetImage('assets/img/profile.png'),
                             backgroundColor: Colors.transparent,
                             child: Container(
                               height: 80,
@@ -122,9 +218,9 @@ class _PredictPageState extends State<PredictPage> {
                         ),
                       ],
                     ),
-                    Center(
+                    const Center(
                       child: Padding(
-                        padding: const EdgeInsets.all(8),
+                        padding: EdgeInsets.all(8),
                         child: Text(
                           "ทำนายราคาหุ้น",
                           style: TextStyle(
@@ -137,13 +233,13 @@ class _PredictPageState extends State<PredictPage> {
                       right: 0,
                       child: IconButton(
                         iconSize: 30,
-                        icon: Icon(Icons.notifications),
+                        icon: const Icon(Icons.notifications),
                         onPressed: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) =>
-                                    NotifyActivity(username: 'foczz123')),
+                                    NotifyActivity(username: username)),
                           );
                           // Handle settings button press here
                         },
@@ -154,13 +250,13 @@ class _PredictPageState extends State<PredictPage> {
                       right: 50,
                       child: IconButton(
                         iconSize: 30,
-                        icon: Icon(Icons.settings),
+                        icon: const Icon(Icons.settings),
                         onPressed: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) =>
-                                    Settings(username: 'foczz123')),
+                                    Settings(username: username)),
                           );
                           // Handle settings button press here
                         },
@@ -169,36 +265,134 @@ class _PredictPageState extends State<PredictPage> {
                   ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(
-                    left: 20.0, bottom: 20.0, right: 20.0),
+              Container(
+                margin: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Container(
-                        margin:
-                            EdgeInsets.only(left: 16, bottom: 16, right: 16),
-                        padding: EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Color(0xFF2A3547),
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
-                              spreadRadius: 2,
-                              blurRadius: 5,
-                              offset: Offset(
-                                  0, 3), // changes the position of the shadow
-                            ),
-                          ],
-                        ),
-                        child: Text(
-                          "ข้อควรระวัง: การลงทุนในหุ้นเป็นเรื่องที่มีความเสี่ยงสูง การใช้โมเดลทำนายอาจไม่แม่นยำเสมอไป โปรดพิจารณาเพิ่มเติม",
-                          style: TextStyle(
-                              color: Colors.yellow.shade800, fontSize: 14),
-                        )),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF212436),
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: const Offset(
+                                0, 3), // changes the position of the shadow
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        "ข้อควรระวัง: การลงทุนในหุ้นเป็นเรื่องที่มีความเสี่ยงสูง การใช้โมเดลทำนายอาจไม่แม่นยำเสมอไป โปรดพิจารณาเพิ่มเติม ระยะเวลารอการแสดงผลลัพธ์ขึ้นอยู่กับจำนวนหุ้นที่ต้องการทำนาย",
+                        style: TextStyle(
+                            color: Colors.yellow.shade800, fontSize: 14),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 12,
+                    ),
                     Container(
-                      padding: EdgeInsets.all(20),
+                      height: 110,
+                      child: ans == '{error: Empty}'
+                          ? const Center(
+                              child: Text(
+                                'ไม่มีรายการเฝ้าดู',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            )
+                          : stockSymbols.isEmpty
+                              ? const Center(
+                                  child: CircularProgressIndicator(),
+                                )
+                              : Container(
+                                  decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                  ),
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: stockSymbols.length,
+                                    itemBuilder: (context, index) {
+                                      var symbol = stockSymbols[index];
+                                      var price = stockPrices[symbol];
+                                      var percentage = stockPercentage[symbol];
+                                      return Padding(
+                                        padding: const EdgeInsets.all(6.0),
+                                        child: Container(
+                                          width: 100,
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFF212436),
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(12.0),
+                                                child: Column(
+                                                  children: [
+                                                    Text(
+                                                      symbol,
+                                                      style: const TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color: Colors.white,
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      '$price',
+                                                      style: TextStyle(
+                                                          fontSize: 14,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                          color: percentage! > 0
+                                                              ? const Color(
+                                                                  0xFF0AFF96)
+                                                              : percentage < 0
+                                                                  ? const Color(
+                                                                      0xFFFF002E)
+                                                                  : Colors
+                                                                      .white),
+                                                    ),
+                                                    Text(
+                                                      percentage > 0
+                                                          ? '+$percentage%'
+                                                          : '$percentage%',
+                                                      style: TextStyle(
+                                                          fontSize: 14,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                          color: percentage > 0
+                                                              ? const Color(
+                                                                  0xFF0AFF96)
+                                                              : percentage < 0
+                                                                  ? const Color(
+                                                                      0xFFFF002E)
+                                                                  : Colors
+                                                                      .white),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              // Add additional information or widgets related to the stock here
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.symmetric(vertical: 16),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(10),
@@ -207,13 +401,13 @@ class _PredictPageState extends State<PredictPage> {
                             color: Colors.grey.withOpacity(0.5),
                             spreadRadius: 2,
                             blurRadius: 5,
-                            offset: Offset(
+                            offset: const Offset(
                                 0, 3), // changes the position of the shadow
                           ),
                         ],
                       ),
                       child: Container(
-                        margin: EdgeInsets.all(10),
+                        margin: const EdgeInsets.all(10),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
@@ -221,11 +415,110 @@ class _PredictPageState extends State<PredictPage> {
                               controller: _textEditingController,
                               keyboardType: TextInputType.name,
                               decoration: InputDecoration(
-                                labelText: 'พิมพ์ Symbol หุ้นที่จะทำนาย..',
-                                border: OutlineInputBorder(),
+                                labelText: 'เพิ่ม Symbol หุ้นที่จะทำนาย..',
+                                labelStyle: const TextStyle(fontSize: 16),
+                                contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 16, horizontal: 12),
+                                prefixIcon: Container(
+                                  alignment: Alignment.center,
+                                  height: 56,
+                                  width: 60,
+                                  margin: const EdgeInsets.only(right: 12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade200,
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(8),
+                                      bottomLeft: Radius.circular(8),
+                                    ),
+                                    border: Border.all(
+                                      strokeAlign:
+                                          BorderSide.strokeAlignOutside,
+                                      width: 2,
+                                      color: const Color(0xFF212436),
+                                    ),
+                                  ),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton(
+                                      icon: const Icon(
+                                        Icons.arrow_drop_down_rounded,
+                                        color: Color(0xFF212436),
+                                      ),
+                                      borderRadius: BorderRadius.circular(10),
+                                      value: selectedStockNation,
+                                      onChanged: (String? newValue) {
+                                        setState(() {
+                                          selectedStockNation = newValue!;
+                                        });
+                                      },
+                                      items: const [
+                                        DropdownMenuItem(
+                                          value: 'US',
+                                          child: Center(
+                                              child: Text(
+                                            'US',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.w500),
+                                          )),
+                                        ),
+                                        DropdownMenuItem(
+                                          value: 'TH',
+                                          child: Center(
+                                              child: Text(
+                                            'TH',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.w500),
+                                          )),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                suffixIcon: GestureDetector(
+                                  onTap: () {
+                                    if (_textEditingController.text != '') {
+                                      setState(() {
+                                        selectedStockNation == 'TH'
+                                            ? dataList.add(
+                                                '${_textEditingController.text}.BK')
+                                            : dataList.add(
+                                                _textEditingController.text);
+                                      });
+
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                              AddPredictListSuccessSnackBar(
+                                                  symbol: _textEditingController
+                                                      .text));
+                                      _textEditingController.clear();
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                              AddPredictListFailSnackBar(
+                                                  symbol: _textEditingController
+                                                      .text));
+                                      _textEditingController.clear();
+                                    }
+                                  },
+                                  child: Container(
+                                      height: 60,
+                                      width: 60,
+                                      decoration: const BoxDecoration(
+                                          color: Color(0xFF212436),
+                                          borderRadius: BorderRadius.only(
+                                              topRight: Radius.circular(10),
+                                              bottomRight:
+                                                  Radius.circular(10))),
+                                      child: const Icon(
+                                        Icons.add_circle_outline_rounded,
+                                        size: 32,
+                                        color: Colors.white,
+                                      )),
+                                ),
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10)),
                               ),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: 20,
                             ),
                             PredictLengthDropdown(
@@ -236,52 +529,72 @@ class _PredictPageState extends State<PredictPage> {
                                 });
                               },
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: 20,
                             ),
                             Container(
                               height: 40,
                               child: ElevatedButton(
-                                onPressed: _predictStock,
-                                child: Text(
-                                  'ทำนาย',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 16),
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              height: 16,
-                            ),
-                            Container(
-                              height: 40,
-                              child: ElevatedButton(
                                 onPressed: () {
-                                  _predictStock();
-                                  if (!isPredicting) {
-                                    setState(() {
-                                      showModalBottomSheet(
+                                  if (dataList.length == 0) {
+                                    QuickAlert.show(
+                                      context: context,
+                                      type: QuickAlertType.error,
+                                      title: 'มีบางอย่างผิดพลาด',
+                                      text:
+                                          'โปรดเพิ่มหุ้นที่ต้องการทำนายลงไปในรายการทำนาย',
+                                      width: 0,
+                                      confirmBtnColor: Color(0xFF212436),
+                                      confirmBtnText: 'ตกลง',
+                                      confirmBtnTextStyle: TextStyle(
+                                          fontSize: 14, color: Colors.white),
+                                    );
+                                  } else {
+                                    QuickAlert.show(
+                                      context: context,
+                                      type: QuickAlertType.loading,
+                                      barrierDismissible: false,
+                                      title: 'โปรดรอสักครู่..',
+                                      text: 'กำลังทำนายราคาหุ้น',
+                                      width: 0,
+                                      confirmBtnColor: Color(0xFF212436),
+                                      confirmBtnText: 'ตกลง',
+                                      confirmBtnTextStyle: TextStyle(
+                                          fontSize: 14, color: Colors.white),
+                                    );
+
+                                    // เรียก _predictStock() เมื่อแสดง Alert แล้ว
+                                    _predictStock().then((_) {
+                                      setState(() {
+                                        // ปิด QuickAlert เมื่อ isPredicting เป็น false
+                                        if (!isPredicting) {
+                                          Navigator.pop(context); // ปิด Alert
+                                        }
+                                        showModalBottomSheet(
                                           isScrollControlled: true,
                                           backgroundColor: Colors.transparent,
                                           context: context,
                                           builder: (BuildContext context) {
                                             return buildPredictSheet(
-                                                prediction: _prediction,
-                                                context: context);
-                                          });
+                                              data: predictdata,
+                                              context: context,
+                                            );
+                                          },
+                                        );
+                                      });
                                     });
                                   }
                                 },
-                                child: Text(
-                                  'ทำนายหุ้นหลายรายการ',
+                                child: const Text(
+                                  'ทำนายหุ้น',
                                   style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 16),
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                  ),
                                 ),
                               ),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: 16,
                             ),
                             Container(
@@ -289,17 +602,51 @@ class _PredictPageState extends State<PredictPage> {
                               color: Colors.black,
                               child: ElevatedButton(
                                 onPressed: () {
+                                  //!isPredicting ?
                                   showModalBottomSheet(
                                       isScrollControlled: true,
                                       backgroundColor: Colors.transparent,
                                       context: context,
                                       builder: (BuildContext context) {
                                         return buildPredictSheet(
-                                            prediction: _prediction,
+                                            data: predictdata,
                                             context: context);
                                       });
+                                  /*: showModalBottomSheet(
+                                          isScrollControlled: true,
+                                          backgroundColor: Colors.transparent,
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return Container(
+                                                height: 180,
+                                                decoration: const BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius:
+                                                        BorderRadius.vertical(
+                                                            top:
+                                                                Radius.circular(
+                                                                    30))),
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceEvenly,
+                                                  children: [
+                                                    Icon(
+                                                      Icons.warning_rounded,
+                                                      size: 84,
+                                                      color:
+                                                          Colors.red.shade900,
+                                                    ),
+                                                    const Text(
+                                                      'โปรดเลือกหุ้นและทำนายหุ้นเพื่อดูรายละเอียดของผลลัพธ์',
+                                                      style: TextStyle(
+                                                          fontSize: 16),
+                                                    ),
+                                                  ],
+                                                ));
+                                          });*/
                                 },
-                                child: Text(
+                                child: const Text(
                                   "รายละเอียดผลลัพธ์การทำนาย",
                                   style: TextStyle(
                                       fontWeight: FontWeight.w600,
@@ -307,63 +654,75 @@ class _PredictPageState extends State<PredictPage> {
                                 ),
                               ),
                             ),
-                            SizedBox(
-                              height: 40,
+                            const SizedBox(
+                              height: 20,
                             ),
-                            Column(
-                              children: [
-                                Text(
-                                  "ผลลัพธ์การทำนายใน ${editPredictLength(selectedInterval)} ของ ${_textEditingController.text} คือ $_prediction",
-                                  style: TextStyle(fontSize: 16.0),
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                Text(
-                                  "ราคาวันนี้ 296.21",
-                                  style: TextStyle(fontSize: 16.0),
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                Text(
-                                  "ราคาจะขึ้นในวันถัดไป",
-                                  style: TextStyle(fontSize: 16.0),
-                                ),
-                              ],
+                            Container(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                      "จำนวนหุ้นที่ต้องการทำนาย ${dataList.length} หุ้น"),
+                                  const SizedBox(
+                                    height: 16,
+                                  ),
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: dataList.map((item) {
+                                      return Chip(
+                                        backgroundColor: Colors.grey.shade200,
+                                        label: Text(
+                                          item.toUpperCase(),
+                                          style: const TextStyle(fontSize: 14),
+                                        ),
+                                        deleteIconColor: Color(0xFFBB2525),
+                                        onDeleted: () {
+                                          setState(() {
+                                            dataList.remove(item);
+                                          });
+                                        },
+                                      );
+                                    }).toList(),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 40,
                             ),
 
                             /*AspectRatio(
-                              aspectRatio: 2,
-                              child: LineChart(
-                                LineChartData(
-                                  lineBarsData: [
-                                    LineChartBarData(
-                                      spots: pricePoints.map((point) {
-                                        return FlSpot(point.x, point.y);
-                                      }).toList(),
-                                    ),
-                                    LineChartBarData(
-                                      spots: [
-                                        FlSpot(0, 3),
-                                        FlSpot(1, 5),
-                                        FlSpot(2, 5),
-                                        FlSpot(3, 10),
-                                        FlSpot(4, 2),
-                                        FlSpot(5, 5),
-                                        FlSpot(6, 4),
-                                        FlSpot(7, 8),
-                                        // ... ข้อมูลเส้นกราฟแสดงข้อมูลแบบเส้นที่สอง
-                                      ],
-                                      color: Colors
-                                          .red, // สีของเส้นกราฟแสดงข้อมูลแบบเส้นที่สอง
-                                      isCurved:
-                                          true, // แสดงเส้นกราฟแบบโค้งหรือไม่
-                                    ),
-                                  ],
+                                aspectRatio: 2,
+                                child: LineChart(
+                                  LineChartData(
+                                    lineBarsData: [
+                                      LineChartBarData(
+                                        spots: pricePoints.map((point) {
+                                          return FlSpot(point.x, point.y);
+                                        }).toList(),
+                                      ),
+                                      LineChartBarData(
+                                        spots: [
+                                          FlSpot(0, 3),
+                                          FlSpot(1, 5),
+                                          FlSpot(2, 5),
+                                          FlSpot(3, 10),
+                                          FlSpot(4, 2),
+                                          FlSpot(5, 5),
+                                          FlSpot(6, 4),
+                                          FlSpot(7, 8),
+                                          // ... ข้อมูลเส้นกราฟแสดงข้อมูลแบบเส้นที่สอง
+                                        ],
+                                        color: Colors
+                                            .red, // สีของเส้นกราฟแสดงข้อมูลแบบเส้นที่สอง
+                                        isCurved:
+                                            true, // แสดงเส้นกราฟแบบโค้งหรือไม่
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ),*/
+                              ),*/
                           ],
                         ),
                       ),
@@ -371,10 +730,10 @@ class _PredictPageState extends State<PredictPage> {
                   ],
                 ),
               ),
-              Row(
+              const Row(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(left: 30, bottom: 10),
+                    padding: EdgeInsets.only(left: 30, bottom: 10),
                     child: Text(
                       "วิเคราะห์กราฟ",
                       style:
@@ -392,14 +751,14 @@ class _PredictPageState extends State<PredictPage> {
                     return CarouselSlider(
                       options: CarouselOptions(
                         autoPlay: true,
-                        autoPlayInterval: Duration(seconds: 5),
+                        autoPlayInterval: const Duration(seconds: 5),
                         height: 160.0,
                       ),
                       items: newsList.map((news) {
                         return Builder(
                           builder: (BuildContext context) {
                             return Container(
-                              margin: EdgeInsets.symmetric(horizontal: 5),
+                              margin: const EdgeInsets.symmetric(horizontal: 5),
                               child: Stack(
                                 children: [
                                   ClipRRect(
@@ -413,12 +772,12 @@ class _PredictPageState extends State<PredictPage> {
                                   Container(
                                     width: MediaQuery.of(context).size.width,
                                     decoration: BoxDecoration(
-                                      gradient: LinearGradient(
+                                      gradient: const LinearGradient(
                                         begin: Alignment.topCenter,
                                         end: Alignment.bottomCenter,
                                         colors: [
-                                          const Color(0x00000000),
-                                          const Color(0xCC000000),
+                                          Color(0x00000000),
+                                          Color(0xCC000000),
                                         ],
                                       ),
                                       borderRadius: BorderRadius.circular(20),
@@ -427,10 +786,10 @@ class _PredictPageState extends State<PredictPage> {
                                   Align(
                                     alignment: Alignment.bottomCenter,
                                     child: Container(
-                                      padding: EdgeInsets.all(20),
+                                      padding: const EdgeInsets.all(20),
                                       child: Text(
                                         news.title,
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           fontSize: 15,
                                           color: Colors.white,
                                         ),
@@ -445,12 +804,15 @@ class _PredictPageState extends State<PredictPage> {
                       }).toList(),
                     );
                   } else if (snapshot.hasError) {
-                    return Text('Failed to load news');
+                    return const Text('Failed to load news');
                   } else {
-                    return Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator());
                   }
                 },
               ),
+              const SizedBox(
+                height: 10,
+              )
             ],
           ),
         ),
@@ -473,29 +835,40 @@ class PredictLengthDropdown extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text('ระยะเวลาที่ต้องการทำนาย'),
-        DropdownButtonHideUnderline(
-          child: DropdownButton<String>(
-            value: selectedInterval,
-            onChanged: onChanged,
-            items: [
-              DropdownMenuItem(
-                value: '1D',
-                child: Text('วันถัดไป'),
+        const Text('ระยะเวลาที่ต้องการทำนาย'),
+        Container(
+          decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(10)),
+          padding: EdgeInsets.symmetric(horizontal: 8),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              icon: const Icon(
+                Icons.arrow_drop_down_rounded,
+                color: Color(0xFF212436),
               ),
-              DropdownMenuItem(
-                value: '2D',
-                child: Text('2 วันถัดไป'),
-              ),
-              DropdownMenuItem(
-                value: '3D',
-                child: Text('3 วันถัดไป'),
-              ),
-            ],
+              borderRadius: BorderRadius.circular(10),
+              value: selectedInterval,
+              onChanged: onChanged,
+              items: const [
+                DropdownMenuItem(
+                  value: '1D',
+                  child: Center(child: Text('วันถัดไป')),
+                ),
+                DropdownMenuItem(
+                  value: '2D',
+                  child: Center(child: Text('2 วันถัดไป')),
+                ),
+                DropdownMenuItem(
+                  value: '3D',
+                  child: Center(child: Text('3 วันถัดไป')),
+                ),
+              ],
+            ),
           ),
         ),
         IconButton(
-          icon: Icon(
+          icon: const Icon(
             Icons.info,
             size: 24,
           ),
@@ -504,11 +877,12 @@ class PredictLengthDropdown extends StatelessWidget {
               context: context,
               builder: (context) {
                 return AlertDialog(
-                  title: Text('More Info'),
-                  content: Text('Additional information about timeframes.'),
+                  title: const Text('More Info'),
+                  content:
+                      const Text('Additional information about timeframes.'),
                   actions: [
                     TextButton(
-                      child: Text('OK'),
+                      child: const Text('OK'),
                       onPressed: () {
                         Navigator.of(context).pop();
                       },

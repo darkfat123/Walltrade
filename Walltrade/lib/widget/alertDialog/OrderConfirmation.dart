@@ -22,7 +22,7 @@ void quickAlert(
           confirmBtnTextStyle: TextStyle(fontSize: 14, color: Colors.white))
       : QuickAlert.show(
           context: context,
-          type: QuickAlertType.info,
+          type: QuickAlertType.confirm,
           title: 'ยืนยันคำสั่งซื้อ',
           width: 350,
           widget: Column(
