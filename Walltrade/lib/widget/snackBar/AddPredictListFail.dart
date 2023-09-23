@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 
 class AddPredictListFailSnackBar extends SnackBar {
   AddPredictListFailSnackBar({super.key, required String symbol})
@@ -10,13 +9,13 @@ class AddPredictListFailSnackBar extends SnackBar {
           content: Stack(
             children: [
               Container(
-                padding: EdgeInsets.all(12),
+                padding: const EdgeInsets.all(12),
                 height: 90,
                 decoration: BoxDecoration(
-                  color: Color(0xFFBB2525),
+                  color: const Color(0xFFBB2525),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Row(
+                child: const Row(
                   children: [
                     SizedBox(width: 60),
                     Expanded(
@@ -46,7 +45,7 @@ class AddPredictListFailSnackBar extends SnackBar {
                   ],
                 ),
               ),
-              Positioned(
+              const Positioned(
                 left: 15,
                 bottom: 10,
                 child: ClipRRect(
@@ -56,7 +55,7 @@ class AddPredictListFailSnackBar extends SnackBar {
                   child: Icon(Icons.remove_circle_rounded,color: Color(0xFF952323),size: 40,)
                 ),
               ),
-              Positioned(
+              const Positioned(
                 right: -25,
                 top: -20,
                 child: ClipRRect(

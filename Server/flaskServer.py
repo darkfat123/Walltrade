@@ -35,15 +35,23 @@ mysql = MySQL(app)
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    dataList = request.get_json()  # รับข้อมูล JSON จาก Flutter
-    symbol_list = dataList.get('dataList', [])  # แปลงข้อมูล JSON เป็น List
+    dataList = request.get_json() 
+    predictLengthDay = request.json.get('predictDay')
+    symbol_list = dataList.get('dataList', [],)  # แปลงข้อมูล JSON เป็น List
     list_dict = []
+
+    #กำหนดจำนวนวันที่ต้องการทำนาย
+    if predictLengthDay == 1:
+        prediction_day = 60
+    elif predictLengthDay == 2:
+        prediction_day = 90
+    else:
+        prediction_day = 120
+
     for symbol in symbol_list:
         data = yf.download(symbol, period="3y")
-
         scaler = MinMaxScaler(feature_range=(0, 1))
         scaled_data = scaler.fit_transform(data['Close'].values.reshape(-1, 1))
-        prediction_day = 60
         x_train = []
         y_train = []
         for x in range(prediction_day, len(scaled_data)):
@@ -83,7 +91,7 @@ def predict():
         predicted_prices = model.predict(x_test)
         predicted_prices = scaler.inverse_transform(predicted_prices)
 
-        # + 1 -
+        # + 1 - predict Next day
         real_data = [
             model_inputs[len(model_inputs) + 1 - prediction_day:len(model_inputs+1), 0]]
         real_data = np.array(real_data)
@@ -93,9 +101,19 @@ def predict():
         
         prediction = model.predict(real_data)
         prediction = scaler.inverse_transform(prediction)
+
+        if symbol.endswith('.BK'):
+            symbols = symbol.rstrip(".BK") 
+            analysis = getSymbolHandler(symbols)
+        else:
+            analysis = getSymbolHandler(symbol)
+
+        close = analysis.indicators['close']
+
         result_dict = {
             'symbol': symbol,
-            'prediction': float(prediction[0][0])
+            'prediction': float(prediction[0][0]),
+            'close' : float(close)
         }
 
         #Append the dictionary to the list

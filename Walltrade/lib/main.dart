@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
         fontFamily: "IBMPlexSansThai",
         
       ),
-      home: Home(username: "foczz123",initialIndex:3),
+      home: const Home(username: "foczz123",initialIndex:3),
     );
   }
 }
@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
 class Home extends StatefulWidget {
   final String username;
   final int initialIndex;
-  Home({required this.username, required this.initialIndex});
+  const Home({super.key, required this.username, required this.initialIndex});
 
   @override
   HomeState createState() => HomeState(username: username, initialIndex: initialIndex);
@@ -54,7 +54,7 @@ class HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF212436),
+      backgroundColor: const Color(0xFF212436),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: index,
         onTap: (value) {
@@ -62,9 +62,9 @@ class HomeState extends State<Home> {
             index = value;
           });
         },
-        backgroundColor: Color(0xFF212436),
+        backgroundColor: const Color(0xFF212436),
         type: BottomNavigationBarType.fixed, // Set the type to fixed
-        items: [
+        items: const [
           BottomNavigationBarItem(
             icon: FaIcon(
               FontAwesomeIcons.home,

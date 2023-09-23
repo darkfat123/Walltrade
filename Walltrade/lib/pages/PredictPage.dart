@@ -26,36 +26,20 @@ class _PredictPageState extends State<PredictPage> {
   TextEditingController _textEditingController = TextEditingController();
   String _prediction = '';
   String selectedStockNation = 'US';
-  String selectedInterval = '1D';
+  String selectedInterval = '1';
   bool isPredicting = true;
 
   late final List<PricePoint> points;
 
-  List<String> dataList = ["META", "AAPL", "TSLA"];
+  List<String> dataList = ["META"];
   List<Map<String, dynamic>> symbolStockPrices = [];
 
-  List<Map<String, dynamic>> predictdata = [
-    {
-      'symbol': "META",
-      'prediction': "256.89",
-    },
-    {
-      'symbol': "AAPL",
-      'prediction': "171.92",
-    },
-    {
-      'symbol': "TSLA",
-      'prediction': "359.21",
-    },
-    {
-      'symbol': "PTT.BK",
-      'prediction': "31.75",
-    },
-  ];
+  List<Map<String, dynamic>> predictdata = [];
   Future<void> _predictStock() async {
     var url = Uri.parse('${Constants.serverUrl}/predict');
     final headers = {'Content-Type': 'application/json'};
-    final body = jsonEncode({'dataList': dataList});
+    final body = jsonEncode({'dataList': dataList,'predictDay': selectedInterval});
+    print(body);
 
     try {
       http.Response response =
@@ -67,6 +51,7 @@ class _PredictPageState extends State<PredictPage> {
             predictdata.add({
               'symbol': item['symbol'],
               'prediction': item['prediction'],
+              'close': item['close'],
             });
           });
         }
@@ -75,41 +60,6 @@ class _PredictPageState extends State<PredictPage> {
         });
       } else {
         throw Exception('Prediction failed.');
-      }
-    } catch (e) {
-      setState(() {
-        _prediction = 'error caught: $e';
-      });
-    }
-  }
-
-  Future<void> getPricePredictList() async {
-    var url = Uri.parse('${Constants.serverUrl}/getPricePredictList');
-    final headers = {'Content-Type': 'application/json'};
-
-    final List<Map<String, dynamic>> symbolList = predictdata.map((item) {
-      return {
-        'symbol': item['symbol'],
-      };
-    }).toList();
-
-    final body = jsonEncode({'symbolPredictList': symbolList});
-
-    try {
-      http.Response response =
-          await http.post(url, headers: headers, body: body);
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
-        for (var item in data) {
-          setState(() {
-            symbolStockPrices.add({
-              'symbol': item['symbol'],
-              'price': item['price'],
-            });
-          });
-        }
-      } else {
-        throw Exception('Get Stock Price Failed.');
       }
     } catch (e) {
       setState(() {
@@ -544,7 +494,7 @@ class _PredictPageState extends State<PredictPage> {
                                       text:
                                           'โปรดเพิ่มหุ้นที่ต้องการทำนายลงไปในรายการทำนาย',
                                       width: 0,
-                                      confirmBtnColor: Color(0xFF212436),
+                                      confirmBtnColor: const Color(0xFF212436),
                                       confirmBtnText: 'ตกลง',
                                       confirmBtnTextStyle: TextStyle(
                                           fontSize: 14, color: Colors.white),
@@ -552,37 +502,60 @@ class _PredictPageState extends State<PredictPage> {
                                   } else {
                                     QuickAlert.show(
                                       context: context,
-                                      type: QuickAlertType.loading,
-                                      barrierDismissible: false,
-                                      title: 'โปรดรอสักครู่..',
-                                      text: 'กำลังทำนายราคาหุ้น',
+                                      type: QuickAlertType.warning,
+                                      barrierDismissible: true,
+                                      title: 'ยืนยันการทำนาย',
+                                      text:
+                                          'เมื่อกดยืนยันอาจใช้เวลาสักครู่และไม่สามารถทำอะไรได้ทั้งสิ้น',
                                       width: 0,
                                       confirmBtnColor: Color(0xFF212436),
-                                      confirmBtnText: 'ตกลง',
+                                      confirmBtnText: 'ยืนยัน',
+                                      cancelBtnText: 'ยกเลิก',
+                                      cancelBtnTextStyle:
+                                          TextStyle(fontSize: 14),
+                                      showCancelBtn: true,
+                                      onConfirmBtnTap: () {
+                                        Navigator.pop(context);
+                                        QuickAlert.show(
+                                          context: context,
+                                          type: QuickAlertType.loading,
+                                          barrierDismissible: false,
+                                          title: 'โปรดรอสักครู่..',
+                                          text: 'กำลังทำนายราคาหุ้น',
+                                          width: 0,
+                                          confirmBtnColor: Color(0xFF212436),
+                                          confirmBtnText: 'ตกลง',
+                                          confirmBtnTextStyle: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.white),
+                                        );
+                                        _predictStock().then((_) {
+                                          setState(() {
+                                            // ปิด QuickAlert เมื่อ isPredicting เป็น false
+                                            if (!isPredicting) {
+                                              Navigator.pop(
+                                                  context); // ปิด Alert
+                                            }
+                                            showModalBottomSheet(
+                                              isScrollControlled: true,
+                                              backgroundColor:
+                                                  Colors.transparent,
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return buildPredictSheet(
+                                                  data: predictdata,
+                                                  context: context,
+                                                );
+                                              },
+                                            );
+                                          });
+                                        });
+                                      },
                                       confirmBtnTextStyle: TextStyle(
                                           fontSize: 14, color: Colors.white),
                                     );
 
                                     // เรียก _predictStock() เมื่อแสดง Alert แล้ว
-                                    _predictStock().then((_) {
-                                      setState(() {
-                                        // ปิด QuickAlert เมื่อ isPredicting เป็น false
-                                        if (!isPredicting) {
-                                          Navigator.pop(context); // ปิด Alert
-                                        }
-                                        showModalBottomSheet(
-                                          isScrollControlled: true,
-                                          backgroundColor: Colors.transparent,
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return buildPredictSheet(
-                                              data: predictdata,
-                                              context: context,
-                                            );
-                                          },
-                                        );
-                                      });
-                                    });
                                   }
                                 },
                                 child: const Text(
@@ -602,17 +575,17 @@ class _PredictPageState extends State<PredictPage> {
                               color: Colors.black,
                               child: ElevatedButton(
                                 onPressed: () {
-                                  //!isPredicting ?
-                                  showModalBottomSheet(
-                                      isScrollControlled: true,
-                                      backgroundColor: Colors.transparent,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return buildPredictSheet(
-                                            data: predictdata,
-                                            context: context);
-                                      });
-                                  /*: showModalBottomSheet(
+                                  !isPredicting
+                                      ? showModalBottomSheet(
+                                          isScrollControlled: true,
+                                          backgroundColor: Colors.transparent,
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return buildPredictSheet(
+                                                data: predictdata,
+                                                context: context);
+                                          })
+                                      : showModalBottomSheet(
                                           isScrollControlled: true,
                                           backgroundColor: Colors.transparent,
                                           context: context,
@@ -644,7 +617,7 @@ class _PredictPageState extends State<PredictPage> {
                                                     ),
                                                   ],
                                                 ));
-                                          });*/
+                                          });
                                 },
                                 child: const Text(
                                   "รายละเอียดผลลัพธ์การทำนาย",
@@ -680,6 +653,7 @@ class _PredictPageState extends State<PredictPage> {
                                         onDeleted: () {
                                           setState(() {
                                             dataList.remove(item);
+                                            print(dataList);
                                           });
                                         },
                                       );
@@ -852,15 +826,15 @@ class PredictLengthDropdown extends StatelessWidget {
               onChanged: onChanged,
               items: const [
                 DropdownMenuItem(
-                  value: '1D',
+                  value: '1',
                   child: Center(child: Text('วันถัดไป')),
                 ),
                 DropdownMenuItem(
-                  value: '2D',
+                  value: '2',
                   child: Center(child: Text('2 วันถัดไป')),
                 ),
                 DropdownMenuItem(
-                  value: '3D',
+                  value: '3',
                   child: Center(child: Text('3 วันถัดไป')),
                 ),
               ],

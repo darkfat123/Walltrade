@@ -32,7 +32,7 @@ class AddPredictListSuccessSnackBar extends SnackBar {
                             ),
                           ),
                           Text(
-                            'เพิ่มหุ้น $symbol ลงในรายการทำนายเรียบร้อยแล้ว',
+                            'เพิ่มหุ้น ${symbol.toUpperCase()} ลงในรายการทำนายเรียบร้อยแล้ว',
                             style: TextStyle(
                               fontFamily: 'IBMPlexSansThai',
                               fontSize: 14,
