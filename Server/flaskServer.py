@@ -166,7 +166,7 @@ def getAccount():
 
 
 
-@app.route('/login', methods=['POST'])
+'''@app.route('/login', methods=['POST'])
 def login():
     username = request.form.get('username')
     password = request.form.get('password')
@@ -180,7 +180,41 @@ def login():
     if user:
         return jsonify({'message': 'Login successful'})
     else:
-        return jsonify({'message': 'Invalid username or password'})
+        return jsonify({'message': 'Invalid username or password'})'''
+    
+@app.route('/getUsernamefromEmail', methods=['POST'])
+def getUsernamefromEmail():
+    try:
+        # Get data from request
+        email = request.json.get('email')
+        print(email)
+
+        # Establish connection to MySQL database
+        conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
+        cursor = conn.cursor()
+
+        # Check if username already exists
+        query = "SELECT username FROM users_info WHERE email = %s"
+        cursor.execute(query, (email,))
+        
+        # Fetch the result
+        result = cursor.fetchone()
+
+        # Close the database connection
+        conn.close()
+
+        if result:
+            # If a result is found, return the username
+            username = result[0]
+            print(username)
+            return jsonify({'username': username})
+            
+        else:
+            return jsonify({'error': 'Email not found'})
+
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -1378,7 +1412,7 @@ def th_portfolio():
         is_auto_queue=False
     )
 
-    equity = investor.Equity(account_no=f"{username}-E")
+    equity = investor.Equity(account_no=f"foczz123-E")
 
     account_info = equity.get_account_info()
     portfolio = equity.get_portfolios()

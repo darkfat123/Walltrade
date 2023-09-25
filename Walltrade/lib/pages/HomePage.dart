@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:Walltrade/pages/FAQpage.dart';
 import 'package:Walltrade/pages/HistoryAutoTrade.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -14,10 +15,13 @@ import '../variables/serverURL.dart';
 import 'package:intl/intl.dart';
 
 import '../widget/snackBar/DeleteWatchlistSuccess.dart';
+import 'FirebaseAuth/auth.dart';
+import 'FirebaseAuth/userVariable.dart';
 
 class HomePage extends StatefulWidget {
   final String username;
   HomePage({required this.username});
+  final User? user = Auth().currentUser;
   @override
   _HomePageState createState() => _HomePageState(username: username);
 }
@@ -168,8 +172,10 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> deleteWatchlist(String symbol) async {
     var url = '${Constants.serverUrl}/deleteWatchlist';
-    var body = jsonEncode(
-        {'username': username, 'symbol': symbol}); // Add the 'symbol' parameter
+    var body = jsonEncode({
+      'username': username,
+      'symbol': symbol
+    }); // Add the 'symbol' parameter
 
     var response = await http.post(
       Uri.parse(url),
@@ -191,11 +197,11 @@ class _HomePageState extends State<HomePage> {
     getBalance();
     getStockPrices();
     _newsFuture = StaticValues().fetchNews();
+    print(username);
   }
 
   @override
   Widget build(BuildContext context) {
-    String username = widget.username;
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -586,7 +592,8 @@ class _HomePageState extends State<HomePage> {
                                                         ScaffoldMessenger.of(
                                                                 context)
                                                             .showSnackBar(
-                                                          DeleteWatchlistSnackBar(symbol: symbol),
+                                                          DeleteWatchlistSnackBar(
+                                                              symbol: symbol),
                                                         );
                                                       },
                                                       child: Chip(

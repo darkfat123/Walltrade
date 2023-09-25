@@ -1,9 +1,17 @@
+import 'package:Walltrade/pages/FirebaseAuth/auth.dart';
+import 'package:Walltrade/pages/FirebaseAuth/login_page.dart';
+
+
+import 'package:Walltrade/pages/FirebaseAuth/register_page.dart';
 import 'package:Walltrade/pages/MoreTechnicalOrder.dart';
 import 'package:Walltrade/pages/TradePageOptions.dart';
-import 'package:Walltrade/pages/login_page.dart';
 import 'package:Walltrade/pages/HistoryAutoTrade.dart';
+
+
 import 'package:Walltrade/pages/thStockView.dart';
 import 'package:Walltrade/primary.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'pages/HomePage.dart';
@@ -13,13 +21,29 @@ import 'pages/PredictPage.dart';
 import 'package:Walltrade/pages/SearchPage.dart';
 import 'pages/WalletPage.dart';
 
-
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+      options: const FirebaseOptions(
+    apiKey: 'AIzaSyD5Ntd5aan0rYJTrkM0STIMgLPZzXgCJmw',
+    appId: '1:207848542192:android:68540f26183154fbb99735',
+    messagingSenderId: '207848542192',
+    projectId: 'walltrade-b174e',
+  ));
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  final User? user;
+
+  MyApp({Key? key})
+      : user = Auth().currentUser,
+        super(key: key) {
+    // Initialize username in the constructor
+    username = user?.displayName ?? "Guest";
+  }
+
+  String username = "Guest";
 
   @override
   Widget build(BuildContext context) {
@@ -28,9 +52,22 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: primary,
         fontFamily: "IBMPlexSansThai",
-        
       ),
-      home: const Home(username: "foczz123",initialIndex:3),
+      home: FutureBuilder(
+        future: Auth().authStateChanges.first, 
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // กำลังโหลดข้อมูล
+            return CircularProgressIndicator(); // หรือเฉลยอื่นๆ ที่คุณต้องการในระหว่างรอ
+          } else {
+            if (snapshot.hasData) {
+              return Home(username: username, initialIndex: 0);
+            } else {
+              return LoginPage();
+            }
+          }
+        },
+      ),
     );
   }
 }
@@ -41,7 +78,8 @@ class Home extends StatefulWidget {
   const Home({super.key, required this.username, required this.initialIndex});
 
   @override
-  HomeState createState() => HomeState(username: username, initialIndex: initialIndex);
+  HomeState createState() =>
+      HomeState(username: username, initialIndex: initialIndex);
 }
 
 class HomeState extends State<Home> {
@@ -126,7 +164,9 @@ class HomeState extends State<Home> {
         widget = TradePageOptions(username: username);
         break;
       case 3:
-        widget = PredictPage(username: username,);
+        widget = PredictPage(
+          username: username,
+        );
         break;
       case 4:
         widget = WalletPage(username: username);

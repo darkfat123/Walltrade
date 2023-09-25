@@ -1,8 +1,10 @@
+import 'package:Walltrade/pages/FirebaseAuth/login_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../variables/serverURL.dart';
+import 'FirebaseAuth/auth.dart';
 
 class Settings extends StatefulWidget {
   final String username;
@@ -62,6 +64,10 @@ class _SettingsState extends State<Settings> {
         SnackBar(content: Text('Failed to connect to the server')),
       );
     }
+  }
+
+  Future<void> signOut() async {
+    await Auth().signOut();
   }
 
   @override
@@ -287,6 +293,15 @@ class _SettingsState extends State<Settings> {
                   ],
                 ),
               ),
+              ElevatedButton(
+                  onPressed: () {
+                    signOut().then((value) => Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => LoginPage(),
+                        )));
+                  },
+                  child: Text("ออกจากระบบ"))
             ],
           ),
         ),
