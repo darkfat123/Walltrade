@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'makeDismissible.dart';
 
-String testTrend = 'ลง';
 var testPrice = 210;
+
 Widget buildPredictSheet({
   required List<Map<String, dynamic>> data,
   required BuildContext
@@ -26,6 +26,14 @@ Widget buildPredictSheet({
             itemCount: data.length, // จำนวนรายการข้อมูล
             itemBuilder: (BuildContext context, int index) {
               var item = data[index];
+              List<double> realPrices = [];
+              List<double> predictedPrices = [];
+              realPrices =
+                  (item['real_prices_chart'] as List<dynamic>).cast<double>();
+
+              predictedPrices = (item['predict_prices_chart'] as List<dynamic>)
+                  .cast<double>();
+
               double percentage =
                   ((item['prediction'] - item['close']) / item['close']) * 100;
               print(data);
@@ -141,7 +149,10 @@ Widget buildPredictSheet({
                       SizedBox(
                         height: 16,
                       ),
-                      PredictLineChart(),
+                      PredictLineChart(
+                        realPrices: realPrices,
+                        predictedPrices: predictedPrices,
+                      ),
                       SizedBox(
                         height: 16,
                       ),
@@ -158,7 +169,7 @@ Widget buildPredictSheet({
                               SizedBox(
                                 width: 4,
                               ),
-                              Text('ราคาทำนาย')
+                              Text('ราคาจริง')
                             ],
                           ),
                           Row(
@@ -171,7 +182,7 @@ Widget buildPredictSheet({
                               SizedBox(
                                 width: 4,
                               ),
-                              Text('ราคาจริง')
+                              Text('ราคาทำนาย')
                             ],
                           ),
                         ],

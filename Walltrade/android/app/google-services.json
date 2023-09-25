@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "207848542192",
+    "project_id": "walltrade-b174e",
+    "storage_bucket": "walltrade-b174e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:207848542192:android:68540f26183154fbb99735",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5Ntd5aan0rYJTrkM0STIMgLPZzXgCJmw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

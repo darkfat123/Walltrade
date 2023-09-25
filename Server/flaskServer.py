@@ -109,11 +109,24 @@ def predict():
             analysis = getSymbolHandler(symbol)
 
         close = analysis.indicators['close']
+        # หาค่าราคาที่ทำนายของ 10 วันสุดท้าย
+        predicted_prices = predicted_prices[-60:]
+        predicted_prices = predicted_prices.reshape(-1)
+        real_prices = data['Close'][-60:]
+
+        real_prices_list = real_prices.tolist()
+        predicted_prices = np.append(predicted_prices, prediction[0][0])
+        print(prediction[0][0])
+        predicted_prices_list = predicted_prices.tolist()
+        print("predict length",len(predicted_prices_list))
+        print("real length",len(real_prices_list))
 
         result_dict = {
             'symbol': symbol,
             'prediction': float(prediction[0][0]),
-            'close' : float(close)
+            'close' : float(close),
+            'real_prices_chart': real_prices_list,
+            'predict_prices_chart': predicted_prices_list
         }
 
         #Append the dictionary to the list

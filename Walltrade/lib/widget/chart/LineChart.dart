@@ -2,7 +2,14 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 class PredictLineChart extends StatefulWidget {
-  const PredictLineChart({super.key});
+  final List<double> realPrices;
+  final List<double> predictedPrices;
+
+  const PredictLineChart({
+    super.key,
+    required this.realPrices,
+    required this.predictedPrices,
+  });
 
   @override
   State<PredictLineChart> createState() => _PredictLineChartState();
@@ -28,7 +35,7 @@ class _PredictLineChartState extends State<PredictLineChart> {
         AspectRatio(
           aspectRatio: 1.6,
           child: LineChart(
-            mainData(),
+            mainData(widget.realPrices, widget.predictedPrices),
           ),
         ),
       ],
@@ -70,7 +77,7 @@ class _PredictLineChartState extends State<PredictLineChart> {
     );
   }
 
-  LineChartData mainData() {
+  LineChartData mainData(List<double> realPrices, List<double> predictPrices) {
     return LineChartData(
       gridData: const FlGridData(
         show: false,
@@ -87,8 +94,7 @@ class _PredictLineChartState extends State<PredictLineChart> {
           sideTitles: SideTitles(
             showTitles: true,
             reservedSize: 30,
-            interval: 1,
-            getTitlesWidget: bottomTitleWidgets,
+            interval: 10,
           ),
         ),
         leftTitles: AxisTitles(
@@ -103,25 +109,26 @@ class _PredictLineChartState extends State<PredictLineChart> {
         border: Border.all(color: const Color(0xff37434d)),
       ),
       minX: 0,
-      maxX: 3,
-      minY: testChart / 2,
-      maxY: testChart * 1.5,
+      maxX: realPrices.length.toDouble() - 1, // ปรับขอบเขต X
+      minY: realPrices.reduce((a, b) => a < b ? a : b), // ปรับขอบเขต Y
+      maxY: realPrices.reduce((a, b) => a > b ? a : b), // ปรับขอบเขต Y
       lineBarsData: [
         LineChartBarData(
-          spots: const [
-            FlSpot(0, 298.5),
-            FlSpot(1, 318.6),
-            FlSpot(2, 429.42),
-            FlSpot(3, 387.86),
-          ],
+          spots: realPrices.asMap().entries.map(
+            (entry) {
+              final int index = entry.key;
+              final double price = entry.value;
+              return FlSpot(index.toDouble(), price);
+            },
+          ).toList(),
           isCurved: true,
           gradient: LinearGradient(
             colors: gradientColors,
           ),
-          barWidth: 5,
+          barWidth: 2,
           isStrokeCapRound: true,
           dotData: const FlDotData(
-            show: true,
+            show: false,
           ),
           belowBarData: BarAreaData(
             show: true,
@@ -133,19 +140,21 @@ class _PredictLineChartState extends State<PredictLineChart> {
           ),
         ),
         LineChartBarData(
-          spots: const [
-            FlSpot(0, 199.5),
-            FlSpot(1, 300.6),
-            FlSpot(2, 414.42),
-          ],
+          spots: predictPrices.asMap().entries.map(
+            (entry) {
+              final int index = entry.key;
+              final double price = entry.value;
+              return FlSpot(index.toDouble(), price);
+            },
+          ).toList(),
           isCurved: true,
           gradient: LinearGradient(
             colors: gradientColors2,
           ),
-          barWidth: 5,
+          barWidth: 2,
           isStrokeCapRound: true,
           dotData: const FlDotData(
-            show: true,
+            show: false,
           ),
           belowBarData: BarAreaData(
             show: true,

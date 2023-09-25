@@ -52,6 +52,8 @@ class _PredictPageState extends State<PredictPage> {
               'symbol': item['symbol'],
               'prediction': item['prediction'],
               'close': item['close'],
+              'real_prices_chart': item['real_prices_chart'],
+              'predict_prices_chart': item['predict_prices_chart'],
             });
           });
         }

@@ -51,10 +51,11 @@ dependencies:
   syncfusion_flutter_charts: ^22.2.9
   flutter_circle_chart: ^1.0.0
   dots_indicator: ^3.0.0
-  bloc: ^7.0.0
   flutter_bloc: ^7.3.3
   flutter_svg: ^2.0.7
   quickalert: ^1.0.2
+  firebase_core: ^2.16.0
+  firebase_auth: ^4.10.0
   
 
 dev_dependencies:
