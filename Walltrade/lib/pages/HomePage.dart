@@ -16,7 +16,6 @@ import 'package:intl/intl.dart';
 
 import '../widget/snackBar/DeleteWatchlistSuccess.dart';
 import 'FirebaseAuth/auth.dart';
-import 'FirebaseAuth/userVariable.dart';
 
 class HomePage extends StatefulWidget {
   final String username;

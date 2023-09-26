@@ -56,6 +56,8 @@ dependencies:
   quickalert: ^1.0.2
   firebase_core: ^2.16.0
   firebase_auth: ^4.10.0
+  lottie: ^2.6.0
+  fluttertoast: ^8.2.2
   
 
 dev_dependencies:
@@ -86,8 +88,25 @@ flutter:
     - assets/img/predict.png
     - assets/img/thaiflag.png
     - assets/img/usflag.png
+    - assets/img/alpacaHome.png
+    - assets/img/alpacaInput.png
+    - assets/img/alpacaConfirmRegister.png
+    - assets/img/alpacaLogin.png
+    - assets/img/alpacaLoginInput.png
+    - assets/img/alpacaContainerAPI.png
+    - assets/img/alpacaRegenerate.png
+    - assets/img/alpacaGenerated.png
+    - assets/img/alpacaChangeMode.png
+    - assets/img/settradeHome.png
+    - assets/img/settradeRegister.png
+    - assets/img/settradeConfirmPrivacy.png
+    - assets/img/settradeCreateAPI.png
+    - assets/img/settradeGenerated.png
+    - assets/img/settradeBroker.png
     - assets/img/bubble.svg
     - assets/img/success.svg
+    - assets/lottie/loginLottie.json
+    - assets/lottie/registerLottie.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:Walltrade/pages/FirebaseAuth/auth.dart';
-import 'package:Walltrade/widget/bottomSheet/RegisterSheet.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:lottie/lottie.dart';
 import '../../main.dart';
 import '../../variables/serverURL.dart';
 import 'register_page.dart';
@@ -32,43 +32,41 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF068DA9), Colors.white],
-          ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(50),
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.all(30),
-                height: 400,
+      backgroundColor: Color(0xFF212436),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Lottie.asset('assets/lottie/loginLottie.json', height: 350),
+              Container(
+                height: MediaQuery.of(context).size.height, 
+                padding: EdgeInsets.all(30),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFECF8F9),
-                  borderRadius: BorderRadius.circular(50),
-                  border: Border.all(
-                    color: const Color(0xFF212436),
-                    width: 4,
-                  ),
-                ),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(30),
+                        topRight: Radius.circular(30))),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Text(
-                      'ยินดีต้อนรับสู่ Walltrade!',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Colors.black,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Icon(Icons.login_rounded),
+                        SizedBox(
+                          width: 8,
+                        ),
+                        Text(
+                          "เข้าสู่ระบบ",
+                          style: TextStyle(
+                              fontSize: 26, fontWeight: FontWeight.w600),
+                        ),
+                      ],
                     ),
-                    const SizedBox(
-                      height: 30,
+                    SizedBox(
+                      height: 20,
                     ),
                     TextFormField(
                       controller: _emailController,
@@ -79,13 +77,13 @@ class _LoginPageState extends State<LoginPage> {
                           fontWeight: FontWeight.bold,
                         ),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         contentPadding: const EdgeInsets.symmetric(
-                          vertical: 12.0,
+                          vertical: 20.0,
                           horizontal: 16.0,
                         ),
-                        prefixIcon: const Icon(Icons.person_outline),
+                        prefixIcon: const Icon(Icons.email_rounded),
                       ),
                     ),
                     const SizedBox(height: 16.0),
@@ -98,10 +96,10 @@ class _LoginPageState extends State<LoginPage> {
                           fontWeight: FontWeight.bold,
                         ),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         contentPadding: const EdgeInsets.symmetric(
-                          vertical: 12.0,
+                          vertical: 20.0,
                           horizontal: 16.0,
                         ),
                         prefixIcon: const Icon(Icons.lock_outline),
@@ -146,61 +144,62 @@ class _LoginPageState extends State<LoginPage> {
                                           initialIndex: 0,
                                         ))));
                       },
-                      child: Container(
-                        height: 30,
-                        width: 100,
-                        child: const Center(
-                          child: Text(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
                             'เข้าสู่ระบบ',
                             style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
+                                fontWeight: FontWeight.w500, fontSize: 16),
                           ),
-                        ),
+                        ],
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF7E1717),
-                        padding: const EdgeInsets.symmetric(vertical: 14.0),
+                        padding: const EdgeInsets.symmetric(vertical: 18.0),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 30),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'ไม่มีบัญชี?  ',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                        InkWell(
-                          onTap: () {
-                            showModalBottomSheet(
-                              context: context,
-                              builder: (context) {
-                                return buildRegisterSheet(context: context);
-                              },
-                            );
-                          },
-                          child: const Text(
-                            'สร้างบัญชี',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              decoration: TextDecoration.underline,
-                              color: Color(0xFF212436),
-                            ),
-                          ),
-                        ),
-                      ],
+                    const SizedBox(height: 12),
+                    Divider(thickness: 3),
+                    Text(
+                      "ไม่มีสมาชิก?",
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                     ),
+                    const SizedBox(height: 6),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => RegisterPage()));
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'สมัครสมาชิก',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w500, fontSize: 16),
+                          ),
+                        ],
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF212436),
+                        padding: const EdgeInsets.symmetric(vertical: 18.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
                   ],
                 ),
               ),
-            ),
+            ],
           ),
         ),
       ),

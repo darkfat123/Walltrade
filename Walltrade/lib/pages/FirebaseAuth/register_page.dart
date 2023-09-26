@@ -1,10 +1,15 @@
 import 'dart:convert';
 
 import 'package:Walltrade/pages/FirebaseAuth/auth.dart';
+import 'package:Walltrade/pages/FirebaseAuth/continue_register_page.dart';
 import 'package:Walltrade/pages/FirebaseAuth/login_page.dart';
+import 'package:Walltrade/primary.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:lottie/lottie.dart';
+import 'package:quickalert/quickalert.dart';
 
 import '../../variables/serverURL.dart';
 
@@ -19,6 +24,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmpasswordController =
       TextEditingController();
+
   String errorMessage = '';
 
   Future<void> registerUser() async {
@@ -36,53 +42,9 @@ class _RegisterPageState extends State<RegisterPage> {
       body: jsonEncode(body),
     );
 
-    if (response.statusCode == 200 &&
-        confirmpasswordController == passwordController) {
+    if (response.statusCode == 200) {
       // Registration successful
-      final Map<String, dynamic> data = jsonDecode(response.body);
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text('Success'),
-          content: Text(data['message']),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => LoginPage(),
-                  ),
-                );
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-    } else {
-      // Registration failed
-      final Map<String, dynamic> error = jsonDecode(response.body);
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text('Error'),
-          content: Text(error['message']),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => LoginPage(),
-                  ),
-                );
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
+      Fluttertoast.showToast(msg: "สมัครสมาชิกสำเร็จ",backgroundColor:primary,textColor: Colors.white);
     }
   }
 
@@ -103,39 +65,40 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF068DA9), Colors.white],
-          ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(50),
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.all(30),
-                height: 500,
+      backgroundColor: primary,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Lottie.asset('assets/lottie/registerLottie.json', height: 380),
+              Container(
+                
                 decoration: BoxDecoration(
-                  color: const Color(0xFFECF8F9),
-                  borderRadius: BorderRadius.circular(50),
-                  border: Border.all(
-                    color: const Color(0xFF212436),
-                    width: 4,
-                  ),
-                ),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(30),
+                        topRight: Radius.circular(30))),
+                padding: EdgeInsets.all(30),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Text(
-                      'สมัครสมาชิก',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.black,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Icon(Icons.app_registration_rounded),
+                        SizedBox(
+                          width: 8,
+                        ),
+                        const Text(
+                          'สมัครสมาชิก',
+                          style: TextStyle(
+                            fontSize: 26,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(
                       height: 30,
@@ -149,7 +112,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           fontWeight: FontWeight.w300,
                         ),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         contentPadding: const EdgeInsets.symmetric(
                           vertical: 12.0,
@@ -168,7 +131,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           fontWeight: FontWeight.w300,
                         ),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         contentPadding: const EdgeInsets.symmetric(
                           vertical: 12.0,
@@ -187,7 +150,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           fontWeight: FontWeight.w400,
                         ),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         contentPadding: const EdgeInsets.symmetric(
                           vertical: 12.0,
@@ -207,7 +170,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           fontWeight: FontWeight.w400,
                         ),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         contentPadding: const EdgeInsets.symmetric(
                           vertical: 12.0,
@@ -217,62 +180,60 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       obscureText: true,
                     ),
+                    const SizedBox(height: 16.0),
                     const SizedBox(height: 30),
                     ElevatedButton(
-                      onPressed: createUserWithEmailAndPassword,
-                      child: Container(
-                        height: 30,
-                        width: 100,
-                        child: const Center(
-                          child: Text(
-                            'สมัครสมาชิก',
+                      onPressed: () {
+                        if (passwordController.text !=
+                            confirmpasswordController.text) {
+                          QuickAlert.show(
+                            context: context,
+                            type: QuickAlertType.error,
+                            width: 0,
+                            title: "เกิดข้อผิดพลาด",
+                            text: "ยืนยันรหัสผ่านไม่ถูกต้อง",
+                            confirmBtnColor: primary,
+                            confirmBtnText: "ตกลง",
+                            onConfirmBtnTap: () => Navigator.pop(context),
+                            confirmBtnTextStyle:
+                                TextStyle(fontSize: 16, color: Colors.white),
+                          );
+                        } else if (emailController.text != '' &&
+                            usernameController.text != '' &&
+                            passwordController.text != '' &&
+                            confirmpasswordController.text != '') {
+                          createUserWithEmailAndPassword()
+                              .then((value) => registerUser())
+                              .then((value) => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        ContinueRegisterPage(),
+                                  )));
+                        }
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'ถัดไป',
                             style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                            ),
+                                fontWeight: FontWeight.w500, fontSize: 16),
                           ),
-                        ),
+                        ],
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF7E1717),
-                        padding: const EdgeInsets.symmetric(vertical: 14.0),
+                        padding: const EdgeInsets.symmetric(vertical: 18.0),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 30),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'มีบัญชีแล้ว?  ',
-                          style: TextStyle(
-                            color: Colors.black,
-                          ),
-                        ),
-                        InkWell(
-                          onTap: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => LoginPage(),
-                              ),
-                            );
-                          },
-                          child: const Text(
-                            'เข้าสู่ระบบ',
-                            style: TextStyle(
-                              decoration: TextDecoration.underline,
-                              color: Color(0xFF212436),
-                            ),
-                          ),
-                        ),
-                      ],
                     ),
                   ],
                 ),
               ),
-            ),
+            ],
           ),
         ),
       ),

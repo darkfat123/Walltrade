@@ -1,3 +1,4 @@
+import 'package:Walltrade/guidePage/alpacaRegisterGuide.dart';
 import 'package:Walltrade/pages/FirebaseAuth/auth.dart';
 import 'package:Walltrade/pages/FirebaseAuth/login_page.dart';
 
@@ -14,6 +15,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'guidePage/settradeRegisterGuide.dart';
 import 'pages/HomePage.dart';
 import 'pages/PortfolioDetail.dart';
 import 'pages/PredictPage.dart';
@@ -63,7 +65,7 @@ class MyApp extends StatelessWidget {
             if (snapshot.hasData) {
               return Home(username: username, initialIndex: 0);
             } else {
-              return LoginPage();
+              return RegisterPage();
             }
           }
         },
