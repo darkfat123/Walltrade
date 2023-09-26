@@ -1,15 +1,17 @@
-import 'package:Walltrade/guidePage/settradeRegisterGuide.dart';
+import 'package:Walltrade/pages/guidePage/alpacaLoginGuide.dart';
+import 'package:Walltrade/pages/FirebaseAuth/register_page.dart';
 import 'package:flutter/material.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class AlpacaLoginGuidePage extends StatelessWidget {
-  const AlpacaLoginGuidePage({super.key});
+class SettradeRegisterGuidePage extends StatelessWidget {
+  const SettradeRegisterGuidePage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
-      appBar: AppBar(title: Text("เข้าสู่ระบบกับ Alpaca")),
+      appBar: AppBar(title: Text("สมัครสมาชิกกับ Settrade")),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -31,7 +33,7 @@ class AlpacaLoginGuidePage extends StatelessWidget {
               margin: EdgeInsets.all(12),
               child: TextButton(
                 child: Text(
-                  "เข้าสู่เว็บไซต์: alpaca.markets",
+                  "เข้าสู่เว็บไซต์: open-api.settrade.com",
                   style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
                 onPressed: () {
@@ -40,7 +42,7 @@ class AlpacaLoginGuidePage extends StatelessWidget {
                     type: QuickAlertType.warning,
                     width: 0,
                     title: 'เปิด Browser',
-                    text: 'เมื่อกดปุ่ม "ตกลง" จะนำไปสู่เว็บไซต์ Alpaca',
+                    text: 'เมื่อกดปุ่ม "ตกลง" จะนำไปสู่เว็บไซต์ Settrade',
                     backgroundColor: Colors.white,
                     titleColor: Colors.black,
                     textColor: Colors.black,
@@ -51,7 +53,8 @@ class AlpacaLoginGuidePage extends StatelessWidget {
                     cancelBtnTextStyle: TextStyle(fontSize: 16),
                     showCancelBtn: true,
                     onConfirmBtnTap: () {
-                      launchUrl(Uri.parse("https://alpaca.markets/"),
+                      launchUrl(
+                          Uri.parse("https://open-api.settrade.com/open-api/"),
                           mode: LaunchMode.externalApplication);
                       Navigator.of(context).pop();
                     },
@@ -79,7 +82,7 @@ class AlpacaLoginGuidePage extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    'ไปที่คำว่า "Login" และ "Traders"',
+                    'ไปที่คำว่า "สมัครเข้าใช้งาน"',
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
@@ -92,7 +95,7 @@ class AlpacaLoginGuidePage extends StatelessWidget {
                     borderRadius:
                         BorderRadius.circular(20.0), // ปรับค่าตามความต้องการ
                     child: Image.asset(
-                      "assets/img/alpacaLogin.png",
+                      "assets/img/settradeHome.png",
                       width: 320,
                     ),
                   ),
@@ -119,7 +122,7 @@ class AlpacaLoginGuidePage extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    'กรอกข้อมูลให้เรียบร้อย และกด "Continue"',
+                    'กรอกข้อมูลที่ให้เรียบร้อย และกด "ลงทะเบียน"',
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
@@ -132,7 +135,7 @@ class AlpacaLoginGuidePage extends StatelessWidget {
                     borderRadius:
                         BorderRadius.circular(20.0), // ปรับค่าตามความต้องการ
                     child: Image.asset(
-                      "assets/img/alpacaLoginInput.png",
+                      "assets/img/settradeRegister.png",
                       width: 320,
                     ),
                   ),
@@ -159,7 +162,7 @@ class AlpacaLoginGuidePage extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    'เมื่อเข้าสู่ระบบสำเร็จ ให้เลื่อนลงมาจนกว่าจะพบคำว่า "Quick Trade" และกดไปที่คำว่า "View API Keys"',
+                    'เมื่อกรอกข้อมูลสำเร็จ จะมีข้อตกลงการใช้งานแสดงขึ้นมา อ่านให้เรียบร้อยและเลื่อนลงมาจนสุดจึงจะกดยอมรับได้',
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
@@ -172,7 +175,7 @@ class AlpacaLoginGuidePage extends StatelessWidget {
                     borderRadius:
                         BorderRadius.circular(20.0), // ปรับค่าตามความต้องการ
                     child: Image.asset(
-                      "assets/img/alpacaContainerAPI.png",
+                      "assets/img/settradeConfirmPrivacy.png",
                       width: 320,
                     ),
                   ),
@@ -199,7 +202,7 @@ class AlpacaLoginGuidePage extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    'กดที่คำว่า Generate New Keys',
+                    'หลังจากกดยอมรับจะเข้าสู่ระบบทันที และกดคำว่า "สร้าง Application Id" ',
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
@@ -212,7 +215,7 @@ class AlpacaLoginGuidePage extends StatelessWidget {
                     borderRadius:
                         BorderRadius.circular(20.0), // ปรับค่าตามความต้องการ
                     child: Image.asset(
-                      "assets/img/alpacaRegenerate.png",
+                      "assets/img/settradeCreateAPI.png",
                       width: 320,
                     ),
                   ),
@@ -239,7 +242,7 @@ class AlpacaLoginGuidePage extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    'จดข้อมูลในช่องสีแดงทั้ง 2 ช่องไว้  *จำเป็นต้องใช้',
+                    'หลังจากนั้นให้จดหรือบันทึกข้อมูลในช่องสีแดงไว้  *จำเป็นต้องใช้',
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
@@ -252,7 +255,7 @@ class AlpacaLoginGuidePage extends StatelessWidget {
                     borderRadius:
                         BorderRadius.circular(20.0), // ปรับค่าตามความต้องการ
                     child: Image.asset(
-                      "assets/img/alpacaGenerated.png",
+                      "assets/img/settradeGenerated.png",
                       width: 320,
                     ),
                   ),
@@ -279,10 +282,10 @@ class AlpacaLoginGuidePage extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    'หากต้องการเปลี่ยนเป็นการเทรดด้วยเงินจริง ให้กดที่โลโก้ของ Alpaca และเลือก Live และนำ Key ที่อยู่ใน Live มาใช้และจดบันทึกไว้',
+                    'หากต้องการเปลี่ยนเป็นการเทรดด้วยเงินจริง ให้ติดต่อโบรกเกอร์ที่ใช้งานได้กับ Settrade',
                     style: TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.w400,
+                        fontWeight: FontWeight.w500,
                         color: Colors.white),
                   ),
                   SizedBox(
@@ -292,13 +295,22 @@ class AlpacaLoginGuidePage extends StatelessWidget {
                     borderRadius:
                         BorderRadius.circular(20.0), // ปรับค่าตามความต้องการ
                     child: Image.asset(
-                      "assets/img/alpacaChangeMode.png",
+                      "assets/img/settradeBroker.png",
                       width: 320,
                     ),
                   ),
                 ],
               ),
             ),
+            SizedBox(
+              height: 16,
+            ),
+            Container(
+                margin: EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
+                  'หมายเหตุ: การใช้เงินทดลองในการซื้อขายหุ้นไทย จะสามารถใช้งานได้เพียงวันเดียว วันถัดไปหุ้นที่ซื้อในระบบจำลองจะหายไปทั้งหมด',
+                  style:TextStyle(fontSize: 16)
+                )),
             SizedBox(
               height: 16,
             ),
@@ -313,7 +325,7 @@ class AlpacaLoginGuidePage extends StatelessWidget {
                   width: 8,
                 ),
                 Text(
-                  'การดำเนินการในหุ้นอเมริกาสำเร็จแล้ว!',
+                  'ได้สมัครสมาชิกกับ Settrade เรียบร้อยแล้ว!',
                   style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
                 ),
               ],
@@ -328,11 +340,11 @@ class AlpacaLoginGuidePage extends StatelessWidget {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => SettradeRegisterGuidePage(),
+                            builder: (context) => RegisterPage(),
                           ));
                     },
                     child: Text(
-                      "ขั้นตอนถัดไป ตั้งค่า Settrade",
+                      "ขั้นตอนถัดไป",
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                     ),

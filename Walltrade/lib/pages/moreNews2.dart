@@ -23,23 +23,34 @@ class News2 {
 }
 
 class NewsListPage extends StatefulWidget {
+  final String username;
+  NewsListPage({required this.username});
   @override
-  _NewsListPageState createState() => _NewsListPageState();
+  _NewsListPageState createState() => _NewsListPageState(username: username);
 }
 
 class _NewsListPageState extends State<NewsListPage> {
   List<Map<String, dynamic>> newsData = [];
   bool isLoading = true;
+  final String username;
+  _NewsListPageState({required this.username});
   @override
   void initState() {
     super.initState();
-    fetchNewsData();
+    fetchNewsData(username: username);
   }
 
-  Future<void> fetchNewsData() async {
-    final response = await http.get(
-      Uri.parse(
-          '${Constants.serverUrl}/news'), // Replace with the actual API endpoint
+  Future<void> fetchNewsData({required username}) async {
+    final Map<String, dynamic> requestData = {
+      'username': username,
+    };
+
+    final response = await http.post(
+      Uri.parse('${Constants.serverUrl}/news'), // เปลี่ยนเป็น POST
+      headers: {
+        'Content-Type': 'application/json', // ระบุ content type เป็น JSON
+      },
+      body: jsonEncode(requestData), // ส่งข้อมูล JSON ไปยัง server
     );
 
     if (response.statusCode == 200) {

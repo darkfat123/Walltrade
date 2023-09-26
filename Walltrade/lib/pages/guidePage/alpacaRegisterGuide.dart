@@ -1,17 +1,18 @@
-import 'package:Walltrade/guidePage/alpacaLoginGuide.dart';
-import 'package:Walltrade/pages/FirebaseAuth/register_page.dart';
+import 'package:Walltrade/pages/guidePage/alpacaLoginGuide.dart';
 import 'package:flutter/material.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class SettradeRegisterGuidePage extends StatelessWidget {
-  const SettradeRegisterGuidePage({super.key});
 
+
+class AlpacaRegisterGuidePage extends StatelessWidget {
+  const AlpacaRegisterGuidePage({super.key});
+  
   @override
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
-      appBar: AppBar(title: Text("สมัครสมาชิกกับ Settrade")),
+      appBar: AppBar(title: Text("สมัครสมาชิกกับ Alpaca")),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -33,7 +34,7 @@ class SettradeRegisterGuidePage extends StatelessWidget {
               margin: EdgeInsets.all(12),
               child: TextButton(
                 child: Text(
-                  "เข้าสู่เว็บไซต์: open-api.settrade.com",
+                  "เข้าสู่เว็บไซต์: alpaca.markets",
                   style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
                 onPressed: () {
@@ -42,7 +43,7 @@ class SettradeRegisterGuidePage extends StatelessWidget {
                     type: QuickAlertType.warning,
                     width: 0,
                     title: 'เปิด Browser',
-                    text: 'เมื่อกดปุ่ม "ตกลง" จะนำไปสู่เว็บไซต์ Settrade',
+                    text: 'เมื่อกดปุ่ม "ตกลง" จะนำไปสู่เว็บไซต์ Alpaca',
                     backgroundColor: Colors.white,
                     titleColor: Colors.black,
                     textColor: Colors.black,
@@ -53,8 +54,7 @@ class SettradeRegisterGuidePage extends StatelessWidget {
                     cancelBtnTextStyle: TextStyle(fontSize: 16),
                     showCancelBtn: true,
                     onConfirmBtnTap: () {
-                      launchUrl(
-                          Uri.parse("https://open-api.settrade.com/open-api/"),
+                      launchUrl(Uri.parse("https://alpaca.markets/"),
                           mode: LaunchMode.externalApplication);
                       Navigator.of(context).pop();
                     },
@@ -82,7 +82,7 @@ class SettradeRegisterGuidePage extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    'ไปที่คำว่า "สมัครเข้าใช้งาน"',
+                    'ไปที่คำว่า "Sign up for free หรือ Sign up"',
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
@@ -95,7 +95,7 @@ class SettradeRegisterGuidePage extends StatelessWidget {
                     borderRadius:
                         BorderRadius.circular(20.0), // ปรับค่าตามความต้องการ
                     child: Image.asset(
-                      "assets/img/settradeHome.png",
+                      "assets/img/alpacaHome.png",
                       width: 320,
                     ),
                   ),
@@ -122,7 +122,7 @@ class SettradeRegisterGuidePage extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    'กรอกข้อมูลที่ให้เรียบร้อย และกด "ลงทะเบียน"',
+                    'กรอกข้อมูลให้เรียบร้อย และกด "Sign up"',
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
@@ -135,7 +135,7 @@ class SettradeRegisterGuidePage extends StatelessWidget {
                     borderRadius:
                         BorderRadius.circular(20.0), // ปรับค่าตามความต้องการ
                     child: Image.asset(
-                      "assets/img/settradeRegister.png",
+                      "assets/img/alpacaInput.png",
                       width: 320,
                     ),
                   ),
@@ -162,7 +162,7 @@ class SettradeRegisterGuidePage extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    'เมื่อกรอกข้อมูลสำเร็จ จะมีข้อตกลงการใช้งานแสดงขึ้นมา อ่านให้เรียบร้อยและเลื่อนลงมาจนสุดจึงจะกดยอมรับได้',
+                    'เมื่อสำเร็จ จะมีข้อความยืนยันถูกส่งไปที่อีเมลที่เราสมัคร ให้กดที่คำว่า "Confirm My Account"',
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
@@ -175,142 +175,13 @@ class SettradeRegisterGuidePage extends StatelessWidget {
                     borderRadius:
                         BorderRadius.circular(20.0), // ปรับค่าตามความต้องการ
                     child: Image.asset(
-                      "assets/img/settradeConfirmPrivacy.png",
+                      "assets/img/alpacaConfirmRegister.png",
                       width: 320,
                     ),
                   ),
                 ],
               ),
             ),
-            Container(
-              padding:
-                  EdgeInsets.only(bottom: 30, top: 20, left: 30, right: 30),
-              margin: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Color(0xFF212436),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: Offset(0, 3), // changes the position of the shadow
-                  ),
-                ],
-              ),
-              width: double.infinity,
-              child: Column(
-                children: [
-                  Text(
-                    'หลังจากกดยอมรับจะเข้าสู่ระบบทันที และกดคำว่า "สร้าง Application Id" ',
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.white),
-                  ),
-                  SizedBox(
-                    height: 12,
-                  ),
-                  ClipRRect(
-                    borderRadius:
-                        BorderRadius.circular(20.0), // ปรับค่าตามความต้องการ
-                    child: Image.asset(
-                      "assets/img/settradeCreateAPI.png",
-                      width: 320,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding:
-                  EdgeInsets.only(bottom: 30, top: 20, left: 30, right: 30),
-              margin: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Color(0xFF212436),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: Offset(0, 3), // changes the position of the shadow
-                  ),
-                ],
-              ),
-              width: double.infinity,
-              child: Column(
-                children: [
-                  Text(
-                    'หลังจากนั้นให้จดหรือบันทึกข้อมูลในช่องสีแดงไว้  *จำเป็นต้องใช้',
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.white),
-                  ),
-                  SizedBox(
-                    height: 12,
-                  ),
-                  ClipRRect(
-                    borderRadius:
-                        BorderRadius.circular(20.0), // ปรับค่าตามความต้องการ
-                    child: Image.asset(
-                      "assets/img/settradeGenerated.png",
-                      width: 320,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding:
-                  EdgeInsets.only(bottom: 30, top: 20, left: 30, right: 30),
-              margin: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Color(0xFF212436),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: Offset(0, 3), // changes the position of the shadow
-                  ),
-                ],
-              ),
-              width: double.infinity,
-              child: Column(
-                children: [
-                  Text(
-                    'หากต้องการเปลี่ยนเป็นการเทรดด้วยเงินจริง ให้ติดต่อโบรกเกอร์ที่ใช้งานได้กับ Settrade',
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white),
-                  ),
-                  SizedBox(
-                    height: 12,
-                  ),
-                  ClipRRect(
-                    borderRadius:
-                        BorderRadius.circular(20.0), // ปรับค่าตามความต้องการ
-                    child: Image.asset(
-                      "assets/img/settradeBroker.png",
-                      width: 320,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(
-              height: 16,
-            ),
-            Container(
-                margin: EdgeInsets.symmetric(horizontal: 20),
-                child: Text(
-                  'หมายเหตุ: การใช้เงินทดลองในการซื้อขายหุ้นไทย จะสามารถใช้งานได้เพียงวันเดียว วันถัดไปหุ้นที่ซื้อในระบบจำลองจะหายไปทั้งหมด',
-                  style:TextStyle(fontSize: 16)
-                )),
             SizedBox(
               height: 16,
             ),
@@ -325,7 +196,7 @@ class SettradeRegisterGuidePage extends StatelessWidget {
                   width: 8,
                 ),
                 Text(
-                  'ได้สมัครสมาชิกกับ Settrade เรียบร้อยแล้ว!',
+                  'ได้สมัครสมาชิกกับ Alpaca เรียบร้อยแล้ว!',
                   style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
                 ),
               ],
@@ -340,7 +211,7 @@ class SettradeRegisterGuidePage extends StatelessWidget {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => RegisterPage(),
+                            builder: (context) => AlpacaLoginGuidePage(),
                           ));
                     },
                     child: Text(

@@ -38,7 +38,10 @@ class _PredictPageState extends State<PredictPage> {
   Future<void> _predictStock() async {
     var url = Uri.parse('${Constants.serverUrl}/predict');
     final headers = {'Content-Type': 'application/json'};
-    final body = jsonEncode({'dataList': dataList,'predictDay': selectedInterval});
+    final body = jsonEncode({
+      'dataList': dataList,
+      //'predictDay': selectedInterval,
+    });
     print(body);
 
     try {
@@ -473,17 +476,15 @@ class _PredictPageState extends State<PredictPage> {
                             const SizedBox(
                               height: 20,
                             ),
-                            PredictLengthDropdown(
+                            /* PredictLengthDropdown(
                               selectedInterval: selectedInterval,
                               onChanged: (String? newValue) {
                                 setState(() {
                                   selectedInterval = newValue!;
                                 });
                               },
-                            ),
-                            const SizedBox(
-                              height: 20,
-                            ),
+                            ),*/
+
                             Container(
                               height: 40,
                               child: ElevatedButton(

@@ -33,20 +33,15 @@ app.config['MYSQL_DB'] = 'walltrade'  # ชื่อฐานข้อมูล
 CORS(app)
 mysql = MySQL(app)
 
+conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
+
 @app.route('/predict', methods=['POST'])
 def predict():
     dataList = request.get_json() 
-    predictLengthDay = request.json.get('predictDay')
     symbol_list = dataList.get('dataList', [],)  # แปลงข้อมูล JSON เป็น List
+    
     list_dict = []
-
-    #กำหนดจำนวนวันที่ต้องการทำนาย
-    if predictLengthDay == 1:
-        prediction_day = 60
-    elif predictLengthDay == 2:
-        prediction_day = 90
-    else:
-        prediction_day = 120
+    prediction_day = 60
 
     for symbol in symbol_list:
         data = yf.download(symbol, period="3y")
@@ -269,12 +264,29 @@ def register():
             'error': str(e)
         }
         return jsonify(response), 400
+    
+@app.route('/updateAPI', methods=['POST'])
+def updateAPI():
+    api_key = request.form['api_key']
+    secret_key = request.form['secret_key']
+    th_api_key = request.form['th_api_key']
+    th_secret_key = request.form['ath_secret_key']
+    username = request.form['username'] 
+
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        UPDATE users_info SET api_key=%s, secret_key=%s, th_api_key=%s, th_api_key=%s WHERE username = %s
+    """, (api_key, secret_key, th_api_key, th_secret_key, username))
+    mysql.connection.commit()
+    cur.close()
+
+    return jsonify({'message': 'Update Success'})
 
 @app.route('/asset_list', methods=['GET'])
 def get_asset_list():
     api = tradeapi.REST(
-        key_id='PK8NXGV44WWTJA356CDG',
-        secret_key='nR9ySdpMSTKbnflGrJaBueH3EVCJ9fRV9gxOhnod',
+        key_id='PKPZNZ5UPZP41MZUUYXF',
+        secret_key='fajFEMpQSTE31NaQOUX3USwkWkl67oAtDERjRmmK',
         base_url='https://paper-api.alpaca.markets'
     )
 
@@ -348,8 +360,8 @@ def thStockList():
     }
 
     investor = Investor(
-        app_id="l6A2nvIv9t5YnPTE",
-        app_secret="AJqOuo549hxwITYkBKDnd5dFQ08ogVG5qp6e7pBxnIdi",
+        app_id="jduRiuYHoFfCJ2Na",
+        app_secret="UwyAQLrW5ic3ljn2bWzoC+9S0o9UlZvxGarfgZ0mTVk=",
         broker_id="SANDBOX",
         app_code="SANDBOX",
         is_auto_queue=False)
@@ -367,8 +379,8 @@ def thStockList():
     return jsonify(stocks_list)
 
 
-@app.route('/api/user', methods=['POST'])
-def create_user():
+@app.route('/updateUSalpacaAPI', methods=['POST'])
+def updateUSalpacaAPI():
     api_key = request.form['api_key']
     secret_key = request.form['secret_key']
     username = request.form['username'] # ชื่อผู้ใช้งานที่ต้องการแทรก
@@ -380,7 +392,22 @@ def create_user():
     mysql.connection.commit()
     cur.close()
 
-    return jsonify({'message': 'User created successfully'})
+    return jsonify({'message': 'Update Success'})
+
+@app.route('/updateTHsettradeAPI', methods=['POST'])
+def updateTHsettradeAPI():
+    th_api_key = request.form['th_api_key']
+    th_secret_key = request.form['th_secret_key']
+    username = request.form['username'] # ชื่อผู้ใช้งานที่ต้องการแทรก
+
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        UPDATE users_info SET th_api_key=%s, th_secret_key=%s WHERE username = %s
+    """, (th_api_key, th_secret_key, username))
+    mysql.connection.commit()
+    cur.close()
+
+    return jsonify({'message': 'Update Success'})
    
 
 @app.route('/update_watchlist', methods=['POST'])
@@ -636,8 +663,8 @@ def get_positions():
 '''@app.route('/streamPriceUS', methods=['POST'])
 async def connect_to_alpaca():
     symbol = request.json.get('symbol')
-    api = "PK8NXGV44WWTJA356CDG"
-    secret = "nR9ySdpMSTKbnflGrJaBueH3EVCJ9fRV9gxOhnod"
+    api = "PKPZNZ5UPZP41MZUUYXF"
+    secret = "fajFEMpQSTE31NaQOUX3USwkWkl67oAtDERjRmmK"
     uri = "wss://stream.data.alpaca.markets/v2/iex"
     auth_message = {
         "action": "auth",
@@ -1337,8 +1364,8 @@ def getPricePredictList():
 @app.route('/checkMarketStatus', methods=['POST'])
 def checkMarketStatus():
     # กำหนดคีย์และตัวระบุสำหรับเข้าถึง Alpaca API
-    API_KEY = 'PK8NXGV44WWTJA356CDG'
-    API_SECRET = 'nR9ySdpMSTKbnflGrJaBueH3EVCJ9fRV9gxOhnod'
+    API_KEY = 'PKPZNZ5UPZP41MZUUYXF'
+    API_SECRET = 'fajFEMpQSTE31NaQOUX3USwkWkl67oAtDERjRmmK'
     APCA_API_BASE_URL = 'https://paper-api.alpaca.markets'
 
     # ส่งคำสั่งซื้อ
@@ -1349,12 +1376,19 @@ def checkMarketStatus():
     clock = api.get_clock()
     return jsonify('{}'.format('open' if clock.is_open else 'closed'))
 
-@app.route('/news', methods=['GET'])
+@app.route('/news', methods=['POST'])
 def news():
+    username = request.json.get('username')
     url = 'https://data.alpaca.markets/v1beta1/news?limit=15&exclude_contentless=true'
+
+    cur = conn.cursor()
+    cur.execute("SELECT api_key, secret_key FROM users_info WHERE username = %s", (username,))
+
+    result = cur.fetchone()
+    api_key, secret_key = result
     headers = {
-        'Apca-Api-Key-Id': 'PK8NXGV44WWTJA356CDG',
-        'Apca-Api-Secret-Key': 'nR9ySdpMSTKbnflGrJaBueH3EVCJ9fRV9gxOhnod'
+        'Apca-Api-Key-Id': api_key,
+        'Apca-Api-Secret-Key': secret_key
     }
 
     response = requests.get(url, headers=headers)
@@ -1397,18 +1431,18 @@ def th_portfolio():
     username = request.json.get('username')
 
     conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
-    query = f"SELECT th_api_key, th_secret_key FROM users_info WHERE username = '{username}'"
+    query = f"SELECT th_api_key, th_secret_key,broker_id, app_code FROM users_info WHERE username = '{username}'"
     cursor = conn.cursor()
     cursor.execute(query)
     result = cursor.fetchone()
 
-    app_id, app_secret = result
+    app_id, app_secret, broker_id, app_code = result
 
     investor = Investor(
         app_id=app_id,
         app_secret=app_secret,
-        broker_id="SANDBOX",
-        app_code="SANDBOX",
+        broker_id=broker_id,
+        app_code=app_code,
         is_auto_queue=False
     )
 

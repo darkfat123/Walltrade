@@ -195,7 +195,7 @@ class _HomePageState extends State<HomePage> {
     getBalanceChange();
     getBalance();
     getStockPrices();
-    _newsFuture = StaticValues().fetchNews();
+    _newsFuture = StaticValues().fetchNews(username: username);
     print(username);
   }
 
@@ -768,7 +768,7 @@ class _HomePageState extends State<HomePage> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => NewsListPage(),
+                                        builder: (context) => NewsListPage(username: username,),
                                       ),
                                     );
                                   },

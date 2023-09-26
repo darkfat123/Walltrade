@@ -19,9 +19,17 @@ class News {
 class StaticValues {
   List<News> news = [];
 
-  Future<List<News>> fetchNews() async {
-    final response2 = await http.get(
-      Uri.parse('${Constants.serverUrl}/news'),
+  Future<List<News>> fetchNews({required String username}) async {
+    final Map<String, dynamic> requestData = {
+      'username': username,
+    };
+
+    final response2 = await http.post(
+      Uri.parse('${Constants.serverUrl}/news'), // เปลี่ยนเป็น POST
+      headers: {
+        'Content-Type': 'application/json', // ระบุ content type เป็น JSON
+      },
+      body: jsonEncode(requestData), // ส่งข้อมูล JSON ไปยัง server
     );
     if (response2.statusCode == 200) {
       final parsedResponse = jsonDecode(response2.body);
@@ -32,12 +40,8 @@ class StaticValues {
         final symbol = article['Symbols'];
         final url = article['URL'];
 
-        final newsItem = News(
-          title: title,
-          symbol: symbol,
-          image: image,
-          url:url
-        );
+        final newsItem =
+            News(title: title, symbol: symbol, image: image, url: url);
         news.add(newsItem);
       }
       return news.take(5).toList();

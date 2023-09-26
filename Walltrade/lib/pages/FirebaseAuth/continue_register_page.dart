@@ -2,17 +2,22 @@ import 'dart:convert';
 
 import 'package:Walltrade/pages/FirebaseAuth/auth.dart';
 import 'package:Walltrade/pages/FirebaseAuth/login_page.dart';
+import 'package:Walltrade/pages/HomePage.dart';
 import 'package:Walltrade/primary.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:quickalert/quickalert.dart';
 
 import '../../variables/serverURL.dart';
 
 class ContinueRegisterPage extends StatefulWidget {
+  final String username;
+  ContinueRegisterPage({required this.username});
   @override
-  _ContinueRegisterPageState createState() => _ContinueRegisterPageState();
+  _ContinueRegisterPageState createState() =>
+      _ContinueRegisterPageState(username: username);
 }
 
 class _ContinueRegisterPageState extends State<ContinueRegisterPage> {
@@ -22,6 +27,35 @@ class _ContinueRegisterPageState extends State<ContinueRegisterPage> {
   final TextEditingController settradeSecretController =
       TextEditingController();
   String errorMessage = '';
+  final String username;
+
+  _ContinueRegisterPageState({required this.username});
+
+  Future<void> updateUser() async {
+    final url = Uri.parse('${Constants.serverUrl}/updateAPI');
+
+    final response = await http.post(
+      url,
+      body: {
+        'api_key': alpacaKeyController.text,
+        'secret_key': alpacaSecretController.text,
+        'th_api_key': settradeAppIDController.text,
+        'ath_secret_key': settradeSecretController.text,
+        'username': username,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      // สำเร็จ
+      Fluttertoast.showToast(
+          msg: "สมัครสมาชิกสำเร็จ",
+          backgroundColor: primary,
+          textColor: Colors.white);
+    } else {
+      // ไม่สามารถส่งข้อมูลไปยัง Flask server ได้
+      print('Failed to update user');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -127,7 +161,9 @@ class _ContinueRegisterPageState extends State<ContinueRegisterPage> {
                     if (alpacaKeyController.text != '' &&
                         alpacaSecretController.text != '' &&
                         settradeAppIDController.text != '' &&
-                        settradeSecretController.text != '') {}
+                        settradeSecretController.text != '') {
+                      updateUser().then((value) => HomePage(username: username));
+                    }
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
