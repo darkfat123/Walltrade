@@ -1,7 +1,12 @@
 import 'dart:convert';
 
+import 'package:Walltrade/pages/HistoryAutoTrade.dart';
+import 'package:Walltrade/pages/SettingsPage.dart';
+import 'package:Walltrade/primary.dart';
+import 'package:Walltrade/widget/alertDialog/InfoDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:quickalert/quickalert.dart';
 import '../variables/serverURL.dart';
 
 class MoreTechnicalOrder extends StatefulWidget {
@@ -88,7 +93,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
         padding: const EdgeInsets.all(16),
         margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
         decoration: BoxDecoration(
-          color: const Color(0xFF2A3547),
+          color: primary,
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
@@ -105,16 +110,6 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
               padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: Colors.grey.shade200,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.7),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: const Offset(
-                        0, 3), // changes the position of the shadow
-                  ),
-                ],
               ),
               child: Text(
                 "เทคนิคที่ต้องการใช้: ${selectedMenus.join(', ')}",
@@ -155,7 +150,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(
                           color:
-                              Colors.black, // สีเส้นโครงรอบช่องพิมพ์ในสถานะปกติ
+                              Colors.white, // สีเส้นโครงรอบช่องพิมพ์ในสถานะปกติ
                           width:
                               2.0, // ความหนาของเส้นโครงรอบช่องพิมพ์ในสถานะปกติ
                         ),
@@ -201,7 +196,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(
                           color:
-                              Colors.black, // สีเส้นโครงรอบช่องพิมพ์ในสถานะปกติ
+                              Colors.white, // สีเส้นโครงรอบช่องพิมพ์ในสถานะปกติ
                           width:
                               2.0, // ความหนาของเส้นโครงรอบช่องพิมพ์ในสถานะปกติ
                         ),
@@ -217,91 +212,80 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                     ),
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.info,
-                    size: 24,
-                    color: Colors.white,
-                  ),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: const Text('More Info'),
-                          content: const Text(
-                              'Additional information about timeframes.'),
-                          actions: [
-                            TextButton(
-                              child: const Text('OK'),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                ),
               ],
             ),
             const SizedBox(
-              height: 10,
+              height: 20,
             ),
-            ElevatedButton(
-              onPressed: () {
-                if (selectedMenus.length < 2) {
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        title: const Text('เกิดข้อผิดพลาด'),
-                        content: const Text(
-                            'โปรดเลือกเทคนิคชี้วัดที่ต้องการใช้อย่างน้อย 2 เทคนิค'),
-                        actions: [
-                          TextButton(
-                            child: const Text('ตกลง'),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                        ],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    if (selectedMenus.length < 2) {
+                      QuickAlert.show(
+                          context: context,
+                          type: QuickAlertType.error,
+                          text:
+                              'โปรดเลือกเทคนิคชี้วัดที่ต้องการใช้อย่างน้อย 2 เทคนิค',
+                          title: "เกิดข้อผิดพลาด",
+                          confirmBtnText: "ตกลง",
+                          confirmBtnTextStyle: TextStyle(color: Colors.white),
+                          width: 0,
+                          confirmBtnColor: primary);
+                    } else {
+                      multiAutotrade('buy');
+                    }
+                  },
+                  child: const Text("ซื้อ"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF82CD47),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16.0, horizontal: 50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 12,
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (selectedMenus.length < 2) {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: const Text('เกิดข้อผิดพลาด'),
+                            content: const Text(
+                                'โปรดเลือกเทคนิคชี้วัดที่ต้องการใช้อย่างน้อย 2 เทคนิค'),
+                            actions: [
+                              TextButton(
+                                child: const Text('ตกลง'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ],
+                          );
+                        },
                       );
-                    },
-                  );
-                } else {
-                  multiAutotrade('buy');
-                }
-              },
-              child: const Text("ซื้อ"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (selectedMenus.length < 2) {
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        title: const Text('เกิดข้อผิดพลาด'),
-                        content: const Text(
-                            'โปรดเลือกเทคนิคชี้วัดที่ต้องการใช้อย่างน้อย 2 เทคนิค'),
-                        actions: [
-                          TextButton(
-                            child: const Text('ตกลง'),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                } else {
-                  multiAutotrade('sell');
-                }
-              },
-              child: const Text("ขาย"),
+                    } else {
+                      multiAutotrade('sell');
+                    }
+                  },
+                  child: const Text("ขาย"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFBB2525),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16.0, horizontal: 50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ],
             )
           ],
         ),
@@ -331,9 +315,8 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
           children: [
             Container(
               padding: const EdgeInsets.symmetric(vertical: 18),
-              margin: const EdgeInsets.symmetric(horizontal: 18),
               decoration: BoxDecoration(
-                color: const Color(0xFF2A3547),
+                color: primary,
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
@@ -392,9 +375,8 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
         children: [
           Container(
             padding: const EdgeInsets.symmetric(vertical: 18),
-            margin: const EdgeInsets.symmetric(horizontal: 18),
             decoration: BoxDecoration(
-              color: const Color(0xFF2A3547),
+              color: primary,
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
@@ -445,18 +427,10 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                     showDialog(
                       context: context,
                       builder: (context) {
-                        return AlertDialog(
-                          title: const Text('More Info'),
-                          content: const Text(
-                              'Additional information about timeframes.'),
-                          actions: [
-                            TextButton(
-                              child: const Text('OK'),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ],
+                        return InfoAlertDialog(
+                          title: 'RSI คืออะไร?',
+                          content:
+                              'RSI สร้างขึ้นโดยวิธีการคำนวณค่าเฉลี่ยของการเปรียบเทียบราคาที่ขึ้นและลงของสินทรัพย์ในระยะเวลาที่กำหนด (โดยทั่วไปใช้ระยะเวลา 14 วัน) และแปลงผลลัพธ์เป็นช่วงค่าที่อยู่ระหว่าง 0 ถึง 100',
                         );
                       },
                     );
@@ -495,9 +469,8 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
           children: [
             Container(
               padding: const EdgeInsets.symmetric(vertical: 18),
-              margin: const EdgeInsets.symmetric(horizontal: 18),
               decoration: BoxDecoration(
-                color: const Color(0xFF2A3547),
+                color: primary,
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
@@ -526,7 +499,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  const Text('MACD ตัดขึ้น Signal และมีโซนที่ต่ำกว่า 0'),
+                  const Text('MACD ตัด Signal และมีโซนต่ำกว่าหรือมากกว่า 0'),
                   const SizedBox(width: 5),
                   Checkbox(
                     value: macd_crossupIsChecked,
@@ -552,18 +525,11 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                       showDialog(
                         context: context,
                         builder: (context) {
-                          return AlertDialog(
-                            title: const Text('More Info'),
-                            content: const Text(
-                                'Additional information about timeframes.'),
-                            actions: [
-                              TextButton(
-                                child: const Text('OK'),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                            ],
+                          return InfoAlertDialog(
+                            title:
+                                'MACD ตัดขึ้นหรือตัดลง Signal และมีโซนต่ำกว่าหรือมากกว่า 0 คืออะไร?',
+                            content:
+                                'เป็นสัญญาณการซื้อพื้นฐานของ MACD ที่จะซื้อหรือขายเมื่อเส้น MACD ตัดขึ้นหรือตัดลงกับเส้น Signal และเส้นทั้งสองจะต้องมีค่าที่ต่ำกว่าหรือมากกว่า 0',
                           );
                         },
                       );
@@ -577,7 +543,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  const Text('ระบุโซน MACD & Signal ที่ต้องการซื้อ'),
+                  const Text('โซน MACD & Signal'),
                   const SizedBox(width: 5),
                   Expanded(
                     child: TextField(
@@ -598,19 +564,10 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                       showDialog(
                         context: context,
                         builder: (context) {
-                          return AlertDialog(
-                            title: const Text('More Info'),
-                            content: const Text(
-                                'Additional information about timeframes.'),
-                            actions: [
-                              TextButton(
-                                child: const Text('OK'),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                            ],
-                          );
+                          return InfoAlertDialog(
+                              title: "โซน MACD & Signal คืออะไร?",
+                              content:
+                                  "จะสร้างคำสั่งซื้อหรือขายทันทีเมื่อค่าของเส้น MACD และเส้น Signal มีค่าเท่ากับหรือน้อยกว่าหรือมากกว่าค่าที่พิมพ์");
                         },
                       );
                     },
@@ -644,9 +601,8 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
         children: [
           Container(
             padding: const EdgeInsets.symmetric(vertical: 18),
-            margin: const EdgeInsets.symmetric(horizontal: 18),
             decoration: BoxDecoration(
-              color: const Color(0xFF2A3547),
+              color: primary,
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
@@ -677,7 +633,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                const Text('ระบุค่า STO %K และ %D ที่ต้องการซื้อ'),
+                const Text('โซน STO %K และ %D'),
                 const SizedBox(width: 5),
                 Expanded(
                   child: TextField(
@@ -711,18 +667,10 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                     showDialog(
                       context: context,
                       builder: (context) {
-                        return AlertDialog(
-                          title: const Text('More Info'),
-                          content: const Text(
-                              'Additional information about timeframes.'),
-                          actions: [
-                            TextButton(
-                              child: const Text('OK'),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ],
+                        return InfoAlertDialog(
+                          title: 'โซน STO %K และ %D คืออะไร',
+                          content:
+                              'จะสร้างคำสั่งซื้อหรือขายทันทีเมื่อเส้น %K และ %D มีค่าน้อยกว่าหรือมากกว่าเท่ากับโซนที่พิมพ์ โดยจะมีค่าตั้งแต่ 0-100',
                         );
                       },
                     );
@@ -736,7 +684,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                const Text('STO %K ตัดขึ้น %D และมีโซนที่ต่ำกว่า'),
+                const Text('%K ตัด %D และมีโซนต่ำกว่าหรือมากกว่า'),
                 const SizedBox(width: 5),
                 Expanded(
                   child: TextField(
@@ -770,19 +718,11 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                     showDialog(
                       context: context,
                       builder: (context) {
-                        return AlertDialog(
-                          title: const Text('More Info'),
-                          content: const Text(
-                              'Additional information about timeframes.'),
-                          actions: [
-                            TextButton(
-                              child: const Text('OK'),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ],
-                        );
+                        return InfoAlertDialog(
+                            title:
+                                "%K ตัดขึ้นหรือตัดลง %D และมีโซนต่ำกว่าหรือมากกว่า คืออะไร?",
+                            content:
+                                "จะสร้างคำสั่งซื้อทันทีเมื่อเส้น %K ตัดขึ้นหรือตัดลงกับเส้น %D และมีค่าที่ต่ำกว่าหรือมากกว่า(ขึ้นอยู่กับซื้อหรือขาย)โซนที่พิมพ์ โดยจะมีค่าตั้งแต่ 0-100");
                       },
                     );
                   },
@@ -805,21 +745,33 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text("สร้างคำสั่งซื้อแบบหลายเทคนิค",style: TextStyle(fontSize: 18),),
+            const Text(
+              "สร้างคำสั่งซื้อแบบหลายเทคนิค",
+              style: TextStyle(fontSize: 18),
+            ),
             Row(
               children: [
                 IconButton(
                   iconSize: 20,
                   icon: const Icon(Icons.access_time),
                   onPressed: () {
-                    // Handle settings button press here
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              HistoryAutoTradePage(username: username),
+                        ));
                   },
                 ),
                 IconButton(
                   iconSize: 20,
                   icon: const Icon(Icons.settings),
                   onPressed: () {
-                    // Handle settings button press here
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Settings(username: username),
+                        ));
                   },
                 ),
               ],
@@ -1104,23 +1056,68 @@ class TimeframeDropdown extends StatelessWidget {
             icon: const Icon(
               Icons.info,
               size: 24,
+              color: Colors.white,
             ),
             onPressed: () {
               showDialog(
                 context: context,
                 builder: (context) {
-                  return AlertDialog(
-                    title: const Text('More Info'),
-                    content:
-                        const Text('Additional information about timeframes.'),
-                    actions: [
-                      TextButton(
-                        child: const Text('OK'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
+                  return Dialog(
+                    backgroundColor: Colors.transparent,
+                    child: Container(
+                      padding: EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20)),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.timeline_sharp,
+                            color: Colors.amber,
+                            size: 72,
+                          ),
+                          SizedBox(
+                            height: 24,
+                          ),
+                          Text(
+                            'Timeframe คืออะไร?',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w600),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                            'ระยะเวลาที่ใช้ในการวิเคราะห์และตัดสินใจในการซื้อหรือขายสินทรัพย์ทางการเงิน เช่น หุ้นหรือสกุลเงิน ระยะเวลาในการเทรดมักถูกแบ่งออกเป็นหลายช่วง โดยที่แต่ละช่วงมีลักษณะและค่าทางเทคนิคในการเทรดต่างกัน',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          SizedBox(
+                            height: 24,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              OutlinedButton(
+                                style: ButtonStyle(
+                                    backgroundColor: MaterialStatePropertyAll(
+                                        Color(0xFFEC5B5B)),
+                                    padding: MaterialStatePropertyAll(
+                                        EdgeInsets.all(12))),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text(
+                                  'ออก',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 16),
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
                       ),
-                    ],
+                    ),
                   );
                 },
               );
@@ -1149,7 +1146,7 @@ class EMADropdown extends StatelessWidget {
         children: [
           const Text(
             'จำนวนวันของ EMA',
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+            style: TextStyle(color: Colors.black),
           ),
           DropdownButtonHideUnderline(
             child: DropdownButton<String>(
@@ -1213,18 +1210,10 @@ class EMADropdown extends StatelessWidget {
               showDialog(
                 context: context,
                 builder: (context) {
-                  return AlertDialog(
-                    title: const Text('More Info'),
+                  return InfoAlertDialog(
+                    title: 'จำนวนวันของ EMA คืออะไร?',
                     content:
-                        const Text('Additional information about timeframes.'),
-                    actions: [
-                      TextButton(
-                        child: const Text('OK'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
+                        'ระยะเวลาที่ใช้ในการคำนวณค่าเฉลี่ยเคลื่อนที่ของข้อมูลราคาหรือสถิติในช่วงเวลานั้น ค่า EMA ที่มีจำนวนวันน้อยจะมีการผันผวนที่เร็วขึ้น ในขณะที่ค่า EMA ที่มีจำนวนวันมากขึ้นจะมีการผันผวนที่ช้าลง',
                   );
                 },
               );

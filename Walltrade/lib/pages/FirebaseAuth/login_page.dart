@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:Walltrade/pages/FirebaseAuth/auth.dart';
+import 'package:Walltrade/pages/guidePage/alpacaRegisterGuide.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -175,7 +176,7 @@ class _LoginPageState extends State<LoginPage> {
                         Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => RegisterPage()));
+                                builder: (context) => AlpacaRegisterGuidePage()));
                       },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,

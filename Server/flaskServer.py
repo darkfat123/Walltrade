@@ -294,13 +294,15 @@ def get_asset_list():
     active_assets = api.list_assets(status='active',)
 
     # Filter the assets down to just those on NASDAQ.
-    nasdaq_assets = [a for a in active_assets if (a.exchange == 'NASDAQ' or a.exchange == 'NYSE') and a.marginable == True]
+    nasdaq_assets = [a for a in active_assets if (a.exchange == 'NASDAQ' or a.exchange == 'NYSE') and a.tradable and '.' not in a.symbol]
 
     # Create a list of dictionaries containing name and symbol of each NASDAQ asset.
     asset_list = [{'Name': a.name, 'Symbol': a.symbol} for a in nasdaq_assets]
     print(len(asset_list))
     # Return the asset list as JSON.
     return jsonify(assets=asset_list)
+
+
 
 @app.route('/thStockList', methods=['GET'])
 def thStockList():
@@ -605,6 +607,7 @@ def place_order():
     qty = request.json.get('qty')
     side = request.json.get('side')
     type = request.json.get('type')
+    limit_price = request.json.get('limit_price')
     time_in_force = request.json.get('time_in_force')
 
     conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
@@ -617,14 +620,27 @@ def place_order():
     api = REST(result[0], result[1], base_url='https://paper-api.alpaca.markets')
     print(symbol,qty,side,type,time_in_force)
     try:
-        api.submit_order(
-            symbol=symbol,
-            qty=qty,
-            side=side,
-            type=type,
-        )
-        print('คำสั่งซื้อถูกส่งไปยัง Alpaca API แล้ว')
-        return jsonify('success')
+        if type == 'limit' and limit_price >0:
+            api.submit_order(
+                symbol=symbol,
+                qty=qty,
+                side=side,
+                type=type,
+                limit_price=limit_price,
+                time_in_force=time_in_force
+            )
+            print('คำสั่งซื้อถูกส่งไปยัง Alpaca API แล้ว')
+            return jsonify('success')
+        else:
+            api.submit_order(
+                symbol=symbol,
+                qty=qty,
+                side=side,
+                type=type,
+                time_in_force=time_in_force
+            )
+            print('คำสั่งซื้อถูกส่งไปยัง Alpaca API แล้ว')
+            return jsonify('success')
     except Exception as e:
         print(f'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ: {str(e)}')
         return jsonify(f'error: {str(e)}')
@@ -659,40 +675,6 @@ def get_positions():
         positions.append(position_data)
     
     return jsonify(positions)
-
-'''@app.route('/streamPriceUS', methods=['POST'])
-async def connect_to_alpaca():
-    symbol = request.json.get('symbol')
-    api = "PKPZNZ5UPZP41MZUUYXF"
-    secret = "fajFEMpQSTE31NaQOUX3USwkWkl67oAtDERjRmmK"
-    uri = "wss://stream.data.alpaca.markets/v2/iex"
-    auth_message = {
-        "action": "auth",
-        "key": api,
-        "secret": secret
-    }
-    subscribe_message = {
-        "action": "subscribe",
-        "quotes": [symbol]
-    }
-
-    async with websockets.connect(uri) as websocket:
-        await websocket.send(json.dumps(auth_message))
-        print("Authentication sent")
-
-        auth_response = await websocket.recv()
-        print("Authentication response:", auth_response)
-
-        await websocket.send(json.dumps(subscribe_message))
-        print("Subscription sent")
-
-        while True:
-            data = await websocket.recv()
-            if data == "":
-                print("Connection closed")
-                break
-            print("Received data:", data)
-    asyncio.get_event_loop().run_until_complete(connect_to_alpaca())'''
 
 @app.route('/autotradeRSI', methods=['POST'])
 def autotradeRSI():
@@ -1313,6 +1295,22 @@ def autotradeEMA():
             time.sleep(5)
     return jsonify('autotrade success')
 
+@app.route('/getOneSymbolPrice', methods=['POST'])
+def getOneSymbolPrice():
+    symbol = request.json.get('symbol') 
+    prices = []
+    analysis = getSymbolHandler(symbol)
+    close_price = float(round(analysis.indicators["close"], 2))
+    percentage_change = float(round(analysis.indicators["change"], 2))
+     
+    prices.append({
+        'symbol': symbol,
+        'price': close_price,
+        'percentage': percentage_change
+    })
+              
+    return jsonify(prices)
+
 @app.route('/getStockPriceUS', methods=['POST'])
 def getStockPriceUS():
     username = request.json.get('username')
@@ -1494,10 +1492,12 @@ def place_order_th():
     symbol = request.json.get('symbol')
     qty = request.json.get('qty')
     side = request.json.get('side')
+    validate = request.json.get('validate')
     limitPrice = request.json.get('limitPrice')
+    type = request.json.get('type')
 
     conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
-    query = f"SELECT th_api_key, th_secret_key FROM users_info WHERE username = '{username}'"
+    query = f"SELECT th_api_key, th_secret_key, broker_id, app_code, pin FROM users_info WHERE username = '{username}'"
     cursor = conn.cursor()
     cursor.execute(query)
     result = cursor.fetchone()
@@ -1505,22 +1505,85 @@ def place_order_th():
     investor = Investor(
                 app_id=result[0],                                 
                 app_secret=result[1], 
-                broker_id="SANDBOX",
-                app_code="SANDBOX",
+                broker_id=result[2],
+                app_code=result[3],
                 is_auto_queue = False)
-
-    equity = investor.Equity(account_no="foczz123-E")     
+    print(username,symbol,qty,side,validate,limitPrice,type)
+    equity = investor.Equity(account_no=f"{username}-E")     
     try:
-        place_order = equity.place_order(
-                                side= side,
-                                symbol= symbol,
-                                volume= qty,
-                                price = limitPrice,
-                                price_type= "Limit",
-                                pin= "000000"
-                                )
-        print('คำสั่งซื้อขายถูกส่งไปยัง Settrade Sandbox แล้ว')
-        return jsonify('success')
+        if type =='Limit' and limitPrice > 0:
+            if validate == 'GTC':
+                place_order = equity.place_order(
+                                        side= side,
+                                        symbol= symbol,
+                                        volume= qty,
+                                        price = limitPrice,
+                                        price_type= "Limit",
+                                        pin= result[4],
+                                        validity_type='Cancel'
+                                        )
+                print('คำสั่งซื้อขายถูกส่งไปยัง Settrade Sandbox แล้ว')
+                return jsonify('success')
+            elif validate == 'Day':
+                place_order = equity.place_order(
+                                        side= side,
+                                        symbol= symbol,
+                                        volume= qty,
+                                        price = limitPrice,
+                                        price_type= "Limit",
+                                        pin= result[4],
+                                        validity_type='Day'
+                                        )
+                print('คำสั่งซื้อขายถูกส่งไปยัง Settrade Sandbox แล้ว')
+                return jsonify('success')
+            elif validate == 'FOK':
+                place_order = equity.place_order(
+                                        side= side,
+                                        symbol= symbol,
+                                        volume= qty,
+                                        price = limitPrice,
+                                        price_type= "Limit",
+                                        pin= result[4],
+                                        validity_type='FOK'
+                                        )
+                print('คำสั่งซื้อขายถูกส่งไปยัง Settrade Sandbox แล้ว')
+                return jsonify('success')
+            else:
+                place_order = equity.place_order(
+                                        side= side,
+                                        symbol= symbol,
+                                        volume= qty,
+                                        price = limitPrice,
+                                        price_type= "Limit",
+                                        pin= result[4],
+                                        validity_type='IOC'
+                                        )
+                print('คำสั่งซื้อขายถูกส่งไปยัง Settrade Sandbox แล้ว')
+                return jsonify('success')
+        else:
+            if validate == 'FOK':
+                place_order = equity.place_order(
+                    side= side,
+                    symbol= symbol,
+                    volume= qty,
+                    price = limitPrice,
+                    price_type= "MP-MKT",
+                    pin= result[4],
+                    validity_type='FOK'
+                    )
+                print('คำสั่งซื้อขายถูกส่งไปยัง Settrade Sandbox แล้ว')
+                return jsonify('success')
+            else:
+                place_order = equity.place_order(
+                    side= side,
+                    symbol= symbol,
+                    volume= qty,
+                    price_type= "MP-MKT",
+                    pin= result[4],
+                    validity_type='IOC'
+                )
+                print('คำสั่งซื้อขายถูกส่งไปยัง Settrade Sandbox แล้ว')
+                return jsonify('success')
     except Exception as e:
         print(f'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ: {str(e)}')
         return jsonify(f'error: {str(e)}')

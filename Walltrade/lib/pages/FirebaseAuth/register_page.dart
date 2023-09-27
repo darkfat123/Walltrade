@@ -44,7 +44,10 @@ class _RegisterPageState extends State<RegisterPage> {
 
     if (response.statusCode == 200) {
       // Registration successful
-      Fluttertoast.showToast(msg: "สมัครสมาชิกสำเร็จ",backgroundColor:primary,textColor: Colors.white);
+      Fluttertoast.showToast(
+          msg: "สมัครสมาชิกสำเร็จ",
+          backgroundColor: primary,
+          textColor: Colors.white);
     }
   }
 
@@ -71,9 +74,8 @@ class _RegisterPageState extends State<RegisterPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              //Lottie.asset('assets/lottie/registerLottie.json', height: 380),
+              Lottie.asset('assets/lottie/registerLottie.json', height: 380),
               Container(
-                
                 decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.only(
@@ -207,8 +209,9 @@ class _RegisterPageState extends State<RegisterPage> {
                               .then((value) => Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) =>
-                                        ContinueRegisterPage(username: usernameController.text,),
+                                    builder: (context) => ContinueRegisterPage(
+                                      username: usernameController.text,
+                                    ),
                                   )));
                         }
                       },
@@ -230,6 +233,40 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 12),
+                    Divider(thickness: 3),
+                    Text(
+                      "มีสมาชิกแล้ว?",
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                    ),
+                    const SizedBox(height: 6),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => LoginPage()));
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'เข้าสู่ระบบ',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w500, fontSize: 16),
+                          ),
+                        ],
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF212436),
+                        padding: const EdgeInsets.symmetric(vertical: 18.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
                   ],
                 ),
               ),

@@ -59,13 +59,12 @@ class MyApp extends StatelessWidget {
         future: Auth().authStateChanges.first, 
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            // กำลังโหลดข้อมูล
             return CircularProgressIndicator(); // หรือเฉลยอื่นๆ ที่คุณต้องการในระหว่างรอ
           } else {
             if (snapshot.hasData) {
-              return Home(username: username, initialIndex: 0);
+              return Home(username: username, initialIndex: 1);
             } else {
-              return RegisterPage();
+              return LoginPage();
             }
           }
         },

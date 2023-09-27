@@ -309,13 +309,13 @@ class _WalletPageState extends State<WalletPage> {
                       right: 0,
                       child: IconButton(
                         iconSize: 30,
-                        icon: Icon(Icons.notifications),
+                        icon: Icon(Icons.access_time_rounded),
                         onPressed: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) =>
-                                    NotifyActivity(username: username)),
+                                    HistoryAutoTradePage(username: username)),
                           );
                           // Handle settings button press here
                         },

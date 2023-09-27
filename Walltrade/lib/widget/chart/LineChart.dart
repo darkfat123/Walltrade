@@ -109,8 +109,8 @@ class _PredictLineChartState extends State<PredictLineChart> {
         border: Border.all(color: const Color(0xff37434d)),
       ),
       minX: 0,
-      maxX: realPrices.length.toDouble() - 1, // ปรับขอบเขต X
-      minY: realPrices.reduce((a, b) => a < b ? a : b), // ปรับขอบเขต Y
+      maxX: predictPrices.length.toDouble() - 1, // ปรับขอบเขต X
+      minY: predictPrices.reduce((a, b) => a < b ? a : b), // ปรับขอบเขต Y
       maxY: realPrices.reduce((a, b) => a > b ? a : b), // ปรับขอบเขต Y
       lineBarsData: [
         LineChartBarData(

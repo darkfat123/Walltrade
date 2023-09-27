@@ -94,54 +94,50 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> getBalanceChange() async {
-    try {
-      // TH HTTP request
-      var url1 = Uri.parse('${Constants.serverUrl}/th_portfolio');
-      var headers1 = {'Content-Type': 'application/json'};
-      var body1 = {'username': username};
-      var response1 =
-          await http.post(url1, headers: headers1, body: jsonEncode(body1));
+    // TH HTTP request
+    var url1 = Uri.parse('${Constants.serverUrl}/th_portfolio');
+    var headers1 = {'Content-Type': 'application/json'};
+    var body1 = {'username': username};
+    var response1 =
+        await http.post(url1, headers: headers1, body: jsonEncode(body1));
 
-      if (response1.statusCode == 200) {
-        var data1 = jsonDecode(response1.body);
-        setState(() {
-          TH_percentage = data1['percentageChange'];
-          TH_totalProfit = double.parse(data1['balanceProfitChange']);
-          print("TH totalProfit: $TH_totalProfit");
-          print("TH percentage: $TH_percentage");
-        });
-      } else {
-        throw Exception(
-            'Failed to retrieve TH balance. Error: ${response1.body}');
-      }
+    if (response1.statusCode == 200) {
+      var data1 = jsonDecode(response1.body);
+      setState(() {
+        TH_percentage = data1['percentageChange'];
+        TH_totalProfit = double.parse(data1['balanceProfitChange']);
+        print("TH totalProfit: $TH_totalProfit");
+        print("TH percentage: $TH_percentage");
+      });
+    } else {
+      throw Exception(
+          'Failed to retrieve TH balance. Error: ${response1.body}');
+    }
 
-      // US HTTP request
-      var url2 = Uri.parse('${Constants.serverUrl}/get_balance_change');
-      var headers2 = {'Content-Type': 'application/json'};
-      var body2 = jsonEncode({'username': username});
+    // US HTTP request
+    var url2 = Uri.parse('${Constants.serverUrl}/get_balance_change');
+    var headers2 = {'Content-Type': 'application/json'};
+    var body2 = jsonEncode({'username': username});
 
-      var response2 = await http.post(url2, headers: headers2, body: body2);
-      if (response2.statusCode == 200) {
-        var data2 = jsonDecode(response2.body);
-        var balanceChange = data2['balance_change'];
-        var percentageChange = data2['percentage_change'];
-        setState(() {
-          _balanceChange = balanceChange;
-          print("US totalProfit: $_balanceChange");
+    var response2 = await http.post(url2, headers: headers2, body: body2);
+    if (response2.statusCode == 200) {
+      var data2 = jsonDecode(response2.body);
+      var balanceChange = data2['balance_change'];
+      var percentageChange = data2['percentage_change'];
+      setState(() {
+        _balanceChange = balanceChange;
+        print("US totalProfit: $_balanceChange");
 
-          _percentageChange = percentageChange;
-          print("US percentage: $_percentageChange");
-        });
-        totalProfit = TH_totalProfit + _balanceChange;
-        totalPercentage = TH_percentage + _percentageChange;
-        print("Total profit: $totalProfit");
-        print("Total percentage: $totalPercentage");
-      } else {
-        throw Exception(
-            'Failed to retrieve balance change. Error: ${response2.body}');
-      }
-    } catch (e) {
-      throw Exception('Error: $e');
+        _percentageChange = percentageChange;
+        print("US percentage: $_percentageChange");
+      });
+      totalProfit = TH_totalProfit + _balanceChange;
+      totalPercentage = TH_percentage + _percentageChange;
+      print("Total profit: $totalProfit");
+      print("Total percentage: $totalPercentage");
+    } else {
+      throw Exception(
+          'Failed to retrieve balance change. Error: ${response2.body}');
     }
   }
 
@@ -171,10 +167,8 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> deleteWatchlist(String symbol) async {
     var url = '${Constants.serverUrl}/deleteWatchlist';
-    var body = jsonEncode({
-      'username': username,
-      'symbol': symbol
-    }); // Add the 'symbol' parameter
+    var body = jsonEncode(
+        {'username': username, 'symbol': symbol}); // Add the 'symbol' parameter
 
     var response = await http.post(
       Uri.parse(url),
@@ -274,7 +268,7 @@ class _HomePageState extends State<HomePage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => NotifyActivity(
+                                builder: (context) => HistoryAutoTradePage(
                                       username: username,
                                     )),
                           );
@@ -768,7 +762,9 @@ class _HomePageState extends State<HomePage> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => NewsListPage(username: username,),
+                                        builder: (context) => NewsListPage(
+                                          username: username,
+                                        ),
                                       ),
                                     );
                                   },

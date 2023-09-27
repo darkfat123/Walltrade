@@ -890,7 +890,7 @@ class EMADropdown extends StatelessWidget {
         children: [
           const Text(
             'จำนวนวันของ EMA',
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+            style: TextStyle(color: Colors.black),
           ),
           DropdownButtonHideUnderline(
             child: DropdownButton<String>(

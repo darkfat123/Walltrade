@@ -1,3 +1,4 @@
+// ignore: file_names
 import 'dart:convert';
 import 'package:Walltrade/pages/thAssetDetail.dart';
 import 'package:Walltrade/widget/snackBar/DeleteWatchlistSuccess.dart';
@@ -132,6 +133,7 @@ class _AssetTHListScreenState extends State<AssetTHListScreen>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
@@ -190,7 +192,8 @@ class _AssetTHListScreenState extends State<AssetTHListScreen>
                                       builder: (context) =>
                                           AssetTHDetailsScreen(
                                               symbol: symbol,
-                                              fullname: fullname),
+                                              fullname: fullname,
+                                              username: username),
                                     ),
                                   );
                                 },

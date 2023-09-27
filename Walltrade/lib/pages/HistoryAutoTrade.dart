@@ -3,20 +3,20 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import '../variables/serverURL.dart';
 
-class NotifyActivity extends StatefulWidget {
+class HistoryAutoTradePage extends StatefulWidget {
   final String username;
-  NotifyActivity({required this.username});
+  HistoryAutoTradePage({required this.username});
   @override
-  _NotifyActivity createState() => _NotifyActivity(username: username);
+  _HistoryAutoTradePage createState() => _HistoryAutoTradePage(username: username);
 }
 
-class _NotifyActivity extends State<NotifyActivity> {
+class _HistoryAutoTradePage extends State<HistoryAutoTradePage> {
   final String username;
   List<dynamic> autoOrders = [];
   List<dynamic> autoOrdersPending = [];
   List<dynamic> autoOrdersCompleted = [];
   bool isLoading = true;
-  _NotifyActivity({required this.username});
+  _HistoryAutoTradePage({required this.username});
 
   Future<void> getAutoOrders() async {
     final url = '${Constants.serverUrl}/getAutoOrders';

@@ -17,9 +17,9 @@ Future<List<Knowledge>> fetchKnowledge() async {
 class BuildKnowledge {
   List<Knowledge> knowledgeList = [
     Knowledge(
-      title: "การทำงานและการใช้งานของระบบสร้างคำสั่งเทรดอัตโนมัติ",
+      title: "ระบบสร้างคำสั่งเทรดอัตโนมัติ",
       image:
-          "https://blog.cloudflare.com/content/images/2022/01/Super-Bot-Fight-mode-1.png",
+          "https://cdn.dnaindia.com/sites/default/files/styles/full/public/2019/06/19/838366-robot-representational.jpg",
       description:
           "การทำงานของระบบจะสั่งซื้อตามเงื่อนไขการซื้อขายหุ้นตามที่ผู้ใช้ได้วิเคราะห์หรือต้องการตัวชี้วัดทางเทคนิคไว้ในแต่ละ Timeframe เนื่องจากแต่ละ Timeframe นั้นจะมีค่าตัวชี้วัดทางเทคนิคที่ไม่เหมือนกัน โดยไม่ต้องคอยเฝ้าหน้าจอเพื่อกดซื้อขายหุ้นเอง เช่น ตั้งเงื่อนไขให้ซื้อหุ้น META หาก RSI มีค่าน้อยกว่าหรือเท่ากับ 30 ระบบจะทำการสั่งซื้อตามจำนวนที่ผู้ใช้ต้องการทันที ตั้งเงื่อนไขให้ขายหุ้น PTT หาก MACD ตัดลงและมีค่ามากกว่า 0 ระบบจะทำการสั่งขายตามจำนวนที่ผู้ใช้ต้องการทันที",
     ),

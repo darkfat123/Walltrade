@@ -188,13 +188,13 @@ class _PredictPageState extends State<PredictPage> {
                       right: 0,
                       child: IconButton(
                         iconSize: 30,
-                        icon: const Icon(Icons.notifications),
+                        icon: const Icon(Icons.access_time_rounded),
                         onPressed: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) =>
-                                    NotifyActivity(username: username)),
+                                    HistoryAutoTradePage(username: username)),
                           );
                           // Handle settings button press here
                         },
