@@ -6,7 +6,6 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:quickalert/quickalert.dart';
 import '../model/technicalAnalyze.dart';
 import '../variables/serverURL.dart';
@@ -24,7 +23,6 @@ class _PredictPageState extends State<PredictPage> {
   final String username;
   _PredictPageState({required this.username});
   TextEditingController _textEditingController = TextEditingController();
-  String _prediction = '';
   String selectedStockNation = 'US';
   String selectedInterval = '1';
   bool isPredicting = true;
@@ -68,7 +66,7 @@ class _PredictPageState extends State<PredictPage> {
       }
     } catch (e) {
       setState(() {
-        _prediction = 'error caught: $e';
+        print('error caught: $e');
       });
     }
   }

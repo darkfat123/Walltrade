@@ -1,14 +1,11 @@
-import 'dart:convert';
-
-import 'package:Walltrade/pages/FirebaseAuth/auth.dart';
 import 'package:Walltrade/pages/FirebaseAuth/login_page.dart';
 import 'package:Walltrade/pages/HomePage.dart';
 import 'package:Walltrade/primary.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
-import 'package:quickalert/quickalert.dart';
+
 
 import '../../variables/serverURL.dart';
 

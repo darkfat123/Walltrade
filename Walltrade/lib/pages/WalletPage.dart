@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
-
 import 'package:Walltrade/pages/PortfolioDetail.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -11,8 +9,6 @@ import 'HistoryAutoTrade.dart';
 import 'package:syncfusion_flutter_treemap/treemap.dart';
 import 'Treemap.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:flutter_circle_chart/flutter_circle_chart.dart';
 
 class WalletPage extends StatefulWidget {
   final String username;

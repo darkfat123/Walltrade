@@ -8,7 +8,6 @@ import 'package:Walltrade/pages/TradePageBuy.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:quickalert/quickalert.dart';
 import '../model/knowledge.dart';
 import '../variables/serverURL.dart';
 import '../variables/symbolInput.dart';

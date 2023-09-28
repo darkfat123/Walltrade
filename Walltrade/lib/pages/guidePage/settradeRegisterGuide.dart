@@ -1,4 +1,3 @@
-import 'package:Walltrade/pages/guidePage/alpacaLoginGuide.dart';
 import 'package:Walltrade/pages/FirebaseAuth/register_page.dart';
 import 'package:flutter/material.dart';
 import 'package:quickalert/quickalert.dart';

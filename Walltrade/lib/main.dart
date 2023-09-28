@@ -59,10 +59,10 @@ class MyApp extends StatelessWidget {
         future: Auth().authStateChanges.first, 
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator(); // หรือเฉลยอื่นๆ ที่คุณต้องการในระหว่างรอ
+            return const CircularProgressIndicator(); // หรือเฉลยอื่นๆ ที่คุณต้องการในระหว่างรอ
           } else {
             if (snapshot.hasData) {
-              return Home(username: username, initialIndex: 1);
+              return Home(username: username, initialIndex: 0);
             } else {
               return LoginPage();
             }

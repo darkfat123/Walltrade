@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:Walltrade/pages/FAQpage.dart';
 import 'package:Walltrade/pages/HistoryAutoTrade.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_svg/svg.dart';
+
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:Walltrade/pages/SettingsPage.dart';
@@ -106,8 +106,7 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         TH_percentage = data1['percentageChange'];
         TH_totalProfit = double.parse(data1['balanceProfitChange']);
-        print("TH totalProfit: $TH_totalProfit");
-        print("TH percentage: $TH_percentage");
+
       });
     } else {
       throw Exception(

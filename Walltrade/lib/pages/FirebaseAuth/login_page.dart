@@ -1,12 +1,12 @@
-import 'dart:convert';
+
 import 'package:Walltrade/pages/FirebaseAuth/auth.dart';
 import 'package:Walltrade/pages/guidePage/alpacaRegisterGuide.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+
 import 'package:lottie/lottie.dart';
 import '../../main.dart';
-import '../../variables/serverURL.dart';
+
 import 'register_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -39,7 +39,7 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              //Lottie.asset('assets/lottie/loginLottie.json', height: 350),
+              Lottie.asset('assets/lottie/loginLottie.json', height: 350),
               Container(
                 height: MediaQuery.of(context).size.height, 
                 padding: EdgeInsets.all(30),

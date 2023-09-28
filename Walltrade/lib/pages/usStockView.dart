@@ -3,7 +3,6 @@ import 'package:Walltrade/widget/snackBar/DeleteWatchlistSuccess.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../variables/serverURL.dart';
@@ -142,6 +141,7 @@ class _AssetListScreenState extends State<AssetListScreen>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(

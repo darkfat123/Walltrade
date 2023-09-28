@@ -31,7 +31,6 @@ class _TradePageSellState extends State<TradePageSell> {
   final TextEditingController _searchController = TextEditingController();
   bool macd_crossupIsChecked = false;
   String searchText = '';
-  String _walletBalance = '';
   String selectedDay = '5';
   bool showDetails = false;
   String selectedInterval = '1h';
@@ -156,33 +155,6 @@ class _TradePageSellState extends State<TradePageSell> {
         result = 'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ';
       });
     }
-  }
-
-  Future<void> getBalance() async {
-    var url = Uri.parse('${Constants.serverUrl}/getBalance');
-    var headers = {'Content-Type': 'application/x-www-form-urlencoded'};
-    var body = {'username': username};
-
-    var response = await http.post(url, headers: headers, body: body);
-
-    if (response.statusCode == 200) {
-      var data = jsonDecode(response.body);
-      var walletBalance = data['wallet_balance'];
-      setState(
-        () {
-          _walletBalance = walletBalance.toString();
-        },
-      );
-    } else {
-      throw Exception(
-          'Failed to retrieve wallet balance. Error: ${response.body}');
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    getBalance();
   }
 
   @override
