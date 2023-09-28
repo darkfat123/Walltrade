@@ -1,9 +1,9 @@
-
 import 'package:Walltrade/pages/FirebaseAuth/auth.dart';
 import 'package:Walltrade/pages/guidePage/alpacaRegisterGuide.dart';
+import 'package:Walltrade/primary.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
+import 'package:quickalert/quickalert.dart';
 import 'package:lottie/lottie.dart';
 import '../../main.dart';
 
@@ -41,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               Lottie.asset('assets/lottie/loginLottie.json', height: 350),
               Container(
-                height: MediaQuery.of(context).size.height, 
+                height: MediaQuery.of(context).size.height,
                 padding: EdgeInsets.all(30),
                 decoration: BoxDecoration(
                     color: Colors.white,
@@ -173,10 +173,23 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 6),
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => AlpacaRegisterGuidePage()));
+                        QuickAlert.show(
+                            context: context,
+                            type: QuickAlertType.info,
+                            onConfirmBtnTap: () => Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        AlpacaRegisterGuidePage())),
+                            showCancelBtn: true,
+                            onCancelBtnTap: () => Navigator.pop(context),
+                            title: "ข้อมูลเพิ่มเติม",
+                            confirmBtnTextStyle: TextStyle(color: Colors.white),
+                            confirmBtnColor: primary,
+                            text:
+                                "การสมัครสมาชิกอาจมีขั้นตอนเพิ่มเติมเล็กน้อย เพื่อการใช้งานอย่างสะดวกหลังจากสมัครเรียบร้อย",
+                            confirmBtnText: "ตกลง",
+                            cancelBtnText: "ยกเลิก");
                       },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
