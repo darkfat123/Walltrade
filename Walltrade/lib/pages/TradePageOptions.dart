@@ -45,12 +45,21 @@ class _TradePageOptionsState extends State<TradePageOptions>
 
     if (response.statusCode == 200) {
       final responseData = jsonDecode(response.body);
-      for (final order in responseData) {
-        final status = order['status'];
-        if (status == 'pending') {
-          autoOrders.add(order);
+      print(responseData);
+
+      if (responseData is Map<String, dynamic> &&
+          responseData.containsKey('message') &&
+          responseData['message'] == 'No auto orders found for the username.') {
+        print("eiei");
+      } else {
+        for (final order in responseData) {
+          final status = order['status'];
+          if (status == 'pending') {
+            autoOrders.add(order);
+          }
         }
       }
+
       isLoading = false;
     } else {
       print("Error");
@@ -92,8 +101,9 @@ class _TradePageOptionsState extends State<TradePageOptions>
         TH_Fiat = double.parse(th_fiat);
       });
     } else {
-      throw Exception(
-          'Failed to retrieve TH portfolio. Error: ${response4.body}');
+      setState(() {
+        TH_Fiat = 0;
+      });
     }
   }
 
@@ -126,7 +136,8 @@ class _TradePageOptionsState extends State<TradePageOptions>
       var response = await http.post(url, headers: headers, body: body);
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
-        var walletBalance = data['wallet_balance'];
+        var walletBalance =
+            data['wallet_balance'] == null ? "0" : data['wallet_balance'];
         setState(
           () {
             _walletBalance = double.parse(walletBalance);

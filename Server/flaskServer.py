@@ -33,7 +33,6 @@ app.config['MYSQL_DB'] = 'walltrade'  # ชื่อฐานข้อมูล
 CORS(app)
 mysql = MySQL(app)
 
-conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -158,24 +157,6 @@ def getAccount():
         return jsonify(balance)
     else:
         return (f"Error: {response.status_code} - {response.text}")
-
-
-
-'''@app.route('/login', methods=['POST'])
-def login():
-    username = request.form.get('username')
-    password = request.form.get('password')
-
-
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM users_info WHERE username = %s AND password = %s", (username, password))
-    user = cur.fetchone()
-    cur.close()
-    
-    if user:
-        return jsonify({'message': 'Login successful'})
-    else:
-        return jsonify({'message': 'Invalid username or password'})'''
     
 @app.route('/getUsernamefromEmail', methods=['POST'])
 def getUsernamefromEmail():
@@ -275,7 +256,7 @@ def updateAPI():
 
     cur = mysql.connection.cursor()
     cur.execute("""
-        UPDATE users_info SET api_key=%s, secret_key=%s, th_api_key=%s, th_api_key=%s WHERE username = %s
+        UPDATE users_info SET api_key=%s, secret_key=%s, th_api_key=%s, th_secret_key=%s WHERE username = %s
     """, (api_key, secret_key, th_api_key, th_secret_key, username))
     mysql.connection.commit()
     cur.close()
@@ -301,6 +282,20 @@ def get_asset_list():
     print(len(asset_list))
     # Return the asset list as JSON.
     return jsonify(assets=asset_list)
+
+@app.route('/displayWatchlist', methods=['POST'])
+def displayWatchlist():
+    username = request.json.get('username')
+    conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
+    cursor = conn.cursor()
+    query = f"SELECT watchlist FROM users_info WHERE username = '{username}'"
+    cursor.execute(query)
+    result = cursor.fetchone()
+    
+    if result is not None:
+        watchlist_json = result[0]
+        stock_list = json.loads(watchlist_json) if watchlist_json else []      
+    return jsonify(stock_list)
 
 
 
@@ -480,21 +475,6 @@ def deleteWatchlist():
 
     conn.close()
     return 'User not found or watchlist is empty'
-
-
-@app.route('/displayWatchlist', methods=['POST'])
-def displayWatchlist():
-    username = request.json.get('username')
-    conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
-    cursor = conn.cursor()
-    query = f"SELECT watchlist FROM users_info WHERE username = '{username}'"
-    cursor.execute(query)
-    result = cursor.fetchone()
-    
-    if result is not None:
-        watchlist_json = result[0]
-        stock_list = json.loads(watchlist_json) if watchlist_json else []      
-    return jsonify(stock_list)
 
 
 @app.route('/getBalance', methods=['POST'])
@@ -1329,17 +1309,24 @@ def getStockPriceUS():
         else:
             for symbol in stock_list:
                 analysis = getSymbolHandler(symbol)
+                thai_stocks = ["ADVANC", "AOT", "BBL",  "BCP","BDMS","BEM", "BGRIM", "BH","BJC","BPP", "BTS","CBG","CENTEL", "CK",  "CPALL", "CPF", "CPN", "CRC","DELTA", "EA","EGCO","GGC","GPSC", "GULF", "HANA", "IRPC", "IVL","KBANK","KCE","KKP", "KTB", "LH","M", "MAJOR","OR","PTT","PTTEP","PTTGC","S","SAMART",
+    "SAWAD", "SCB", "SCC","SCP","SCGP","SIRI","SPALI", "SPRC","STA" ,"SUPER", "TCAP","THANI"]
 
                 close_price = round(analysis.indicators["close"], 2)
                 percentage_change = round(analysis.indicators["change"], 2)
+
+                if symbol in thai_stocks:
+                    tags = "TH"
+                else:
+                    tags = "US"
                 
                 prices.append({
                     'symbol': symbol,
                     'price': close_price,
-                    'percentage': percentage_change
+                    'percentage': percentage_change,
+                    'tags' : tags
                 })
-                print(prices)
-                
+
             return jsonify(prices)
         
 @app.route('/getPricePredictList', methods=['POST'])
@@ -1378,16 +1365,22 @@ def checkMarketStatus():
 def news():
     username = request.json.get('username')
     url = 'https://data.alpaca.markets/v1beta1/news?limit=15&exclude_contentless=true'
-
+    conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
     cur = conn.cursor()
     cur.execute("SELECT api_key, secret_key FROM users_info WHERE username = %s", (username,))
 
     result = cur.fetchone()
-    api_key, secret_key = result
+    print(result)
+    if result and result != ('', ''):
+        api_key, secret_key = result
+    else:
+        api_key, secret_key = "PKPZNZ5UPZP41MZUUYXF", "fajFEMpQSTE31NaQOUX3USwkWkl67oAtDERjRmmK"
+
     headers = {
         'Apca-Api-Key-Id': api_key,
         'Apca-Api-Secret-Key': secret_key
     }
+
 
     response = requests.get(url, headers=headers)
 
@@ -1421,7 +1414,7 @@ def news():
         return jsonify(output_data)
         
     else:
-        return jsonify({"message": "Failed to fetch news. Status code:", "status_code": response.status_code})
+        return jsonify({"message": "Failed to fetch news."})
     
 @app.route('/th_portfolio', methods= ['POST'])
 def th_portfolio():

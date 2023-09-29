@@ -705,7 +705,7 @@ class _PredictPageState extends State<PredictPage> {
                   ],
                 ),
               ),
-              const Row(
+             /* const Row(
                 children: [
                   Padding(
                     padding: EdgeInsets.only(left: 30, bottom: 10),
@@ -717,7 +717,7 @@ class _PredictPageState extends State<PredictPage> {
                   )
                 ],
               ),
-              FutureBuilder<List<TechnicalAnaylyze>>(
+             FutureBuilder<List<TechnicalAnaylyze>>(
                 future: fetchTechnicalAnaylyze(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
@@ -784,7 +784,7 @@ class _PredictPageState extends State<PredictPage> {
                     return const Center(child: CircularProgressIndicator());
                   }
                 },
-              ),
+              ),*/
               const SizedBox(
                 height: 10,
               )

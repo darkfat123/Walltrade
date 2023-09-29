@@ -7,7 +7,8 @@ class HistoryAutoTradePage extends StatefulWidget {
   final String username;
   HistoryAutoTradePage({required this.username});
   @override
-  _HistoryAutoTradePage createState() => _HistoryAutoTradePage(username: username);
+  _HistoryAutoTradePage createState() =>
+      _HistoryAutoTradePage(username: username);
 }
 
 class _HistoryAutoTradePage extends State<HistoryAutoTradePage> {
@@ -26,16 +27,29 @@ class _HistoryAutoTradePage extends State<HistoryAutoTradePage> {
         await http.post(Uri.parse(url), headers: headers, body: body);
     if (response.statusCode == 200) {
       setState(() {
-        autoOrders = jsonDecode(response.body);
-        isLoading = false;
-      });
-      for (final order in autoOrders) {
-        if (order['status'] == 'pending') {
-          autoOrdersPending.add(order);
+        final responseData = jsonDecode(response.body);
+        print(responseData);
+
+        if (responseData is Map<String, dynamic> &&
+            responseData.containsKey('message') &&
+            responseData['message'] ==
+                'No auto orders found for the username.') {
+          setState(() {
+            autoOrders = [];
+          });
+          isLoading = false; // ถ้าไม่มีข้อมูล ก็ไม่ต้องใส่ isLoading = false
         } else {
-          autoOrdersCompleted.add(order);
+          autoOrders = responseData;
+          for (final order in autoOrders) {
+            if (order['status'] == 'pending') {
+              autoOrdersPending.add(order);
+            } else {
+              autoOrdersCompleted.add(order);
+            }
+          }
+          isLoading = false; // ถ้ามีข้อมูล ใส่ isLoading = false ที่นี่
         }
-      }
+      });
     } else {
       print("Error");
     }
@@ -92,193 +106,198 @@ class _HistoryAutoTradePage extends State<HistoryAutoTradePage> {
         ),
         body: TabBarView(
           children: [
-            ListView.builder(
-              scrollDirection: Axis.vertical,
-              itemCount: autoOrdersPending.length,
-              itemBuilder: (context, index) {
-                final order = autoOrdersPending[index];
-                return Container(
-                  padding: const EdgeInsets.all(16),
-                  margin: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFFFFF),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      const BoxShadow(
-                        color: Color.fromARGB(128, 0, 0, 0),
-                        offset: Offset(0, 2),
-                        blurRadius: 4,
-                        spreadRadius: 0,
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            order['symbol'],
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
+            autoOrdersPending.length == 0
+                ? Center(
+                    child: Text("ไม่มีข้อมูลคำสั่งซื้อขายที่รอการดำเนินการ"),
+                  )
+                : ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    itemCount: autoOrdersPending.length,
+                    itemBuilder: (context, index) {
+                      final order = autoOrdersPending[index];
+                      return Container(
+                        padding: const EdgeInsets.all(16),
+                        margin: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFFFFF),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            const BoxShadow(
+                              color: Color.fromARGB(128, 0, 0, 0),
+                              offset: Offset(0, 2),
+                              blurRadius: 4,
+                              spreadRadius: 0,
                             ),
-                          ),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.circle,
-                                size: 14,
-                                color: Colors.yellow.shade800,
-                              ),
-                              const SizedBox(
-                                width: 8,
-                              ),
-                              const Text(
-                                "กำลังดำเนินการ",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.black,
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  order['symbol'],
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(
-                                width: 8,
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  cancelOrder(order['OrderID'], true);
-                                  setState(() {
-                                    autoOrdersPending.remove(order);
-                                    autoOrdersCompleted.add(order);
-                                  });
-                                  print(autoOrdersPending);
-                                  final snackBar = const SnackBar(
-                                    content: Text('Order removed'),
-                                  );
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(snackBar);
-                                },
-                                child: const Icon(
-                                  Icons.cancel,
-                                  color: Colors.red,
-                                  size: 18,
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.circle,
+                                      size: 14,
+                                      color: Colors.yellow.shade800,
+                                    ),
+                                    const SizedBox(
+                                      width: 8,
+                                    ),
+                                    const Text(
+                                      "กำลังดำเนินการ",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      width: 8,
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        cancelOrder(order['OrderID'], true);
+                                        setState(() {
+                                          autoOrdersPending.remove(order);
+                                          autoOrdersCompleted.add(order);
+                                        });
+                                        print(autoOrdersPending);
+                                        final snackBar = const SnackBar(
+                                          content: Text('Order removed'),
+                                        );
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(snackBar);
+                                      },
+                                      child: const Icon(
+                                        Icons.cancel,
+                                        color: Colors.red,
+                                        size: 18,
+                                      ),
+                                    )
+                                  ],
                                 ),
-                              )
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Row(
-                        children: [
-                          const Text(
-                            "เทคนิคชี้วัดที่ใช้: ",
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
-                      Wrap(
-                        spacing: 2,
-                        // ระยะห่างระหว่าง Chip ในแนวนอน
-                        runSpacing: 8,
-                        children: order['techniques']
-                            .split(',')
-                            .map((technique) {
-                              return Chip(
-                                label: Text(
-                                  technique.trim(),
-                                  style: TextStyle(fontSize: 12),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Row(
+                              children: [
+                                const Text(
+                                  "เทคนิคชี้วัดที่ใช้: ",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black,
+                                  ),
                                 ),
-                                backgroundColor: const Color(
-                                    0xFF212436), // เลือกสีพื้นหลังตามความต้องการ
-                                labelStyle: TextStyle(color: Colors.white),
-                              );
-                            })
-                            .toList()
-                            .cast<
-                                Widget>(), // แปลง List<dynamic> เป็น List<Widget>
-                      ),
-                      Row(
-                        children: [
-                          const Text(
-                            "หมายเลขคำสั่ง: ",
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
+                              ],
                             ),
-                          ),
-                          Text(
-                            "${order['OrderID'].toString()}",
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
+                            Wrap(
+                              spacing: 2,
+                              // ระยะห่างระหว่าง Chip ในแนวนอน
+                              runSpacing: 8,
+                              children: order['techniques']
+                                  .split(',')
+                                  .map((technique) {
+                                    return Chip(
+                                      label: Text(
+                                        technique.trim(),
+                                        style: TextStyle(fontSize: 12),
+                                      ),
+                                      backgroundColor: const Color(
+                                          0xFF212436), // เลือกสีพื้นหลังตามความต้องการ
+                                      labelStyle:
+                                          TextStyle(color: Colors.white),
+                                    );
+                                  })
+                                  .toList()
+                                  .cast<
+                                      Widget>(), // แปลง List<dynamic> เป็น List<Widget>
                             ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          const Text(
-                            "จำนวน: ",
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
+                            Row(
+                              children: [
+                                const Text(
+                                  "หมายเลขคำสั่ง: ",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                Text(
+                                  "${order['OrderID'].toString()}",
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                          Text(
-                            "${order['quantity'].toString()} หน่วย",
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
+                            Row(
+                              children: [
+                                const Text(
+                                  "จำนวน: ",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                Text(
+                                  "${order['quantity'].toString()} หน่วย",
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          const Text(
-                            "ประเภท: ",
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
+                            Row(
+                              children: [
+                                const Text(
+                                  "ประเภท: ",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                Chip(
+                                  backgroundColor: order['side'] == 'buy'
+                                      ? const Color(0xFF82CD47)
+                                      : const Color(0xFFBB2525),
+                                  label: Text(
+                                    order['side'] == 'buy' ? 'ซื้อ' : 'ขาย',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                          Chip(
-                            backgroundColor: order['side'] == 'buy'
-                                ? const Color(0xFF82CD47)
-                                : const Color(0xFFBB2525),
-                            label: Text(
-                              order['side'] == 'buy' ? 'ซื้อ' : 'ขาย',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
 
-                      // Add additional information or widgets related to the stock here
-                    ],
+                            // Add additional information or widgets related to the stock here
+                          ],
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
-            ListView.builder(
+            autoOrdersCompleted.length == 0 ? Center(child: Text("ไม่มีข้อมูลคำลั่งซื้อขายที่สำเร็จแล้ว"),): ListView.builder(
               scrollDirection: Axis.vertical,
               itemCount: autoOrdersCompleted.length,
               itemBuilder: (context, index) {

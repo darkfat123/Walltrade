@@ -58,6 +58,7 @@ dependencies:
   firebase_auth: ^4.10.0
   lottie: ^2.6.0
   fluttertoast: ^8.2.2
+  animated_toggle_switch: ^0.8.0
   
 
 dev_dependencies:

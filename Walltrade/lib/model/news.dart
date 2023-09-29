@@ -25,14 +25,21 @@ class StaticValues {
     };
 
     final response2 = await http.post(
-      Uri.parse('${Constants.serverUrl}/news'), // เปลี่ยนเป็น POST
+      Uri.parse('${Constants.serverUrl}/news'),
       headers: {
-        'Content-Type': 'application/json', // ระบุ content type เป็น JSON
+        'Content-Type': 'application/json',
       },
-      body: jsonEncode(requestData), // ส่งข้อมูล JSON ไปยัง server
+      body: jsonEncode(requestData),
     );
     if (response2.statusCode == 200) {
+      print(jsonDecode(response2.body));
       final parsedResponse = jsonDecode(response2.body);
+      if (parsedResponse is Map<String, dynamic> &&
+          parsedResponse.containsKey('message') &&
+          parsedResponse['message'] == 'Failed to fetch news.') {
+        return news; // คืนค่า news อย่างเดียว
+      }
+
       final articles = parsedResponse;
       for (var article in articles) {
         final title = article['Headline'];

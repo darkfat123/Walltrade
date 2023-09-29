@@ -22,7 +22,7 @@ class _SearchPageState extends State<SearchPage>
 
   List<dynamic> symbolsWatchlist =[];
 
-  Future<void> watchlist() async {
+ /* Future<void> watchlist() async {
     var url = '${Constants.serverUrl}/displayWatchlist';
     var body = jsonEncode({'username': username});
 
@@ -31,13 +31,13 @@ class _SearchPageState extends State<SearchPage>
     var data = jsonDecode(response.body);
     symbolsWatchlist = data;
     
-  }
+  }*/
 
   @override
   void initState() {
     tabController = TabController(length: 2, vsync: this);
     super.initState();
-    watchlist();
+    //watchlist();
   }
 
   @override

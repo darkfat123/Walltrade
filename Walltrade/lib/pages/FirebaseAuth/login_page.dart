@@ -39,7 +39,7 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Lottie.asset('assets/lottie/loginLottie.json', height: 350),
+              //Lottie.asset('assets/lottie/loginLottie.json', height: 350),
               Container(
                 height: MediaQuery.of(context).size.height,
                 padding: EdgeInsets.all(30),

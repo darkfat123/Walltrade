@@ -198,7 +198,7 @@ class _SettingsState extends State<Settings> {
                       ),
                       SizedBox(height: 16.0),
                       TextFormField(
-                        controller: _apiKeyController,
+                        controller: _secretKeyController,
                         decoration: InputDecoration(
                           labelText: 'Alpaca Secret Key (US)',
                           labelStyle: const TextStyle(

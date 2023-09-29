@@ -135,7 +135,7 @@ class _WalletPageState extends State<WalletPage> {
             'Failed to retrieve wallet balance. Error: ${response.body}');
       }
     } catch (e) {
-      throw Exception('Error: $e');
+      formatted_usCash ='0';
     }
   }
 
@@ -167,8 +167,8 @@ class _WalletPageState extends State<WalletPage> {
         USDtoTHB = data1['USDtoTHB'];
       });
     } else {
-      throw Exception(
-          'Failed to retrieve TH balance. Error: ${response1.body}');
+      TH_percentage = 0;
+      TH_totalProfit = 0;
     }
 
     if (response2.statusCode == 200) {
@@ -184,13 +184,13 @@ class _WalletPageState extends State<WalletPage> {
       formattedProfit = NumberFormat('#,###.##', 'en_US').format(totalProfit);
       totalPercentage = TH_percentage + _percentageChange;
     } else {
-      throw Exception(
-          'Failed to retrieve balance change. Error: ${response2.body}');
+        totalProfit =0;
+        totalPercentage =0;
     }
 
     if (response3.statusCode == 200) {
       var data3 = jsonDecode(response3.body);
-      var walletBalance = data3['wallet_balance'];
+      var walletBalance = data3['wallet_balance'] == null ? "0" :data3['wallet_balance'] ;
 
       setState(() {
         _walletBalance =
@@ -198,8 +198,7 @@ class _WalletPageState extends State<WalletPage> {
         US_cash = _walletBalance;
       });
     } else {
-      throw Exception(
-          'Failed to retrieve wallet balance. Error: ${response3.body}');
+      _walletBalance = 0;
     }
 
     if (response4.statusCode == 200) {
@@ -213,10 +212,10 @@ class _WalletPageState extends State<WalletPage> {
         TH_marketValue = double.parse(th_marketValue);
       });
     } else {
-      throw Exception(
-          'Failed to retrieve TH portfolio. Error: ${response4.body}');
+      TH_balance = 0;
+      TH_Fiat = 0;
+      TH_marketValue = 0;   
     }
-
     TH_chartMarketValue =
         TH_marketValue <= 0 ? 0 : (TH_marketValue / TH_Fiat) * 100;
     US_chartMarketValue =

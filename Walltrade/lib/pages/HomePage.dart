@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:Walltrade/pages/FAQpage.dart';
 import 'package:Walltrade/pages/HistoryAutoTrade.dart';
+import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -31,6 +33,7 @@ class _HomePageState extends State<HomePage> {
   List<String> watchlist = [];
   final String username;
   double _walletBalance = 0;
+  int value = 0;
   double totalBalance = 0;
   double totalProfit = 0;
   double _balanceChange = 0;
@@ -43,6 +46,7 @@ class _HomePageState extends State<HomePage> {
 
   Map<String, double> stockPrices = {};
   Map<String, double> stockPercentage = {};
+  Map<String, String> stockTags = {};
 
   bool isChecked = false;
 
@@ -67,13 +71,15 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           _walletBalance = double.parse(double.parse(walletBalance)
               .toStringAsFixed(2)); // แปลง String เป็น double
+          print(_walletBalance.runtimeType);
+          print(_walletBalance);
         });
       } else {
         throw Exception(
             'Failed to retrieve wallet balance. Error: ${response.body}');
       }
     } catch (e) {
-      throw Exception('Error: $e');
+      _walletBalance = 0;
     }
 
     var url2 = Uri.parse('${Constants.serverUrl}/th_portfolio');
@@ -106,11 +112,12 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         TH_percentage = data1['percentageChange'];
         TH_totalProfit = double.parse(data1['balanceProfitChange']);
-
       });
     } else {
-      throw Exception(
-          'Failed to retrieve TH balance. Error: ${response1.body}');
+      setState(() {
+        TH_percentage = 0;
+        TH_totalProfit = 0;
+      });
     }
 
     // US HTTP request
@@ -135,11 +142,15 @@ class _HomePageState extends State<HomePage> {
       print("Total profit: $totalProfit");
       print("Total percentage: $totalPercentage");
     } else {
-      throw Exception(
-          'Failed to retrieve balance change. Error: ${response2.body}');
+      setState(() {
+        totalProfit = 0;
+        totalPercentage = 0;
+      });
     }
   }
 
+  List<String> watchlist_TH = [];
+  List<String> watchlist_US = [];
   Future<void> getStockPrices() async {
     var url = '${Constants.serverUrl}/getStockPriceUS';
     var body = jsonEncode({'username': username});
@@ -154,14 +165,22 @@ class _HomePageState extends State<HomePage> {
           var symbol = item['symbol'];
           var price = item['price'];
           var percentage = item['percentage'];
+          var tags = item['tags'];
           setState(() {
             stockSymbols.add(symbol);
             stockPrices[symbol] = price.toDouble();
             stockPercentage[symbol] = percentage.toDouble();
+            if (tags == "TH") {
+              watchlist_TH.add(symbol);
+            } else {
+              watchlist_US.add(symbol);
+            }
           });
         },
       );
     }
+    print(watchlist_TH);
+    print(watchlist_US);
   }
 
   Future<void> deleteWatchlist(String symbol) async {
@@ -508,34 +527,80 @@ class _HomePageState extends State<HomePage> {
                                           fontSize: 16),
                                     ),
                                     SizedBox(
-                                      width: 5,
+                                      width: 8,
                                     ),
-                                    GestureDetector(
-                                      onTap: () {
-                                        showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                              title: Text('รายการเฝ้าดู'),
-                                              content: Text(
-                                                  'รายการเฝ้าดูจะแสดงสิ่งที่เราสนใจจากที่เราได้เพิ่มลงรายการ จะแสดงราคาปัจจุบันและเปอร์เซ็นต์การเปลี่ยนแปลงของราคาเปิดและปิดในวันนั้น'),
-                                              actions: <Widget>[
-                                                TextButton(
-                                                  onPressed: () {
-                                                    Navigator.of(context)
-                                                        .pop(); // Close the dialog
-                                                  },
-                                                  child: Text('ตกลง'),
-                                                ),
-                                              ],
+                                    Row(
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  title: Text('รายการเฝ้าดู'),
+                                                  content: Text(
+                                                      'รายการเฝ้าดูจะแสดงสิ่งที่เราสนใจจากที่เราได้เพิ่มลงรายการ จะแสดงราคาปัจจุบันและเปอร์เซ็นต์การเปลี่ยนแปลงของราคาเปิดและปิดในวันนั้น'),
+                                                  actions: <Widget>[
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.of(context)
+                                                            .pop(); // Close the dialog
+                                                      },
+                                                      child: Text('ตกลง'),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
                                             );
                                           },
-                                        );
-                                      },
-                                      child: Icon(
-                                        Icons.info_outline,
-                                        size: 18,
-                                      ),
+                                          child: Icon(
+                                            Icons.info_outline,
+                                            size: 18,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        AnimatedToggleSwitch<
+                                            int>.rollingByHeight(
+                                          current: value,
+                                          indicatorIconScale: 1,
+                                          values: const [0, 1, 2],
+                                          style: ToggleStyle(
+                                              backgroundColor:
+                                                  Color(0xFF424554)),
+                                          onChanged: (i) {
+                                            setState(() => value = i);
+                                            print(value);
+                                          },
+                                          iconList: [
+                                            Icon(Icons.all_inclusive_rounded,
+                                                size: 16, color: Colors.white),
+                                            Container(
+                                              margin: EdgeInsets.all(4),
+                                              child: Text(
+                                                "US",
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.white,
+                                                    fontSize: 12),
+                                              ),
+                                            ),
+                                            Container(
+                                              margin: EdgeInsets.all(4),
+                                              child: Text(
+                                                "TH",
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.white,
+                                                    fontSize: 12),
+                                              ),
+                                            ),
+                                          ],
+                                          height: 30,
+                                          spacing: 0.5,
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -655,91 +720,248 @@ class _HomePageState extends State<HomePage> {
                                         decoration: BoxDecoration(
                                           color: Colors.white,
                                         ),
-                                        child: ListView.builder(
-                                          scrollDirection: Axis.horizontal,
-                                          itemCount: stockSymbols.length,
-                                          itemBuilder: (context, index) {
-                                            var symbol = stockSymbols[index];
-                                            var price = stockPrices[symbol];
-                                            var percentage =
-                                                stockPercentage[symbol];
-                                            return Padding(
-                                              padding: EdgeInsets.all(6.0),
-                                              child: Container(
-                                                width: 100,
-                                                decoration: BoxDecoration(
-                                                  color: Color(0xFF212436),
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
-                                                ),
-                                                child: Column(
-                                                  children: [
-                                                    Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              12.0),
-                                                      child: Column(
-                                                        children: [
-                                                          Text(
-                                                            symbol,
-                                                            style: TextStyle(
-                                                              fontSize: 14,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w600,
-                                                              color:
-                                                                  Colors.white,
-                                                            ),
-                                                          ),
-                                                          Text(
-                                                            '$price',
-                                                            style: TextStyle(
-                                                                fontSize: 14,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500,
-                                                                color: percentage! >
-                                                                        0
-                                                                    ? Color(
-                                                                        0xFF0AFF96)
-                                                                    : percentage <
-                                                                            0
-                                                                        ? Color(
-                                                                            0xFFFF002E)
-                                                                        : Colors
-                                                                            .white),
-                                                          ),
-                                                          Text(
-                                                            percentage > 0
-                                                                ? '+$percentage%'
-                                                                : '$percentage%',
-                                                            style: TextStyle(
-                                                                fontSize: 14,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500,
-                                                                color: percentage >
-                                                                        0
-                                                                    ? Color(
-                                                                        0xFF0AFF96)
-                                                                    : percentage <
-                                                                            0
-                                                                        ? Color(
-                                                                            0xFFFF002E)
-                                                                        : Colors
-                                                                            .white),
-                                                          ),
-                                                        ],
-                                                      ),
+                                        child: value == 1
+                                            ? ListView.builder(
+                                                scrollDirection:
+                                                    Axis.horizontal,
+                                                itemCount: watchlist_US.length,
+                                                itemBuilder: (context, index) {
+                                                  var symbol =
+                                                      watchlist_US[index];
+                                                  var price =
+                                                      stockPrices[symbol];
+                                                  var percentage =
+                                                      stockPercentage[symbol];
+
+                                                  return Container(
+                                                    margin: EdgeInsets.all(6.0),
+                                                    width: 100,
+                                                    decoration: BoxDecoration(
+                                                      color: Color(0xFF212436),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10),
                                                     ),
-                                                    // Add additional information or widgets related to the stock here
-                                                  ],
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
+                                                    child: Column(
+                                                      children: [
+                                                        Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(12.0),
+                                                          child: Column(
+                                                            children: [
+                                                              Text(
+                                                                symbol,
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize: 14,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                  color: Colors
+                                                                      .white,
+                                                                ),
+                                                              ),
+                                                              Text(
+                                                                '$price',
+                                                                style: TextStyle(
+                                                                    fontSize: 14,
+                                                                    fontWeight: FontWeight.w500,
+                                                                    color: percentage! > 0
+                                                                        ? Color(0xFF0AFF96)
+                                                                        : percentage < 0
+                                                                            ? Color(0xFFFF002E)
+                                                                            : Colors.white),
+                                                              ),
+                                                              Text(
+                                                                percentage > 0
+                                                                    ? '+$percentage%'
+                                                                    : '$percentage%',
+                                                                style: TextStyle(
+                                                                    fontSize: 14,
+                                                                    fontWeight: FontWeight.w500,
+                                                                    color: percentage > 0
+                                                                        ? Color(0xFF0AFF96)
+                                                                        : percentage < 0
+                                                                            ? Color(0xFFFF002E)
+                                                                            : Colors.white),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        // Add additional information or widgets related to the stock here
+                                                      ],
+                                                    ),
+                                                  );
+                                                },
+                                              )
+                                            : value == 2
+                                                ? ListView.builder(
+                                                    scrollDirection:
+                                                        Axis.horizontal,
+                                                    itemCount:
+                                                        watchlist_TH.length,
+                                                    itemBuilder:
+                                                        (context, index) {
+                                                      var symbol =
+                                                          watchlist_TH[index];
+                                                      var price =
+                                                          stockPrices[symbol];
+                                                      var percentage =
+                                                          stockPercentage[
+                                                              symbol];
+
+                                                      return Container(
+                                                        margin:
+                                                            EdgeInsets.all(6.0),
+                                                        width: 100,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color:
+                                                              Color(0xFF212436),
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(10),
+                                                        ),
+                                                        child: Column(
+                                                          children: [
+                                                            Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                          .all(
+                                                                      12.0),
+                                                              child: Column(
+                                                                children: [
+                                                                  Text(
+                                                                    symbol,
+                                                                    style:
+                                                                        TextStyle(
+                                                                      fontSize:
+                                                                          14,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w600,
+                                                                      color: Colors
+                                                                          .white,
+                                                                    ),
+                                                                  ),
+                                                                  Text(
+                                                                    '$price',
+                                                                    style: TextStyle(
+                                                                        fontSize: 14,
+                                                                        fontWeight: FontWeight.w500,
+                                                                        color: percentage! > 0
+                                                                            ? Color(0xFF0AFF96)
+                                                                            : percentage < 0
+                                                                                ? Color(0xFFFF002E)
+                                                                                : Colors.white),
+                                                                  ),
+                                                                  Text(
+                                                                    percentage >
+                                                                            0
+                                                                        ? '+$percentage%'
+                                                                        : '$percentage%',
+                                                                    style: TextStyle(
+                                                                        fontSize: 14,
+                                                                        fontWeight: FontWeight.w500,
+                                                                        color: percentage > 0
+                                                                            ? Color(0xFF0AFF96)
+                                                                            : percentage < 0
+                                                                                ? Color(0xFFFF002E)
+                                                                                : Colors.white),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                            // Add additional information or widgets related to the stock here
+                                                          ],
+                                                        ),
+                                                      );
+                                                    },
+                                                  )
+                                                : ListView.builder(
+                                                    scrollDirection:
+                                                        Axis.horizontal,
+                                                    itemCount:
+                                                        stockSymbols.length,
+                                                    itemBuilder:
+                                                        (context, index) {
+                                                      var symbol =
+                                                          stockSymbols[index];
+                                                      var price =
+                                                          stockPrices[symbol];
+                                                      var percentage =
+                                                          stockPercentage[
+                                                              symbol];
+
+                                                      return Container(
+                                                        margin:
+                                                            EdgeInsets.all(6.0),
+                                                        width: 100,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color:
+                                                              Color(0xFF212436),
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(10),
+                                                        ),
+                                                        child: Column(
+                                                          children: [
+                                                            Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                          .all(
+                                                                      12.0),
+                                                              child: Column(
+                                                                children: [
+                                                                  Text(
+                                                                    symbol,
+                                                                    style:
+                                                                        TextStyle(
+                                                                      fontSize:
+                                                                          14,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w600,
+                                                                      color: Colors
+                                                                          .white,
+                                                                    ),
+                                                                  ),
+                                                                  Text(
+                                                                    '$price',
+                                                                    style: TextStyle(
+                                                                        fontSize: 14,
+                                                                        fontWeight: FontWeight.w500,
+                                                                        color: percentage! > 0
+                                                                            ? Color(0xFF0AFF96)
+                                                                            : percentage < 0
+                                                                                ? Color(0xFFFF002E)
+                                                                                : Colors.white),
+                                                                  ),
+                                                                  Text(
+                                                                    percentage >
+                                                                            0
+                                                                        ? '+$percentage%'
+                                                                        : '$percentage%',
+                                                                    style: TextStyle(
+                                                                        fontSize: 14,
+                                                                        fontWeight: FontWeight.w500,
+                                                                        color: percentage > 0
+                                                                            ? Color(0xFF0AFF96)
+                                                                            : percentage < 0
+                                                                                ? Color(0xFFFF002E)
+                                                                                : Colors.white),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                            // Add additional information or widgets related to the stock here
+                                                          ],
+                                                        ),
+                                                      );
+                                                    },
+                                                  )),
                           ),
                           SizedBox(
                             height: 20,
@@ -784,8 +1006,8 @@ class _HomePageState extends State<HomePage> {
                             future: _newsFuture,
                             builder: (context, snapshot) {
                               if (snapshot.hasData) {
-                                final newsList = snapshot
-                                    .data!; // Extract the fetched news list
+                                final newsList = snapshot.data!;
+                                print(newsList);
                                 return CarouselSlider(
                                   options: CarouselOptions(
                                     autoPlay: true,
