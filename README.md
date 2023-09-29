@@ -1,6 +1,6 @@
 # Walltrade (Trading TH & US With Technical Indicator)
 
-### An application that uses user conditions as technical indicators for automated trading of TH and US stocks.
+### An application that uses technical indicators to set up waiting-free automatic trading of US and TH equities
 
 ### Using Firebase Authentication for one-time log-in until sign-out 🦊
 
