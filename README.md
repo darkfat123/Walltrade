@@ -1,4 +1,19 @@
 # Walltrade (Trading TH & US With Technical Indicator)
+
+### An application that uses user conditions as technical indicators for automated trading of TH and US stocks.
+
+### Using Firebase Authentication for one-time log-in until sign-out 🦊
+
+### Technical Indicator which used in this application 🧑‍🔧
+#### 1. RSI
+#### 2. STO
+#### 3. MACD
+#### 4. EMA
+
+### The model of Deep learning is using LSTM. 🚀
+### Dataset from library of python (yfinance) period 3 years. 📊
+
+
 <img align="center" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/1e9eceb4-6b1b-4830-b32a-6597495c3368"> 
 <img align="center" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/ef048fa8-15d1-469c-99c0-02fcd65239c9">
 <img align="center" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/a608af0e-def3-478e-83ee-03c485ff38e0"> 
