@@ -37,12 +37,36 @@ class _TreemapState extends State<TreemapState> {
 
         final positDataList = <PositData>[];
 
+        double totalMarketValue = 0;
+        List<String> otherSymbols = [];
+
+        double totalMarketValue2 = 0;
+        for (var data in positions) {
+          final marketValue2 = double.parse(data['market_value']);
+          totalMarketValue2 += marketValue2;
+          print(marketValue2);
+        }
+
         for (final position in positions) {
           final marketValue = double.parse(position['market_value']);
+          if (marketValue < totalMarketValue2 * 0.02) {
+            totalMarketValue += marketValue;
+            otherSymbols.add(position['symbol']);
+          } else {
+            positDataList.add(PositData(
+              position['symbol'],
+              marketValue,
+              "US",
+            ));
+          }
+        }
+
+        // Add "Others" if there are any entries
+        if (otherSymbols.isNotEmpty) {
           positDataList.add(PositData(
-            position['symbol'],
-            marketValue,
-            "US", // You might want to use "US" or other logic here
+            'Others',
+            totalMarketValue,
+            "US",
           ));
         }
 
@@ -81,10 +105,9 @@ class _TreemapState extends State<TreemapState> {
         backgroundColor: Color(0xFF212436),
         title: Text('Treemap Chart'),
       ),
-      body: _positDataList.isEmpty // Check if positions list is empty
+      body: _positDataList.isEmpty
           ? Center(
-              child:
-                  CircularProgressIndicator(), // Show CircularProgressIndicator if data is loading
+              child: CircularProgressIndicator(),
             )
           : SfTreemap(
               dataCount: _positDataList.length,
@@ -126,7 +149,6 @@ class _TreemapState extends State<TreemapState> {
                     return _positDataList[index].symbol;
                   },
                   labelBuilder: (BuildContext context, TreemapTile tile) {
-                    // Function to calculate font size based on weight value
                     double getFontSize(double weight) {
                       if (weight < 50) return 2;
                       if (weight < 100) return 4;

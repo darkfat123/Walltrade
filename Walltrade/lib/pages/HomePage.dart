@@ -81,22 +81,6 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       _walletBalance = 0;
     }
-
-    var url2 = Uri.parse('${Constants.serverUrl}/th_portfolio');
-    var headers2 = {'Content-Type': 'application/json'};
-    var body2 = {'username': username};
-    var response =
-        await http.post(url2, headers: headers2, body: jsonEncode(body2));
-
-    if (response.statusCode == 200) {
-      var data2 = jsonDecode(response.body);
-      var th_cash = data2['balance'];
-
-      setState(() {
-        TH_balance = double.parse(th_cash);
-      });
-    }
-    totalBalance = _walletBalance + TH_balance;
   }
 
   Future<void> getBalanceChange() async {
@@ -106,12 +90,16 @@ class _HomePageState extends State<HomePage> {
     var body1 = {'username': username};
     var response1 =
         await http.post(url1, headers: headers1, body: jsonEncode(body1));
-
+    double USDtoTHB = 0;
     if (response1.statusCode == 200) {
       var data1 = jsonDecode(response1.body);
+      var th_cash = data1['balance'];
       setState(() {
+        TH_balance = double.parse(th_cash);
         TH_percentage = data1['percentageChange'];
         TH_totalProfit = double.parse(data1['balanceProfitChange']);
+        USDtoTHB = data1['USDtoTHB'];
+        totalBalance = _walletBalance + TH_balance;
       });
     } else {
       setState(() {
@@ -137,7 +125,7 @@ class _HomePageState extends State<HomePage> {
         _percentageChange = percentageChange;
         print("US percentage: $_percentageChange");
       });
-      totalProfit = TH_totalProfit + _balanceChange;
+      totalProfit = (TH_totalProfit / USDtoTHB) + _balanceChange;
       totalPercentage = TH_percentage + _percentageChange;
       print("Total profit: $totalProfit");
       print("Total percentage: $totalPercentage");
@@ -208,7 +196,6 @@ class _HomePageState extends State<HomePage> {
     getBalance();
     getStockPrices();
     _newsFuture = StaticValues().fetchNews(username: username);
-    print(username);
   }
 
   @override

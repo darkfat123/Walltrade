@@ -15,6 +15,7 @@ class _ThaiTreemapState extends State<ThaiTreemapState> {
   final String username;
   List<dynamic> positions = [];
   bool isLoading = true;
+
   _ThaiTreemapState({required this.username});
   @override
   void initState() {
@@ -22,6 +23,7 @@ class _ThaiTreemapState extends State<ThaiTreemapState> {
     getBalance();
   }
 
+  List<dynamic> others_List = [];
   double _walletBalance = 0;
   double TH_balance = 0;
   double TH_Fiat = 0;
@@ -37,6 +39,36 @@ class _ThaiTreemapState extends State<ThaiTreemapState> {
   double TH_totalChart = 0;
   double totalBalance = 0;
   List<dynamic> TH_ListAssets = [];
+
+  // Function to preprocess data and group items with "amount" < 100000 into "Others"
+  List<dynamic> othersData(List<dynamic> TH_assetData) {
+    List<dynamic> othersData = [];
+    double totalAmount = 0;
+    double totalTH_assetDataAmount = 0;
+    for (var item in TH_assetData) {
+      double amount = item['amount'];
+      totalTH_assetDataAmount += amount;
+    }
+
+    for (var item in TH_assetData) {
+      double amount = item['amount'];
+      if (amount >= totalTH_assetDataAmount*0.02) {
+        othersData.add(item);
+      } else {
+        totalAmount += amount;
+      }
+    }
+
+    if (totalAmount > 0) {
+      othersData.add({
+        'symbol': 'Others',
+        'amount': totalAmount,
+      });
+    }
+
+    return othersData;
+  }
+
   Future<void> getBalance() async {
     var url = Uri.parse('${Constants.serverUrl}/getBalance');
     var headers = {'Content-Type': 'application/x-www-form-urlencoded'};
@@ -51,7 +83,7 @@ class _ThaiTreemapState extends State<ThaiTreemapState> {
 
         setState(() {
           _walletBalance = double.parse(double.parse(walletBalance)
-              .toStringAsFixed(2)); // แปลง String เป็น double
+              .toStringAsFixed(2)); // Convert String to double
           US_cash = _walletBalance;
         });
       } else {
@@ -72,19 +104,10 @@ class _ThaiTreemapState extends State<ThaiTreemapState> {
 
       var portfolioList = data2['portfolioList'];
       setState(() {
-        TH_ListAssets = portfolioList;
+        TH_ListAssets = othersData(portfolioList); // Preprocess data
         isLoading = false;
       });
     }
-
-    print(TH_marketValue);
-    TH_chartMarketValue = (TH_marketValue / TH_balance) * 100;
-    US_chartMarketValue = (US_marketValue / US_cash) * 100;
-    totalFiat = US_cash / TH_balance;
-    totalBalance = _walletBalance + TH_balance;
-    print(TH_Fiat);
-
-    print(US_cash);
   }
 
   @override
@@ -94,10 +117,9 @@ class _ThaiTreemapState extends State<ThaiTreemapState> {
         backgroundColor: Color(0xFF212436),
         title: Text('Treemap Chart หุ้นไทย'),
       ),
-      body: isLoading // Check if positions list is empty
+      body: isLoading
           ? Center(
-              child:
-                  CircularProgressIndicator(), // Show CircularProgressIndicator if data is loading
+              child: CircularProgressIndicator(),
             )
           : TH_ListAssets.isEmpty
               ? Center(
@@ -139,7 +161,6 @@ class _ThaiTreemapState extends State<ThaiTreemapState> {
                         return TH_ListAssets[index]['symbol'];
                       },
                       labelBuilder: (BuildContext context, TreemapTile tile) {
-                        // Function to calculate font size based on weight value
                         double getFontSize(double weight) {
                           if (weight < 10000) return 12;
                           if (weight < 100000) return 16;

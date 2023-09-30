@@ -19,7 +19,7 @@ class WalletPage extends StatefulWidget {
 
 class _WalletPageState extends State<WalletPage> {
   final String username;
-  bool isLoading = false;
+  bool isLoading = true;
   double _walletBalance = 0;
   double checkBalanceChange = 0;
   double TH_balance = 0;
@@ -73,40 +73,16 @@ class _WalletPageState extends State<WalletPage> {
       if (response.statusCode == 200) {
         final positions = json.decode(response.body) as List<dynamic>;
 
-        final positDataList = <PositData>[];
-
-        for (final position in positions) {
-          final marketValue = double.parse(position['market_value']);
-          US_marketValue += marketValue;
-          positDataList.add(PositData(
-            position['symbol'],
-            marketValue,
-            "US", // You might want to use "US" or other logic here
-          ));
-        }
-
-        final url2 = Uri.parse('${Constants.serverUrl}/th_portfolio');
-        final body2 = {'username': username};
-
-        final response2 =
-            await http.post(url2, headers: headers, body: jsonEncode(body2));
-
-        if (response2.statusCode == 200) {
-          final data2 = jsonDecode(response2.body);
-          final portfolioList = data2['portfolioList'] as List<dynamic>;
-
-          for (final port in portfolioList) {
-            positDataList.add(PositData(
-              port['symbol'],
-              port['amount'] / 34,
-              "TH",
+        setState(() {
+          for (final position in positions) {
+            final marketValue = double.parse(position['market_value']);
+            US_marketValue += marketValue;
+            _positDataList.add(PositData(
+              position['symbol'],
+              marketValue,
+              "US", // You might want to use "US" or other logic here
             ));
           }
-        }
-
-        setState(() {
-          _positDataList = positDataList;
-          isLoading = false;
         });
       }
     } catch (error) {
@@ -135,38 +111,57 @@ class _WalletPageState extends State<WalletPage> {
             'Failed to retrieve wallet balance. Error: ${response.body}');
       }
     } catch (e) {
-      formatted_usCash ='0';
+      formatted_usCash = '0';
     }
   }
 
   Future<void> getBalances() async {
-    var commonUrl = Uri.parse('${Constants.serverUrl}/th_portfolio');
     var headers = {'Content-Type': 'application/json'};
     var body = {'username': username};
 
-    var response1 =
-        await http.post(commonUrl, headers: headers, body: jsonEncode(body));
+    var response1 = await http.post(
+        Uri.parse('${Constants.serverUrl}/th_portfolio'),
+        headers: headers,
+        body: jsonEncode(body));
+
     var response2 = await http.post(
         Uri.parse('${Constants.serverUrl}/get_balance_change'),
         headers: headers,
         body: jsonEncode({'username': username}));
+
     var response3 = await http.post(
         Uri.parse('${Constants.serverUrl}/getBalance'),
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: {'username': username});
-
-    var response4 =
-        await http.post(commonUrl, headers: headers, body: jsonEncode(body));
-
     if (response1.statusCode == 200) {
       var data1 = jsonDecode(response1.body);
+      var th_cash = data1['balance'];
+      var th_fiat = data1['lineAvailable'];
+      var th_marketValue = data1['marketValue'];
+      final portfolioList = data1['portfolioList'] as List<dynamic>;
+      setState(() {
+        for (final port in portfolioList) {
+          _positDataList.add(PositData(
+            port['symbol'],
+            port['amount'] / 34,
+            "TH",
+          ));
+        }
+        isLoading = false;
+      });
 
       setState(() {
         TH_percentage = data1['percentageChange'];
         TH_totalProfit = double.parse(data1['balanceProfitChange']);
         USDtoTHB = data1['USDtoTHB'];
+        TH_balance = double.parse(th_cash);
+        TH_Fiat = double.parse(th_fiat);
+        TH_marketValue = double.parse(th_marketValue);
       });
     } else {
+      TH_balance = 0;
+      TH_Fiat = 0;
+      TH_marketValue = 0;
       TH_percentage = 0;
       TH_totalProfit = 0;
     }
@@ -180,17 +175,18 @@ class _WalletPageState extends State<WalletPage> {
         _balanceChange = balanceChange;
         _percentageChange = percentageChange;
       });
-      totalProfit = TH_totalProfit + _balanceChange;
+      totalProfit = (TH_totalProfit / USDtoTHB) + _balanceChange;
       formattedProfit = NumberFormat('#,###.##', 'en_US').format(totalProfit);
       totalPercentage = TH_percentage + _percentageChange;
     } else {
-        totalProfit =0;
-        totalPercentage =0;
+      totalProfit = 0;
+      totalPercentage = 0;
     }
 
     if (response3.statusCode == 200) {
       var data3 = jsonDecode(response3.body);
-      var walletBalance = data3['wallet_balance'] == null ? "0" :data3['wallet_balance'] ;
+      var walletBalance =
+          data3['wallet_balance'] == null ? "0" : data3['wallet_balance'];
 
       setState(() {
         _walletBalance =
@@ -201,26 +197,11 @@ class _WalletPageState extends State<WalletPage> {
       _walletBalance = 0;
     }
 
-    if (response4.statusCode == 200) {
-      var data4 = jsonDecode(response4.body);
-      var th_cash = data4['balance'];
-      var th_fiat = data4['lineAvailable'];
-      var th_marketValue = data4['marketValue'];
-      setState(() {
-        TH_balance = double.parse(th_cash);
-        TH_Fiat = double.parse(th_fiat);
-        TH_marketValue = double.parse(th_marketValue);
-      });
-    } else {
-      TH_balance = 0;
-      TH_Fiat = 0;
-      TH_marketValue = 0;   
-    }
     TH_chartMarketValue =
         TH_marketValue <= 0 ? 0 : (TH_marketValue / TH_Fiat) * 100;
     US_chartMarketValue =
         US_marketValue <= 0 ? 0 : (US_marketValue / US_cash) * 100;
-    totalFiat = US_cash / TH_Fiat;
+    totalFiat = US_cash / (TH_Fiat / USDtoTHB);
     totalBalance = _walletBalance + TH_balance;
   }
 
@@ -557,7 +538,7 @@ class _WalletPageState extends State<WalletPage> {
                                       color: Colors.white, fontSize: 12),
                                 ),
                                 Text(
-                                  "\u0024${NumberFormat('#,###.#', 'en_US').format(TH_Fiat)}",
+                                  "\u0E3F${NumberFormat('#,###.#', 'en_US').format(TH_Fiat)}",
                                   style: TextStyle(
                                       color: Colors.white, fontSize: 12),
                                 ),
@@ -614,7 +595,7 @@ class _WalletPageState extends State<WalletPage> {
                                         color: Colors.white, fontSize: 12),
                                   ),
                                   Text(
-                                    "\u0E3F${NumberFormat('#,###.#', 'en_US').format(TH_marketValue * USDtoTHB)}",
+                                    "\u0E3F${NumberFormat('#,###.#', 'en_US').format(TH_marketValue)}",
                                     style: TextStyle(
                                         color: Colors.white, fontSize: 12),
                                   ),
@@ -782,8 +763,35 @@ class _WalletPageState extends State<WalletPage> {
   }
 
   Widget _buildTreemap() {
+    List<PositData> modifiedPositDataList = [];
+    double totalMarketValue2 = 0;
+    for (var data in _positDataList) {
+      final marketValue2 = data.marketValue;
+      totalMarketValue2 += marketValue2;
+    }
+    print("Total Market Value: $totalMarketValue2");
+    // Calculate the total market value of symbols with marketValue < 50
+    double totalMarketValueLessThan50 = 0;
+
+    for (var positData in _positDataList) {
+      if (positData.marketValue < totalMarketValue2 * 0.01) {
+        totalMarketValueLessThan50 += positData.marketValue;
+      } else {
+        modifiedPositDataList.add(positData);
+      }
+    }
+
+    // Add "Others" with the total market value if there are symbols with marketValue < 50
+    if (totalMarketValueLessThan50 > 0) {
+      modifiedPositDataList.add(PositData(
+        'อื่นๆ',
+        totalMarketValueLessThan50,
+        'Less',
+      ));
+    }
+
     return SfTreemap(
-      dataCount: _positDataList.length,
+      dataCount: modifiedPositDataList.length,
       colorMappers: [
         TreemapColorMapper.range(
           from: 0,
@@ -807,12 +815,12 @@ class _WalletPageState extends State<WalletPage> {
         ),
       ],
       weightValueMapper: (int index) {
-        return _positDataList[index].marketValue;
+        return modifiedPositDataList[index].marketValue;
       },
       levels: <TreemapLevel>[
         TreemapLevel(
           groupMapper: (int index) {
-            return _positDataList[index].symbol;
+            return modifiedPositDataList[index].symbol;
           },
           labelBuilder: (BuildContext context, TreemapTile tile) {
             // Function to calculate font size based on weight value
@@ -849,8 +857,9 @@ class _WalletPageState extends State<WalletPage> {
             return Padding(
               padding: const EdgeInsets.all(10),
               child: Text(
-                  '''Symbol: ${tile.group}\nมูลค่าปัจจุบัน : ${NumberFormat('#,###.#', 'en_US').format(tile.weight)} USD''',
-                  style: const TextStyle(color: Colors.black)),
+                '''Symbol: ${tile.group}\nมูลค่าปัจจุบัน : ${NumberFormat('#,###.#', 'en_US').format(tile.weight)} USD''',
+                style: const TextStyle(color: Colors.black),
+              ),
             );
           },
         ),

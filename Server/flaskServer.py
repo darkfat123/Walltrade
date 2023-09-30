@@ -639,8 +639,6 @@ def get_positions():
     # Create the Alpaca REST API client
     api = REST(result[0], result[1], base_url='https://paper-api.alpaca.markets')
     portfolio = api.list_positions()
-
-    print(portfolio)
     positions = []
     for position in portfolio:
         position_data = {
@@ -651,7 +649,6 @@ def get_positions():
             'unrealized_pl': position.unrealized_pl,
             'unrealized_plpc': position.unrealized_plpc
         }
-        print(type(position.unrealized_pl))
         positions.append(position_data)
     
     return jsonify(positions)
@@ -1441,25 +1438,28 @@ def th_portfolio():
 
     account_info = equity.get_account_info()
     portfolio = equity.get_portfolios()
-
     cashBalance = account_info.get('cashBalance')
+    print(account_info)
+    print(cashBalance)
     portfolio_profit = portfolio['totalPortfolio']['profit']
     percentageChange = (portfolio_profit / cashBalance) * 100
         
     cash = getSymbolHandler("THBUSD").indicators['close']
     USDtoTHB = getSymbolHandler("USDTHB").indicators['close']
     balance = f"{cashBalance * cash:.2f}"
+    print(type(USDtoTHB))
+    print(USDtoTHB)
 
-    balanceProfitChange = f"{portfolio_profit * cash:.2f}"
-    lineAvailable = f"{account_info.get('lineAvailable') * cash:.2f}"
-    marketValue = f"{portfolio['totalPortfolio']['marketValue'] * cash:.2f}"
-    print(balance)
+    balanceProfitChange = f"{portfolio_profit}"
+    lineAvailable = f"{account_info.get('lineAvailable')}"
+    marketValue = f"{portfolio['totalPortfolio']['marketValue'] }"
     portfolio_list = []
+
     for item in portfolio['portfolioList']:
         portfolio_list.append({
             'symbol': item['symbol'],
             'averagePrice': item['averagePrice'],
-            'amount': item['amount'],
+            'amount': item['marketValue'],
             'actualVolume': item['actualVolume'],
             'profit': item['profit'],
             'percentProfit': item['percentProfit'],
@@ -1472,7 +1472,7 @@ def th_portfolio():
         'lineAvailable': lineAvailable,
         'marketValue': marketValue,
         'portfolioList': portfolio_list,
-        'USDtoTHB' : USDtoTHB
+        'USDtoTHB' : float(USDtoTHB)
     }
 
     return jsonify(result)

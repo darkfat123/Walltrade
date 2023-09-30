@@ -8,16 +8,14 @@ class USTreemapState extends StatefulWidget {
   final String username;
   USTreemapState({required this.username});
   @override
-  _USTreemapState createState() => _USTreemapState(username:username);
+  _USTreemapState createState() => _USTreemapState(username: username);
 }
-
 
 class _USTreemapState extends State<USTreemapState> {
   List<PositData> _positDataList = [];
   List<dynamic> positions = [];
   final String username;
-   _USTreemapState({required this.username});
-  
+  _USTreemapState({required this.username});
 
   @override
   void initState() {
@@ -47,6 +45,35 @@ class _USTreemapState extends State<USTreemapState> {
           costBasis,
         ));
       }
+
+      // เรียงลำดับ _positDataList ตาม marketValue จากมากไปน้อย
+      _positDataList.sort((a, b) => b.marketValue.compareTo(a.marketValue));
+
+      // สร้าง List ใหม่ที่มี symbol ที่มี marketValue น้อยกว่า 50 รวมเข้าด้วยกัน
+
+      double totalMarketValue = 0;
+      for (var data in _positDataList) {
+        totalMarketValue += data.marketValue;
+      }
+      List<PositData> modifiedList = [];
+      double othersMarketValue = 0;
+      for (var data in _positDataList) {
+        if (data.marketValue < totalMarketValue * 0.02) {
+          othersMarketValue += data.marketValue;
+        } else {
+          modifiedList.add(data);
+        }
+      }
+
+      print('Total Market Value: $totalMarketValue');
+      if (othersMarketValue > 0) {
+        modifiedList.add(PositData('อื่นๆ', othersMarketValue, 0));
+      }
+
+      setState(() {
+        _positDataList = modifiedList;
+      });
+
       print(_positDataList);
     } else {
       print('Failed to fetch position data');

@@ -110,8 +110,14 @@ class _PredictLineChartState extends State<PredictLineChart> {
       ),
       minX: 0,
       maxX: predictPrices.length.toDouble() - 1, // ปรับขอบเขต X
-      minY: predictPrices.reduce((a, b) => a < b ? a : b), // ปรับขอบเขต Y
-      maxY: realPrices.reduce((a, b) => a > b ? a : b), // ปรับขอบเขต Y
+      minY: realPrices.reduce((a, b) => a > b ? a : b) <=
+              predictPrices.reduce((a, b) => a < b ? a : b)
+          ? realPrices.reduce((a, b) => a > b ? a : b)
+          : predictPrices.reduce((a, b) => a < b ? a : b),
+      maxY: realPrices.reduce((a, b) => a > b ? a : b) >=
+              predictPrices.reduce((a, b) => a < b ? a : b)
+          ? realPrices.reduce((a, b) => a > b ? a : b)
+          : predictPrices.reduce((a, b) => a < b ? a : b),
       lineBarsData: [
         LineChartBarData(
           spots: realPrices.asMap().entries.map(
