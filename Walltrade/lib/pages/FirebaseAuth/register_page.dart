@@ -45,7 +45,19 @@ class _RegisterPageState extends State<RegisterPage> {
     if (response.statusCode == 200) {
       // Registration successful
       Fluttertoast.showToast(
-          msg: "สมัครสมาชิกสำเร็จ",
+              msg: "สมัครสมาชิกสำเร็จ",
+              backgroundColor: primary,
+              textColor: Colors.white)
+          .then((value) => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ContinueRegisterPage(
+                  username: usernameController.text,
+                ),
+              )));
+    } else {
+      Fluttertoast.showToast(
+          msg: "Username หรือ Email ถูกใช้แล้ว โปรดใช้ชื่ออื่น",
           backgroundColor: primary,
           textColor: Colors.white);
     }
@@ -74,7 +86,7 @@ class _RegisterPageState extends State<RegisterPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Lottie.asset('assets/lottie/registerLottie.json', height: 380),
+              //Lottie.asset('assets/lottie/registerLottie.json', height: 380),
               Container(
                 decoration: BoxDecoration(
                     color: Colors.white,
@@ -205,14 +217,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             passwordController.text != '' &&
                             confirmpasswordController.text != '') {
                           createUserWithEmailAndPassword()
-                              .then((value) => registerUser())
-                              .then((value) => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ContinueRegisterPage(
-                                      username: usernameController.text,
-                                    ),
-                                  )));
+                              .then((value) => registerUser());
                         }
                       },
                       child: Row(

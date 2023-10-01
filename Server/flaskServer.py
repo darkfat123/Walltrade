@@ -104,9 +104,9 @@ def predict():
 
         close = analysis.indicators['close']
         # หาค่าราคาที่ทำนายของ 10 วันสุดท้าย
-        predicted_prices = predicted_prices[-60:]
+        predicted_prices = predicted_prices[-180:]
         predicted_prices = predicted_prices.reshape(-1)
-        real_prices = data['Close'][-60:]
+        real_prices = data['Close'][-180:]
 
         real_prices_list = real_prices.tolist()
         predicted_prices = np.append(predicted_prices, prediction[0][0])
@@ -191,7 +191,30 @@ def getUsernamefromEmail():
     except Exception as e:
         return jsonify({'error': str(e)})
 
+@app.route('/checkEmailExist', methods=['POST'])
+def checkEmailExist():
+    email = request.json['email']
+    conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
+    cursor = conn.cursor()
+    
+    # Check if email already exists
+    query = "SELECT * FROM users_info WHERE Email = %s"
+    cursor.execute(query, (email,))
+    existing_user = cursor.fetchone()
 
+    if existing_user:
+        response = {
+            'message': 'Email already exists'
+        }
+        return jsonify(response), 200
+    else:
+        response = {
+            'message': 'Email does not exist',
+            'email': email,
+        }
+        return jsonify(response), 400
+
+    
 @app.route('/register', methods=['POST'])
 def register():
     try:
@@ -205,8 +228,8 @@ def register():
         cursor = conn.cursor()
 
         # Check if username already exists
-        query = "SELECT * FROM users_info WHERE username = %s"
-        cursor.execute(query, (username,))
+        query = "SELECT * FROM users_info WHERE username = %s AND Email = %s"
+        cursor.execute(query, (username,email))
         existing_user = cursor.fetchone()
 
         if existing_user:
@@ -216,7 +239,7 @@ def register():
 
             # Return error response as JSON
             response = {
-                'message': 'Username already exists'
+                'message': 'Username & E-mail already exists'
             }
             return jsonify(response), 400
 

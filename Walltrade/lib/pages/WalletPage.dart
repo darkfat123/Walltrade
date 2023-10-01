@@ -194,6 +194,7 @@ class _WalletPageState extends State<WalletPage> {
         US_cash = _walletBalance;
       });
     } else {
+      US_cash = 0;
       _walletBalance = 0;
     }
 
@@ -201,7 +202,12 @@ class _WalletPageState extends State<WalletPage> {
         TH_marketValue <= 0 ? 0 : (TH_marketValue / TH_Fiat) * 100;
     US_chartMarketValue =
         US_marketValue <= 0 ? 0 : (US_marketValue / US_cash) * 100;
-    totalFiat = US_cash / (TH_Fiat / USDtoTHB);
+    totalFiat =
+        US_cash == 0 || TH_Fiat == 0 ? 1 : US_cash / (TH_Fiat / USDtoTHB);
+    print("uscash: $US_cash");
+    print(TH_Fiat);
+    print("USDtoTHB $USDtoTHB");
+    print("total :$totalFiat");
     totalBalance = _walletBalance + TH_balance;
   }
 

@@ -1,6 +1,7 @@
 import 'package:Walltrade/pages/FirebaseAuth/auth.dart';
 import 'package:Walltrade/pages/guidePage/alpacaRegisterGuide.dart';
 import 'package:Walltrade/primary.dart';
+import 'package:Walltrade/widget/bottomSheet/ForgotPassword.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:quickalert/quickalert.dart';
@@ -113,11 +114,13 @@ class _LoginPageState extends State<LoginPage> {
                       children: [
                         InkWell(
                           onTap: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => RegisterPage(),
-                              ),
+                            showModalBottomSheet(
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return ForgotPasswordSheet(context: context);
+                              },
                             );
                           },
                           child: const Text(

@@ -543,9 +543,8 @@ class _PredictPageState extends State<PredictPage> {
                                                   Colors.transparent,
                                               context: context,
                                               builder: (BuildContext context) {
-                                                return buildPredictSheet(
+                                                return PredictSheet(
                                                   data: predictdata,
-                                                  context: context,
                                                 );
                                               },
                                             );
@@ -582,9 +581,9 @@ class _PredictPageState extends State<PredictPage> {
                                           backgroundColor: Colors.transparent,
                                           context: context,
                                           builder: (BuildContext context) {
-                                            return buildPredictSheet(
-                                                data: predictdata,
-                                                context: context);
+                                            return PredictSheet(
+                                              data: predictdata,
+                                            );
                                           })
                                       : showModalBottomSheet(
                                           isScrollControlled: true,
@@ -705,7 +704,7 @@ class _PredictPageState extends State<PredictPage> {
                   ],
                 ),
               ),
-             /* const Row(
+              /* const Row(
                 children: [
                   Padding(
                     padding: EdgeInsets.only(left: 30, bottom: 10),

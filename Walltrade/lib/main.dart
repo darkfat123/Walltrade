@@ -62,7 +62,7 @@ class MyApp extends StatelessWidget {
             return const CircularProgressIndicator(); // หรือเฉลยอื่นๆ ที่คุณต้องการในระหว่างรอ
           } else {
             if (snapshot.hasData) {
-              return Home(username: username, initialIndex: 4);
+              return Home(username: username, initialIndex: 3);
             } else {
               return LoginPage();
             }

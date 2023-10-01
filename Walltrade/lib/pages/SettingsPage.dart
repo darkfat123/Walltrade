@@ -75,7 +75,7 @@ class _SettingsState extends State<Settings> {
 
     // Send the API key and secret key to the Flask server
     String url =
-        '${Constants.serverUrl}/updateUSalpacaAPI'; // เปลี่ยนเป็น URL ของ Flask server ที่ใช้งาน
+        '${Constants.serverUrl}/updateTHsettradeAPI'; // เปลี่ยนเป็น URL ของ Flask server ที่ใช้งาน
 
     Map<String, String> headers = {
       'Content-Type': 'application/x-www-form-urlencoded'
