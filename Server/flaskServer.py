@@ -1384,21 +1384,24 @@ def checkMarketStatus():
 @app.route('/news', methods=['POST'])
 def news():
     username = request.json.get('username')
-    url = 'https://data.alpaca.markets/v1beta1/news?limit=20&exclude_contentless=true'
+
     conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
     cur = conn.cursor()
-    cur.execute("SELECT api_key, secret_key FROM users_info WHERE username = %s", (username,))
-    
-    result = cur.fetchone()
+
     cur.execute(f"SELECT watchlist FROM users_info WHERE username = '{username}'")
     stock_list=[]
     result2 = cur.fetchone()
     if result2 is not None:
         watchlist_json = result2[0]
         stock_list = json.loads(watchlist_json) if watchlist_json else []
-    print(stock_list)
+        stock_string = ','.join(stock_list)
+    print(stock_string)
+    url = f"https://data.alpaca.markets/v1beta1/news?limit=20&exclude_contentless=true&symbols={stock_string}"
+
+    cur.execute("SELECT api_key, secret_key FROM users_info WHERE username = %s", (username,))
     
-    print(result)
+    result = cur.fetchone()
+
     if result and result != ('', ''):
         api_key, secret_key = result
     else:

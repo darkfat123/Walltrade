@@ -1,23 +1,12 @@
-import 'package:Walltrade/pages/guidePage/alpacaRegisterGuide.dart';
 import 'package:Walltrade/pages/FirebaseAuth/auth.dart';
 import 'package:Walltrade/pages/FirebaseAuth/login_page.dart';
-
-
-import 'package:Walltrade/pages/FirebaseAuth/register_page.dart';
-import 'package:Walltrade/pages/MoreTechnicalOrder.dart';
 import 'package:Walltrade/pages/TradePageOptions.dart';
-import 'package:Walltrade/pages/HistoryAutoTrade.dart';
-
-
-import 'package:Walltrade/pages/thStockView.dart';
 import 'package:Walltrade/primary.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'pages/guidePage/settradeRegisterGuide.dart';
 import 'pages/HomePage.dart';
-import 'pages/PortfolioDetail.dart';
 import 'pages/PredictPage.dart';
 
 import 'package:Walltrade/pages/SearchPage.dart';
@@ -35,6 +24,7 @@ Future<void> main() async {
   runApp(MyApp());
 }
 
+// ignore: must_be_immutable
 class MyApp extends StatelessWidget {
   final User? user;
 

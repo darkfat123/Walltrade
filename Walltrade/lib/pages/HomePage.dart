@@ -11,6 +11,7 @@ import 'package:Walltrade/pages/SettingsPage.dart';
 import 'package:Walltrade/pages/moreNews2.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:quickalert/quickalert.dart';
 import '../main.dart';
 import '../model/news.dart';
 import '../variables/serverURL.dart';
@@ -958,12 +959,38 @@ class _HomePageState extends State<HomePage> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  "บทความและข่าวสาร",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
-                                  ),
+                                Row(
+                                  children: [
+                                    Text(
+                                      "บทความและข่าวสาร",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 8,
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        QuickAlert.show(
+                                            context: context,
+                                            type: QuickAlertType.info,
+                                            title: 'บทความและข่าวสาร',
+                                            text: 'บทความและข่าวสารจะกรองสิ่งที่อยู่ในรายการเฝ้าดูมาแสดงผลเป็นอันดับแรกเสมอ',
+                                            width: 0,
+                                            confirmBtnColor: Color(0xFF212436),
+                                            confirmBtnText: 'ตกลง',
+                                            confirmBtnTextStyle: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.white));
+                                      },
+                                      child: Icon(
+                                        Icons.info_outline,
+                                        size: 18,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 GestureDetector(
                                   onTap: () {
