@@ -1388,7 +1388,7 @@ def news():
     conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
     cur = conn.cursor()
     cur.execute("SELECT api_key, secret_key FROM users_info WHERE username = %s", (username,))
-
+    
     result = cur.fetchone()
     print(result)
     if result and result != ('', ''):

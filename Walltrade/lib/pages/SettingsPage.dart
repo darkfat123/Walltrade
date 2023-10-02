@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:Walltrade/pages/FirebaseAuth/login_page.dart';
 import 'package:Walltrade/primary.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -116,8 +120,66 @@ class _SettingsState extends State<Settings> {
     }
   }
 
+  PlatformFile? pickedFile;
+  Future selectFile() async {
+    final result = await FilePicker.platform.pickFiles();
+
+    setState(() {
+      pickedFile = result?.files.first;
+    });
+  }
+
+  UploadTask? uploadTask;
+  Future uploadFile() async {
+    final path = "files/${pickedFile!.name}";
+    final file = File(pickedFile!.path!);
+    final ref = FirebaseStorage.instance.ref().child(path);
+    setState(() {
+      uploadTask = ref.putFile(file);
+    });
+
+    final snapshot = await uploadTask!.whenComplete(() {});
+    final urlDownload = await snapshot.ref.getDownloadURL();
+    print('Download Link: $urlDownload');
+
+    setState(() {
+      uploadTask = null;
+    });
+  }
+
   Future<void> signOut() async {
     await Auth().signOut();
+  }
+
+  Widget buildProgress() {
+    return StreamBuilder(
+        stream: uploadTask?.snapshotEvents,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            final data = snapshot.data!;
+            double progress = data.bytesTransferred / data.totalBytes;
+            return SizedBox(
+              height: 50,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  LinearProgressIndicator(
+                    value: progress,
+                    backgroundColor: Colors.grey,
+                    color: primary,
+                  ),
+                  Center(
+                    child: Text("${(100 * progress).roundToDouble()}%"),
+                  )
+                ],
+              ),
+            );
+          } else {
+            return const SizedBox(
+              height: 50,
+            );
+          }
+        });
   }
 
   @override
@@ -134,6 +196,45 @@ class _SettingsState extends State<Settings> {
             padding: EdgeInsets.all(10),
             child: Column(
               children: [
+                /*Container(
+                  padding: EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset:
+                            Offset(0, 3), // changes the position of the shadow
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        "เปลี่ยนรูปโปรไฟล์",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600, fontSize: 18),
+                      ),
+                      SizedBox(height: 30),
+                      if (pickedFile != null)
+                        Expanded(
+                          child: Image.file(
+                            File(pickedFile!.path!),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ElevatedButton(
+                          onPressed: () => selectFile(),
+                          child: Text("เลือกรูปภาพ")),
+                      ElevatedButton(
+                          onPressed: () => uploadFile(), child: Text("ตกลง")),
+                    ],
+                  ),
+                ),*/
+                SizedBox(height: 30),
                 Container(
                   padding: EdgeInsets.all(20),
                   decoration: BoxDecoration(

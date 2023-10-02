@@ -708,66 +708,61 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                                       ],
                                     ),
                                     child: ListTile(
-                                      title: Row(
+                                      title: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             item['symbol'],
                                             style: TextStyle(
                                                 fontWeight: FontWeight.w500),
                                           ),
-                                          SizedBox(
-                                            width: 8,
-                                          ),
-                                          Container(
-                                            padding: EdgeInsets.symmetric(
-                                                vertical: 2, horizontal: 10),
-                                            child: Row(
-                                              children: [
-                                                Text(
-                                                  hideBalance
-                                                      ? "****"
-                                                      : item['profit']
-                                                              .toString()
-                                                              .startsWith("-")
-                                                          ? "${NumberFormat('#,###.#', 'en_US').format(item['profit'])}\u0E3F"
-                                                          : "+${NumberFormat('#,###.#', 'en_US').format(item['profit'])}\u0E3F",
-                                                  style: TextStyle(
-                                                      color: NumberFormat(
-                                                                  '#,###.##',
-                                                                  'en_US')
-                                                              .format(item[
-                                                                  'profit'])
-                                                              .startsWith('-')
-                                                          ? Color(0xFFBB2525)
-                                                          : Color(0xFF82CD47),
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.w700),
-                                                ),
-                                                SizedBox(
-                                                  width: 8,
-                                                ),
-                                                Text(
-                                                  item['percentProfit']
-                                                          .toString()
-                                                          .startsWith("-")
-                                                      ? "(${NumberFormat('#,###.##', 'en_US').format(item['percentProfit'])}%)"
-                                                      : "(+${NumberFormat('#,###.##', 'en_US').format(item['percentProfit'])}%)",
-                                                  style: TextStyle(
-                                                      color: NumberFormat(
-                                                                  '#,###.##',
-                                                                  'en_US')
-                                                              .format(item[
-                                                                  'percentProfit'])
-                                                              .startsWith('-')
-                                                          ? Color(0xFFBB2525)
-                                                          : Color(0xFF82CD47),
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.w700),
-                                                ),
-                                              ],
-                                            ),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                hideBalance
+                                                    ? "****"
+                                                    : item['profit']
+                                                            .toString()
+                                                            .startsWith("-")
+                                                        ? "${NumberFormat('#,###.#', 'en_US').format(item['profit'])}\u0E3F"
+                                                        : "+${NumberFormat('#,###.#', 'en_US').format(item['profit'])}\u0E3F",
+                                                style: TextStyle(
+                                                    color: NumberFormat(
+                                                                '#,###.##',
+                                                                'en_US')
+                                                            .format(
+                                                                item['profit'])
+                                                            .startsWith('-')
+                                                        ? Color(0xFFBB2525)
+                                                        : Color(0xFF82CD47),
+                                                    fontSize: 12,
+                                                    fontWeight:
+                                                        FontWeight.w700),
+                                              ),
+                                              SizedBox(
+                                                width: 8,
+                                              ),
+                                              Text(
+                                                item['percentProfit']
+                                                        .toString()
+                                                        .startsWith("-")
+                                                    ? "(${NumberFormat('#,###.##', 'en_US').format(item['percentProfit'])}%)"
+                                                    : "(+${NumberFormat('#,###.##', 'en_US').format(item['percentProfit'])}%)",
+                                                style: TextStyle(
+                                                    color: NumberFormat(
+                                                                '#,###.##',
+                                                                'en_US')
+                                                            .format(item[
+                                                                'percentProfit'])
+                                                            .startsWith('-')
+                                                        ? Color(0xFFBB2525)
+                                                        : Color(0xFF82CD47),
+                                                    fontSize: 12,
+                                                    fontWeight:
+                                                        FontWeight.w700),
+                                              ),
+                                            ],
                                           ),
                                         ],
                                       ),
@@ -1065,7 +1060,9 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                                       ],
                                     ),
                                     child: ListTile(
-                                      title: Row(
+                                      title: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             position['symbol'],
@@ -1073,73 +1070,64 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                                                 fontWeight: FontWeight.w500,
                                                 color: Colors.white),
                                           ),
-                                          SizedBox(
-                                            width: 8,
-                                          ),
-                                          Container(
-                                            padding: EdgeInsets.symmetric(
-                                                vertical: 2, horizontal: 10),
-                                            child: Row(
-                                              children: [
-                                                position['unrealized_pl']
-                                                        .toString()
-                                                        .startsWith('-')
-                                                    ? Text(
-                                                        hideBalance
-                                                            ? "****"
-                                                            : "\u0024${NumberFormat('#,###.#', 'en_US').format(double.parse(position['unrealized_pl']))}",
-                                                        style: TextStyle(
-                                                            color: position[
-                                                                        'unrealized_pl']
-                                                                    .toString()
-                                                                    .startsWith(
-                                                                        '-')
-                                                                ? Color(
-                                                                    0xFFFF002E)
-                                                                : Color(
-                                                                    0xFF0AFF96),
-                                                            fontSize: 12,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w700),
-                                                      )
-                                                    : Text(
-                                                        hideBalance
-                                                            ? "****"
-                                                            : "\u0024+${NumberFormat('#,###.#', 'en_US').format(double.parse(position['unrealized_pl']))}",
-                                                        style: TextStyle(
-                                                            color: position[
-                                                                        'unrealized_pl']
-                                                                    .toString()
-                                                                    .startsWith(
-                                                                        '-')
-                                                                ? Color(
-                                                                    0xFFFF002E)
-                                                                : Color(
-                                                                    0xFF0AFF96),
-                                                            fontSize: 12,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w700),
-                                                      ),
-                                                SizedBox(
-                                                  width: 8,
-                                                ),
-                                                Text(
-                                                  "(${NumberFormat('#,###.##', 'en_US').format(double.parse(position['unrealized_plpc']))}%)",
-                                                  style: TextStyle(
-                                                      color: position[
-                                                                  'unrealized_plpc']
-                                                              .toString()
-                                                              .startsWith('-')
-                                                          ? Color(0xFFFF002E)
-                                                          : Color(0xFF0AFF96),
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.w700),
-                                                ),
-                                              ],
-                                            ),
+                                          Row(
+                                            children: [
+                                              position['unrealized_pl']
+                                                      .toString()
+                                                      .startsWith('-')
+                                                  ? Text(
+                                                      hideBalance
+                                                          ? "****"
+                                                          : "\u0024${NumberFormat('#,###.#', 'en_US').format(double.parse(position['unrealized_pl']))}",
+                                                      style: TextStyle(
+                                                          color: position[
+                                                                      'unrealized_pl']
+                                                                  .toString()
+                                                                  .startsWith(
+                                                                      '-')
+                                                              ? Color(
+                                                                  0xFFFF002E)
+                                                              : Color(
+                                                                  0xFF0AFF96),
+                                                          fontSize: 12,
+                                                          fontWeight:
+                                                              FontWeight.w700),
+                                                    )
+                                                  : Text(
+                                                      hideBalance
+                                                          ? "****"
+                                                          : "\u0024+${NumberFormat('#,###.#', 'en_US').format(double.parse(position['unrealized_pl']))}",
+                                                      style: TextStyle(
+                                                          color: position[
+                                                                      'unrealized_pl']
+                                                                  .toString()
+                                                                  .startsWith(
+                                                                      '-')
+                                                              ? Color(
+                                                                  0xFFFF002E)
+                                                              : Color(
+                                                                  0xFF0AFF96),
+                                                          fontSize: 12,
+                                                          fontWeight:
+                                                              FontWeight.w700),
+                                                    ),
+                                              SizedBox(
+                                                width: 8,
+                                              ),
+                                              Text(
+                                                "(${NumberFormat('#,###.##', 'en_US').format(double.parse(position['unrealized_plpc']))}%)",
+                                                style: TextStyle(
+                                                    color: position[
+                                                                'unrealized_plpc']
+                                                            .toString()
+                                                            .startsWith('-')
+                                                        ? Color(0xFFFF002E)
+                                                        : Color(0xFF0AFF96),
+                                                    fontSize: 12,
+                                                    fontWeight:
+                                                        FontWeight.w700),
+                                              ),
+                                            ],
                                           ),
                                         ],
                                       ),

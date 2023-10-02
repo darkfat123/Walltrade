@@ -753,18 +753,6 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
               children: [
                 IconButton(
                   iconSize: 20,
-                  icon: const Icon(Icons.access_time),
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              HistoryAutoTradePage(username: username),
-                        ));
-                  },
-                ),
-                IconButton(
-                  iconSize: 20,
                   icon: const Icon(Icons.settings),
                   onPressed: () {
                     Navigator.pushReplacement(
