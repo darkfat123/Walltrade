@@ -311,12 +311,12 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                                       horizontal: 6, vertical: 3),
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(10),
-                                    color: Color(0xFFECF8F9),
+                                    color: Colors.white,
                                   ),
                                   child: Text(
                                     hideBalance
                                         ? "**** USD (****)"
-                                        : "${TH_ProfitChange.toString().startsWith("-") ? (NumberFormat('#,###.##', 'en_US').format(TH_ProfitChange)) : "+${NumberFormat('#,###.##', 'en_US').format(TH_ProfitChange)}"} USD (${TH_percentageChange.toStringAsFixed(4)}%)",
+                                        : "${TH_ProfitChange.toString().startsWith("-") ? (NumberFormat('#,###.##', 'en_US').format(TH_ProfitChange)) : "+${NumberFormat('#,###.##', 'en_US').format(TH_ProfitChange)}"} บาท (${TH_percentageChange.toStringAsFixed(4)}%)",
                                     style: TextStyle(
                                       fontWeight: FontWeight.w700,
                                       fontSize: 12,
@@ -447,7 +447,7 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage>
                   ),
                 ),
                 Container(
-                  height: 560,
+                  height: MediaQuery.of(context).size.height*0.59,
                   padding: EdgeInsets.all(16),
                   child: IndexedStack(
                     index: _currentIndex,
