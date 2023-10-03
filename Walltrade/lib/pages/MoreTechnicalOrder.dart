@@ -37,7 +37,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
   TextEditingController qtyController = TextEditingController();
   bool isCrossTextFieldEnabled = true;
   bool isZoneTextFieldEnabled = true;
-  String selectedInterval = '1 hour';
+  String selectedInterval = '1h';
 
   String selectedDay = '5';
 
@@ -123,6 +123,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
               onChanged: (String? newValue) {
                 setState(() {
                   selectedInterval = newValue!;
+                  print(selectedInterval);
                 });
               },
             ),
@@ -347,6 +348,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                 onChanged: (String? newValue) {
                   setState(() {
                     selectedDay = newValue!;
+                    print(selectedDay);
                   });
                 },
               ),
@@ -1011,28 +1013,28 @@ class TimeframeDropdown extends StatelessWidget {
               onChanged: onChanged,
               items: const [
                 DropdownMenuItem(
-                  value: '1 hour',
+                  value: '1h',
                   child: Text(
                     '1 hour',
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
                 DropdownMenuItem(
-                  value: '4 hours',
+                  value: '4h',
                   child: Text(
                     '4 hours',
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
                 DropdownMenuItem(
-                  value: '1 day',
+                  value: '1D',
                   child: Text(
                     '1 day',
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
                 DropdownMenuItem(
-                  value: '1 week',
+                  value: '1w',
                   child: Text(
                     '1 week',
                     style: TextStyle(color: Colors.white),

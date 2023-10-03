@@ -1612,6 +1612,7 @@ def multiAutotrade():
     type = "market"
     time_in_force = "gtc"
     interval = request.json.get('interval')
+    print(interval)
 
     techniques = []
 
@@ -1849,6 +1850,9 @@ def multiAutotrade():
                         rsi = analysis.indicators["RSI"]               
                         ema = analysis.indicators[f"EMA{day}"]
                         close = analysis.indicators["close"]
+                        print("RSI:",rsi)
+                        print("EMA:",ema)
+                        print("Close:",close)
                         if rsi < rsi_value and close <= ema and last_close > last_ema:
                             placeOrderAutoTrade(symbol=symbol,username=username,qty=qty,side=side)
                             completeOrder(username=username,orderID=order_number)
