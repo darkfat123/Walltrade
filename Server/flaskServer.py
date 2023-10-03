@@ -98,9 +98,9 @@ def predict():
 
         if symbol.endswith('.BK'):
             symbols = symbol.rstrip(".BK") 
-            analysis = getSymbolHandler(symbols)
+            analysis = getSymbolHandler(symbols,"1D")
         else:
-            analysis = getSymbolHandler(symbol)
+            analysis = getSymbolHandler(symbol,"1D")
 
         close = analysis.indicators['close']
         # หาค่าราคาที่ทำนายของ 10 วันสุดท้าย
@@ -684,6 +684,7 @@ def autotradeRSI():
     qty = float(request.json.get('qty'))
     side = request.json.get('side')
     type = "market"
+    interval = request.json.get('interval')
     time_in_force = "gtc"
 
     conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
@@ -705,33 +706,28 @@ def autotradeRSI():
     # Create the Alpaca REST API client
     api = REST(result[0], result[1], base_url='https://paper-api.alpaca.markets')
     print(symbol,qty,side,type,time_in_force)
-    insert_query = f"INSERT INTO auto_order (OrderID , username, symbol, techniques, quantity, side, status) VALUES ({order_number},%s, %s, %s, %s, %s,'pending')"
+    insert_query = f"INSERT INTO auto_order (OrderID , username, symbol, techniques, quantity, side, timeframe, status) VALUES ({order_number},%s, %s, %s, %s, %s, %s,'pending')"
     if side == "buy":
         techniques = f"RSI < {lowerRSI}"
     else:
         techniques = f"RSI > {lowerRSI}"
-    data = (username, symbol, techniques, qty, side)
+    data = (username, symbol, techniques, qty, side, interval)
     print(symbol,qty,side,type,time_in_force)   
     cursor.execute(insert_query, data)
     print(cursor)
     conn.commit()
 
-    handler = TA_Handler(
-        symbol=symbol,
-        screener="Crypto",
-        exchange="Binance",
-        interval="1m"
-    )
+    analysis = getSymbolHandler(symbol,interval)
     
     if side == 'buy':
         while True:
-            print(handler.get_analysis().indicators["RSI"])
+            print(analysis.indicators["RSI"])
             checkStatus = checkStatusOrder(username=username,order_number=order_number)
             print(checkStatus)
             if checkStatus == 'cancelled':
                 return jsonify('autotrade buy rsi cancelled')
             
-            elif handler.get_analysis().indicators["RSI"] <= lowerRSI:
+            elif analysis.indicators["RSI"] <= lowerRSI:
                 try:
                     api.submit_order(
                     symbol=symbol,
@@ -749,17 +745,13 @@ def autotradeRSI():
         while True:
              # Check the status in localhost and break the loop if it's 'completed'
             print("เข้าเงื่อนไขขาย RSI")
-            query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
-            cursor2 = conn.cursor()
-            cursor2.execute("RESET QUERY CACHE;")
-            cursor2.execute(query2)
-            result2 = cursor2.fetchone()
-            print(result2[0])
-            print(handler.get_analysis().indicators["RSI"])
-            if result2[0] == 'cancelled':
+            checkStatus = checkStatusOrder(username=username,order_number=order_number)
+            print(checkStatus)
+            print(analysis.indicators["RSI"])
+            if checkStatus == 'cancelled':
                 return jsonify('autotrade sell rsi cancelled')
             
-            elif handler.get_analysis().indicators["RSI"] >= lowerRSI:
+            elif analysis.indicators["RSI"] >= lowerRSI:
                 try:
                     api.submit_order(
                     symbol=symbol,
@@ -784,6 +776,7 @@ def autotradeMACD():
     side = request.json.get('side')
     type = "market"
     time_in_force = "gtc"
+    interval = request.json.get('interval')
 
 
     last_macd = 0
@@ -800,13 +793,7 @@ def autotradeMACD():
     api = REST(result[0], result[1], base_url='https://paper-api.alpaca.markets')
     print(symbol,qty,side,type,time_in_force,zone,cross) 
 
-    
-    handler = TA_Handler(
-        symbol=symbol,
-        screener="Crypto",
-        exchange="Binance",
-        interval="1m"
-    )
+    analysis = getSymbolHandler(symbol=symbol,interval=interval)
 
     while True:
         order_number = random.randrange(1, 100000)
@@ -817,7 +804,7 @@ def autotradeMACD():
             order_number=order_number
             break
 
-    insert_query = f"INSERT INTO auto_order (OrderID , username, symbol, techniques, quantity, side, status) VALUES ({order_number},%s, %s, %s, %s, %s,'pending')"
+    insert_query = f"INSERT INTO auto_order (OrderID , username, symbol, techniques, quantity, side, timeframe, status) VALUES ({order_number},%s, %s, %s, %s, %s, %s,'pending')"
     if side == "buy":
         if cross:
             techniques = f"MACD ตัดขึ้น Signal และ < 0"
@@ -828,7 +815,7 @@ def autotradeMACD():
             techniques = f"MACD ตัดลง Signal และ > 0"
         else:
             techniques = f"MACD & Signal > {zone}"
-    data = (username, symbol, techniques, qty, side)
+    data = (username, symbol, techniques, qty, side,interval)
     print(symbol,qty,side,type,time_in_force)   
     cursor.execute(insert_query, data)
     print(cursor)
@@ -837,21 +824,17 @@ def autotradeMACD():
     if side == 'buy':
         if cross:
             while True:
-                macd = handler.get_analysis().indicators["MACD.macd"]
-                signal = handler.get_analysis().indicators["MACD.signal"]
+                macd = analysis.indicators["MACD.macd"]
+                signal = analysis.indicators["MACD.signal"]
 
                 print("Last MACD: ", last_macd)
                 print("Last Signal: ", last_signal)
                 print("MACD: ", macd)
                 print("Signal: ", signal)
                     
-                query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
-                cursor2 = conn.cursor()
-                cursor2.execute("RESET QUERY CACHE;")
-                cursor2.execute(query2)
-                result2 = cursor2.fetchone()
-                print(result2[0])
-                if result2[0] == 'cancelled':
+                checkStatus = checkStatusOrder(username=username,order_number=order_number)
+                print(checkStatus)
+                if checkStatus == 'cancelled':
                     return jsonify('autotrade buy macd cancelled')
                 
                 elif (last_macd < last_signal and macd > signal) and (macd and signal < 0):
@@ -875,21 +858,17 @@ def autotradeMACD():
                 time.sleep(5)
         else:
             while True:
-                macd = handler.get_analysis().indicators["MACD.macd"]
-                signal = handler.get_analysis().indicators["MACD.signal"]
+                macd = analysis.indicators["MACD.macd"]
+                signal = analysis.indicators["MACD.signal"]
 
                 print("Last MACD: ", last_macd)
                 print("Last Signal: ", last_signal)
                 print("MACD: ", macd)
                 print("Signal: ", signal)
 
-                query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
-                cursor2 = conn.cursor()
-                cursor2.execute("RESET QUERY CACHE;")
-                cursor2.execute(query2)
-                result2 = cursor2.fetchone()
-                print(result2[0])
-                if result2[0] == 'cancelled':
+                checkStatus = checkStatusOrder(username=username,order_number=order_number)
+                print(checkStatus)
+                if checkStatus == 'cancelled':
                     return jsonify('autotrade buy macd cancelled')
                 
                 elif macd and signal < zone:
@@ -914,21 +893,17 @@ def autotradeMACD():
     else:
         if cross:
             while True:
-                macd = handler.get_analysis().indicators["MACD.macd"]
-                signal = handler.get_analysis().indicators["MACD.signal"]
+                macd = analysis.indicators["MACD.macd"]
+                signal = analysis.indicators["MACD.signal"]
 
                 print("Last MACD: ", last_macd)
                 print("Last Signal: ", last_signal)
                 print("MACD: ", macd)
                 print("Signal: ", signal)
 
-                query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
-                cursor2 = conn.cursor()
-                cursor2.execute("RESET QUERY CACHE;")
-                cursor2.execute(query2)
-                result2 = cursor2.fetchone()
-                print(result2[0])
-                if result2[0] == 'cancelled':
+                checkStatus = checkStatusOrder(username=username,order_number=order_number)
+                print(checkStatus)
+                if checkStatus == 'cancelled':
                     return jsonify('autotrade sell macd cancelled')
                 
                 elif (last_macd > last_signal and macd < signal) and (macd and signal > 0):
@@ -947,21 +922,17 @@ def autotradeMACD():
                     # เพิ่มโค้ดที่ต้องการเมื่อตรงเงื่อนไขการซื้อหุ้น 
         else:
             while True:
-                macd = handler.get_analysis().indicators["MACD.macd"]
-                signal = handler.get_analysis().indicators["MACD.signal"]
+                macd = analysis.indicators["MACD.macd"]
+                signal = analysis.indicators["MACD.signal"]
 
                 print("Last MACD: ", last_macd)
                 print("Last Signal: ", last_signal)
                 print("MACD: ", macd)
                 print("Signal: ", signal)
 
-                query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
-                cursor2 = conn.cursor()
-                cursor2.execute("RESET QUERY CACHE;")
-                cursor2.execute(query2)
-                result2 = cursor2.fetchone()
-                print(result2[0])
-                if result2[0] == 'cancelled':
+                checkStatus = checkStatusOrder(username=username,order_number=order_number)
+                print(checkStatus)
+                if checkStatus == 'cancelled':
                     return jsonify('autotrade sell macd cancelled')
                 
                 elif macd and signal > zone:
@@ -992,6 +963,7 @@ def autotradeSTO():
     side = request.json.get('side')
     type = "market"
     time_in_force = "gtc"
+    interval = request.json.get('interval')
 
 
     conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
@@ -1014,15 +986,9 @@ def autotradeSTO():
     api = REST(result[0], result[1], base_url='https://paper-api.alpaca.markets')
     print(symbol,qty,side,type,time_in_force,zone_sto,cross_sto)
 
-    
-    handler = TA_Handler(
-        symbol="BTCUSD",
-        screener="Crypto",
-        exchange="Binance",
-        interval="1m"
-    )
+    analysis = getSymbolHandler(symbol=symbol,interval=interval)
 
-    insert_query = f"INSERT INTO auto_order (OrderID , username, symbol, techniques, quantity, side, status) VALUES ({order_number},%s, %s, %s, %s, %s,'pending')"
+    insert_query = f"INSERT INTO auto_order (OrderID , username, symbol, techniques, quantity, side, timeframe, status) VALUES ({order_number},%s, %s, %s, %s, %s, %s,'pending')"
     if side == "buy":
         if cross_sto > 0:
             techniques = f"%K ตัดขึ้น %D และ < {cross_sto}"
@@ -1033,7 +999,7 @@ def autotradeSTO():
             techniques = f"%K ตัดลง %D และ > {cross_sto}"
         else:
             techniques = f"%K และ %D > {zone_sto}"
-    data = (username, symbol, techniques, qty, side)
+    data = (username, symbol, techniques, qty, side,interval)
     print(symbol,qty,side,type,time_in_force)   
     cursor.execute(insert_query, data)
     print(cursor)
@@ -1043,22 +1009,18 @@ def autotradeSTO():
         if cross_sto>0:
             print("cross buy")
             while True:
-                sto_k = handler.get_analysis().indicators["Stoch.K"]
-                sto_d = handler.get_analysis().indicators["Stoch.D"]
-                last_sto_k = handler.get_analysis().indicators["Stoch.K[1]"]
-                last_sto_d = handler.get_analysis().indicators["Stoch.D[1]"]
+                sto_k = analysis.indicators["Stoch.K"]
+                sto_d = analysis.indicators["Stoch.D"]
+                last_sto_k = analysis.indicators["Stoch.K[1]"]
+                last_sto_d = analysis.indicators["Stoch.D[1]"]
                 print("Last K: ", last_sto_k)
                 print("Last D: ", last_sto_d)
                 print("K: ", sto_k)
                 print("D: ", sto_d)
 
-                query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
-                cursor2 = conn.cursor()
-                cursor2.execute("RESET QUERY CACHE;")
-                cursor2.execute(query2)
-                result2 = cursor2.fetchone()
-                print(result2[0])
-                if result2[0] == 'cancelled':
+                checkStatus = checkStatusOrder(username=username,order_number=order_number)
+                print(checkStatus)
+                if checkStatus == 'cancelled':
                     return jsonify('autotrade sell sto cancelled')
                 
                 elif sto_k < cross_sto and sto_d < cross_sto and sto_k > sto_d and last_sto_k < last_sto_d:
@@ -1078,23 +1040,19 @@ def autotradeSTO():
         else:
             print("zone buy")
             while True:
-                sto_k = handler.get_analysis().indicators["Stoch.K"]
-                sto_d = handler.get_analysis().indicators["Stoch.D"]
-                last_sto_k = handler.get_analysis().indicators["Stoch.K[1]"]
-                last_sto_d = handler.get_analysis().indicators["Stoch.D[1]"]
+                sto_k = analysis.indicators["Stoch.K"]
+                sto_d = analysis.indicators["Stoch.D"]
+                last_sto_k = analysis.indicators["Stoch.K[1]"]
+                last_sto_d = analysis.indicators["Stoch.D[1]"]
 
                 print("Last K: ", last_sto_k)
                 print("Last D: ", last_sto_d)
                 print("K: ", sto_k)
                 print("D: ", sto_d)
 
-                query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
-                cursor2 = conn.cursor()
-                cursor2.execute("RESET QUERY CACHE;")
-                cursor2.execute(query2)
-                result2 = cursor2.fetchone()
-                print(result2[0])
-                if result2[0] == 'cancelled':
+                checkStatus = checkStatusOrder(username=username,order_number=order_number)
+                print(checkStatus)
+                if checkStatus == 'cancelled':
                     return jsonify('autotrade sell sto cancelled')
                 
                 elif sto_k <= zone_sto and sto_d <= zone_sto:
@@ -1116,21 +1074,18 @@ def autotradeSTO():
         if cross_sto>0:
             print("cross sell")
             while True:
-                sto_k = handler.get_analysis().indicators["Stoch.K"]
-                sto_d = handler.get_analysis().indicators["Stoch.D"]
-                last_sto_k = handler.get_analysis().indicators["Stoch.K[1]"]
-                last_sto_d = handler.get_analysis().indicators["Stoch.D[1]"]
+                sto_k = analysis.indicators["Stoch.K"]
+                sto_d = analysis.indicators["Stoch.D"]
+                last_sto_k = analysis.indicators["Stoch.K[1]"]
+                last_sto_d = analysis.indicators["Stoch.D[1]"]
                 print("Last K: ", last_sto_k)
                 print("Last D: ", last_sto_d)
                 print("K: ", sto_k)
                 print("D: ", sto_d)
-                query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
-                cursor2 = conn.cursor()
-                cursor2.execute("RESET QUERY CACHE;")
-                cursor2.execute(query2)
-                result2 = cursor2.fetchone()
-                print(result2[0])
-                if result2[0] == 'cancelled':
+
+                checkStatus = checkStatusOrder(username=username,order_number=order_number)
+                print(checkStatus)
+                if checkStatus == 'cancelled':
                     return jsonify('autotrade sell sto cancelled')
                 
                 elif sto_k > cross_sto and sto_d > cross_sto and sto_k < sto_d and last_sto_k > last_sto_d:
@@ -1150,23 +1105,19 @@ def autotradeSTO():
         else:
             print("zone sell")
             while True:
-                sto_k = handler.get_analysis().indicators["Stoch.K"]
-                sto_d = handler.get_analysis().indicators["Stoch.D"]
-                last_sto_k = handler.get_analysis().indicators["Stoch.K[1]"]
-                last_sto_d = handler.get_analysis().indicators["Stoch.D[1]"]
+                sto_k = analysis.indicators["Stoch.K"]
+                sto_d = analysis.indicators["Stoch.D"]
+                last_sto_k = analysis.indicators["Stoch.K[1]"]
+                last_sto_d = analysis.indicators["Stoch.D[1]"]
 
                 print("Last K: ", last_sto_k)
                 print("Last D: ", last_sto_d)
                 print("K: ", sto_k)
                 print("D: ", sto_d)
 
-                query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
-                cursor2 = conn.cursor()
-                cursor2.execute("RESET QUERY CACHE;")
-                cursor2.execute(query2)
-                result2 = cursor2.fetchone()
-                print(result2[0])
-                if result2[0] == 'cancelled':
+                checkStatus = checkStatusOrder(username=username,order_number=order_number)
+                print(checkStatus)
+                if checkStatus == 'cancelled':
                     return jsonify('autotrade sell sto cancelled')
                 
                 elif sto_k >= zone_sto and sto_d >= zone_sto:
@@ -1194,6 +1145,7 @@ def autotradeEMA():
     side = request.json.get('side')
     type = "market"
     time_in_force = "gtc"
+    interval = request.json.get('interval')
 
     conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
     query = f"SELECT api_key, secret_key FROM users_info WHERE username = '{username}'"
@@ -1214,22 +1166,16 @@ def autotradeEMA():
         if count == 0:
             order_number=order_number
             break
+    anaylsis = getSymbolHandler(symbol=symbol,interval=interval)
 
-    handler = TA_Handler(
-        symbol="BTCUSD",
-        screener="Crypto",
-        exchange="Binance",
-        interval="1m"
-    )
-
-    insert_query = f"INSERT INTO auto_order (OrderID , username, symbol, techniques, quantity, side, status) VALUES ({order_number},%s, %s, %s, %s, %s,'pending')"
+    insert_query = f"INSERT INTO auto_order (OrderID , username, symbol, techniques, quantity, side, timeframe, status) VALUES ({order_number},%s, %s, %s, %s, %s, %s,'pending')"
 
     if side == "buy":
         techniques = f"ซื้อเมื่อราคา <= EMA{day}"
     else:
         techniques = f"ขายเมื่อราคา >= EMA{day}"
 
-    data = (username, symbol, techniques, qty, side)
+    data = (username, symbol, techniques, qty, side,interval)
     print(symbol,qty,side,type,time_in_force)   
     cursor.execute(insert_query, data)
     print("cursor:",cursor)
@@ -1237,15 +1183,11 @@ def autotradeEMA():
 
     if side == 'buy':
         while True:
-            ema = handler.get_analysis().indicators[f"EMA{day}"]
-            close = handler.get_analysis().indicators["close"]
-            query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
-            cursor2 = conn.cursor()
-            cursor2.execute("RESET QUERY CACHE;")
-            cursor2.execute(query2)
-            result2 = cursor2.fetchone()
-            print(result2[0])
-            if result2[0] == 'cancelled':
+            ema = anaylsis.indicators[f"EMA{day}"]
+            close = anaylsis.indicators["close"]
+            checkStatus = checkStatusOrder(username=username,order_number=order_number)
+            print(checkStatus)
+            if checkStatus == 'cancelled':
                 return jsonify('autotrade buy ema cancelled')
                 
             elif close <= ema and last_close > last_ema:
@@ -1266,15 +1208,11 @@ def autotradeEMA():
             time.sleep(5)
     else:
          while True:
-            ema = handler.get_analysis().indicators[f"EMA{day}"]
-            close = handler.get_analysis().indicators["close"]
-            query2 = f"SELECT status FROM auto_order WHERE username = '{username}' AND OrderID = '{order_number}' "
-            cursor2 = conn.cursor()
-            cursor2.execute("RESET QUERY CACHE;")
-            cursor2.execute(query2)
-            result2 = cursor2.fetchone()
-            print(result2[0])
-            if result2[0] == 'cancelled':
+            ema = anaylsis.indicators[f"EMA{day}"]
+            close = anaylsis.indicators["close"]
+            checkStatus = checkStatusOrder(username=username,order_number=order_number)
+            print(checkStatus)
+            if checkStatus == 'cancelled':
                 return jsonify('autotrade sell ema cancelled')
                 
             elif close >= ema and last_close < last_ema:
@@ -1298,8 +1236,9 @@ def autotradeEMA():
 @app.route('/getOneSymbolPrice', methods=['POST'])
 def getOneSymbolPrice():
     symbol = request.json.get('symbol') 
+    interval = request.json.get('interval') 
     prices = []
-    analysis = getSymbolHandler(symbol)
+    analysis = getSymbolHandler(symbol,interval)
     close_price = float(round(analysis.indicators["close"], 2))
     percentage_change = float(round(analysis.indicators["change"], 2))
      
@@ -1328,7 +1267,7 @@ def getStockPriceUS():
             return jsonify({'error': 'Empty'})
         else:
             for symbol in stock_list:
-                analysis = getSymbolHandler(symbol)
+                analysis = getSymbolHandler(symbol,"1D")
                 thai_stocks = ["ADVANC", "AOT", "BBL",  "BCP","BDMS","BEM", "BGRIM", "BH","BJC","BPP", "BTS","CBG","CENTEL", "CK",  "CPALL", "CPF", "CPN", "CRC","DELTA", "EA","EGCO","GGC","GPSC", "GULF", "HANA", "IRPC", "IVL","KBANK","KCE","KKP", "KTB", "LH","M", "MAJOR","OR","PTT","PTTEP","PTTGC","S","SAMART",
     "SAWAD", "SCB", "SCC","SCP","SCGP","SIRI","SPALI", "SPRC","STA" ,"SUPER", "TCAP","THANI"]
 
@@ -1356,7 +1295,7 @@ def getPricePredictList():
     listPredict = []
 
     for symbol in symbol_list:
-        analysis = getSymbolHandler(symbol)
+        analysis = getSymbolHandler(symbol,"1D")
         close_price = round(analysis.indicators["close"], 2)         
         listPredict.append({
                 'symbol': symbol,
@@ -1478,8 +1417,8 @@ def th_portfolio():
     portfolio_profit = portfolio['totalPortfolio']['profit']
     percentageChange = (portfolio_profit / cashBalance) * 100
         
-    cash = getSymbolHandler("THBUSD").indicators['close']
-    USDtoTHB = getSymbolHandler("USDTHB").indicators['close']
+    cash = getSymbolHandler("THBUSD","1D").indicators['close']
+    USDtoTHB = getSymbolHandler("USDTHB","1D").indicators['close']
     balance = f"{cashBalance * cash:.2f}"
     print(type(USDtoTHB))
     print(USDtoTHB)
@@ -1672,6 +1611,7 @@ def multiAutotrade():
     side = request.json.get('side')
     type = "market"
     time_in_force = "gtc"
+    interval = request.json.get('interval')
 
     techniques = []
 
@@ -1688,7 +1628,7 @@ def multiAutotrade():
             order_number=order_number
             break
 
-    insert_query = "INSERT INTO auto_order (OrderID, username, symbol, techniques, quantity, side, status) VALUES (%s, %s, %s, %s, %s, %s, 'pending')"
+    insert_query = "INSERT INTO auto_order (OrderID, username, symbol, techniques, quantity, side, timeframe, status) VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending')"
 
 
     if side == "buy":
@@ -1735,7 +1675,7 @@ def multiAutotrade():
             techniques.append(f"ขายเมื่อราคา >= EMA{day}")
     print(techniques)
 
-    data_to_insert = (order_number, username, symbol, ','.join(techniques), qty, side)
+    data_to_insert = (order_number, username, symbol, ','.join(techniques), qty, side, interval)
     cursor.execute(insert_query, data_to_insert)
     conn.commit()
     
@@ -1752,7 +1692,7 @@ def multiAutotrade():
                         if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
-                            analysis = getSymbolHandler(symbol=symbol)
+                            analysis = getSymbolHandler(symbol=symbol,interval=interval)
                             rsi = analysis.indicators["RSI"]
                             stoK = analysis.indicators["Stoch.K"]
                             stoD = analysis.indicators["Stoch.D"] 
@@ -1769,7 +1709,7 @@ def multiAutotrade():
                         if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi zone sto cancelled')
                         else:
-                            analysis = getSymbolHandler(symbol=symbol)
+                            analysis = getSymbolHandler(symbol=symbol,interval=interval)
                             rsi = analysis.indicators["RSI"]
                             stoK = analysis.indicators["Stoch.K"]
                             stoD =  analysis.indicators["Stoch.D"] 
@@ -1787,7 +1727,7 @@ def multiAutotrade():
                         if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
-                            analysis = getSymbolHandler(symbol=symbol)
+                            analysis = getSymbolHandler(symbol=symbol,interval = interval)
                             rsi = analysis.indicators["RSI"]
                             stoK = analysis.indicators["Stoch.K"]
                             stoD = analysis.indicators["Stoch.D"] 
@@ -1804,7 +1744,7 @@ def multiAutotrade():
                         if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
-                            analysis = getSymbolHandler(symbol=symbol)
+                            analysis = getSymbolHandler(symbol=symbol,interval=interval)
                             rsi = analysis.indicators["RSI"]
                             stoK = analysis.indicators["Stoch.K"]
                             stoD =  analysis.indicators["Stoch.D"] 
@@ -1830,7 +1770,7 @@ def multiAutotrade():
                         if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
-                            analysis = getSymbolHandler(symbol=symbol)
+                            analysis = getSymbolHandler(symbol=symbol,interval=interval)
                             rsi = analysis.indicators["RSI"]
                             macd = analysis.indicators["MACD.macd"]
                             signal = analysis.indicators["MACD.signal"]
@@ -1847,7 +1787,7 @@ def multiAutotrade():
                         if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
-                            analysis = getSymbolHandler(symbol=symbol)
+                            analysis = getSymbolHandler(symbol=symbol,interval=interval)
                             rsi = analysis.indicators["RSI"]
                             macd = analysis.indicators["MACD.macd"]
                             signal = analysis.indicators["MACD.signal"]
@@ -1865,7 +1805,7 @@ def multiAutotrade():
                         if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
-                            analysis = getSymbolHandler(symbol=symbol)
+                            analysis = getSymbolHandler(symbol=symbol,interval=interval)
                             rsi = analysis.indicators["RSI"]
                             macd = analysis.indicators["MACD.macd"]
                             signal = analysis.indicators["MACD.signal"]
@@ -1882,7 +1822,7 @@ def multiAutotrade():
                         if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
-                            analysis = getSymbolHandler(symbol=symbol)
+                            analysis = getSymbolHandler(symbol=symbol,interval=interval)
                             rsi = analysis.indicators["RSI"]
                             macd = analysis.indicators["MACD.macd"]
                             signal = analysis.indicators["MACD.signal"]
@@ -1905,7 +1845,7 @@ def multiAutotrade():
                     if checkStatus == 'cancelled':
                         return jsonify('autotrade buy rsi cross sto cancelled')
                     else:
-                        analysis = getSymbolHandler(symbol=symbol)     
+                        analysis = getSymbolHandler(symbol=symbol,interval=interval)     
                         rsi = analysis.indicators["RSI"]               
                         ema = analysis.indicators[f"EMA{day}"]
                         close = analysis.indicators["close"]
@@ -1923,7 +1863,7 @@ def multiAutotrade():
                     if checkStatus == 'cancelled':
                         return jsonify('autotrade buy rsi cross sto cancelled')
                     else:
-                        analysis = getSymbolHandler(symbol=symbol)     
+                        analysis = getSymbolHandler(symbol=symbol,interval=interval)     
                         rsi = analysis.indicators["RSI"]               
                         ema = analysis.indicators[f"EMA{day}"]
                         close = analysis.indicators["close"]
@@ -1948,7 +1888,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)    
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
                                 last_stoK = analysis.indicators["Stoch.K[1]"]
@@ -1967,7 +1907,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)    
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
                                 last_stoK = analysis.indicators["Stoch.K[1]"]
@@ -1987,7 +1927,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)    
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
                                 last_stoK = analysis.indicators["Stoch.K[1]"]
@@ -2006,7 +1946,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)    
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
                                 last_stoK = analysis.indicators["Stoch.K[1]"]
@@ -2029,7 +1969,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)    
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
                                 last_stoK = analysis.indicators["Stoch.K[1]"]
@@ -2048,7 +1988,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)    
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
                                 last_stoK = analysis.indicators["Stoch.K[1]"]
@@ -2068,7 +2008,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)    
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
                                 last_stoK = analysis.indicators["Stoch.K[1]"]
@@ -2087,7 +2027,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)    
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
                                 last_stoK = analysis.indicators["Stoch.K[1]"]
@@ -2113,7 +2053,7 @@ def multiAutotrade():
                         if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
-                            analysis = getSymbolHandler(symbol=symbol)    
+                            analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                             stoK = analysis.indicators["Stoch.K"]
                             stoD = analysis.indicators["Stoch.D"] 
                             last_stoK = analysis.indicators["Stoch.K[1]"]
@@ -2132,7 +2072,7 @@ def multiAutotrade():
                         if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
-                            analysis = getSymbolHandler(symbol=symbol)    
+                            analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                             stoK = analysis.indicators["Stoch.K"]
                             stoD = analysis.indicators["Stoch.D"] 
                             last_stoK = analysis.indicators["Stoch.K[1]"]
@@ -2153,7 +2093,7 @@ def multiAutotrade():
                         if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
-                            analysis = getSymbolHandler(symbol=symbol)    
+                            analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                             stoK = analysis.indicators["Stoch.K"]
                             stoD = analysis.indicators["Stoch.D"] 
                             last_stoK = analysis.indicators["Stoch.K[1]"]
@@ -2172,7 +2112,7 @@ def multiAutotrade():
                         if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
-                            analysis = getSymbolHandler(symbol=symbol)    
+                            analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                             stoK = analysis.indicators["Stoch.K"]
                             stoD = analysis.indicators["Stoch.D"] 
                             last_stoK = analysis.indicators["Stoch.K[1]"]
@@ -2198,7 +2138,7 @@ def multiAutotrade():
                         if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
-                            analysis = getSymbolHandler(symbol=symbol)    
+                            analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                             macd = analysis.indicators["MACD.macd"]
                             signal = analysis.indicators["MACD.signal"]   
                             ema = analysis.indicators[f"EMA{day}"]
@@ -2217,7 +2157,7 @@ def multiAutotrade():
                         if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
-                            analysis = getSymbolHandler(symbol=symbol)    
+                            analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                             macd = analysis.indicators["MACD.macd"]
                             signal = analysis.indicators["MACD.signal"]   
                             ema = analysis.indicators[f"EMA{day}"]
@@ -2238,7 +2178,7 @@ def multiAutotrade():
                         if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
-                            analysis = getSymbolHandler(symbol=symbol)    
+                            analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                             macd = analysis.indicators["MACD.macd"]
                             signal = analysis.indicators["MACD.signal"]   
                             ema = analysis.indicators[f"EMA{day}"]
@@ -2257,7 +2197,7 @@ def multiAutotrade():
                         if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
-                            analysis = getSymbolHandler(symbol=symbol)    
+                            analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                             macd = analysis.indicators["MACD.macd"]
                             signal = analysis.indicators["MACD.signal"]   
                             ema = analysis.indicators[f"EMA{day}"]
@@ -2286,7 +2226,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)    
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                                 rsi = analysis.indicators["RSI"]
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
@@ -2307,7 +2247,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)    
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                                 rsi = analysis.indicators["RSI"]
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
@@ -2328,7 +2268,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)  
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)  
                                 rsi = analysis.indicators["RSI"]  
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
@@ -2348,7 +2288,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)  
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)  
                                 rsi = analysis.indicators["RSI"]   
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
@@ -2372,7 +2312,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol) 
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval) 
                                 rsi = analysis.indicators["RSI"]   
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
@@ -2392,7 +2332,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol) 
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval) 
                                 rsi = analysis.indicators["RSI"]   
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
@@ -2413,7 +2353,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)    
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                                 rsi = analysis.indicators["RSI"]
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
@@ -2433,7 +2373,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)    
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                                 rsi = analysis.indicators["RSI"]
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
@@ -2461,7 +2401,7 @@ def multiAutotrade():
                         if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
-                            analysis = getSymbolHandler(symbol=symbol)   
+                            analysis = getSymbolHandler(symbol=symbol,interval=interval)   
                             rsi = analysis.indicators["RSI"] 
                             stoK = analysis.indicators["Stoch.K"]
                             stoD = analysis.indicators["Stoch.D"] 
@@ -2481,7 +2421,7 @@ def multiAutotrade():
                         if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
-                            analysis = getSymbolHandler(symbol=symbol)  
+                            analysis = getSymbolHandler(symbol=symbol,interval=interval)  
                             rsi = analysis.indicators["RSI"]  
                             stoK = analysis.indicators["Stoch.K"]
                             stoD = analysis.indicators["Stoch.D"] 
@@ -2503,7 +2443,7 @@ def multiAutotrade():
                         if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
-                            analysis = getSymbolHandler(symbol=symbol)  
+                            analysis = getSymbolHandler(symbol=symbol,interval=interval)  
                             rsi = analysis.indicators["RSI"]  
                             stoK = analysis.indicators["Stoch.K"]
                             stoD = analysis.indicators["Stoch.D"] 
@@ -2523,7 +2463,7 @@ def multiAutotrade():
                         if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
-                            analysis = getSymbolHandler(symbol=symbol) 
+                            analysis = getSymbolHandler(symbol=symbol,interval=interval) 
                             rsi = analysis.indicators["RSI"]   
                             stoK = analysis.indicators["Stoch.K"]
                             stoD = analysis.indicators["Stoch.D"] 
@@ -2551,7 +2491,7 @@ def multiAutotrade():
                         if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
-                            analysis = getSymbolHandler(symbol=symbol)    
+                            analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                             rsi = analysis.indicators["RSI"]
                             macd = analysis.indicators["MACD.macd"]
                             signal = analysis.indicators["MACD.signal"]   
@@ -2571,7 +2511,7 @@ def multiAutotrade():
                         if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
-                            analysis = getSymbolHandler(symbol=symbol) 
+                            analysis = getSymbolHandler(symbol=symbol,interval=interval) 
                             rsi = analysis.indicators["RSI"]   
                             macd = analysis.indicators["MACD.macd"]
                             signal = analysis.indicators["MACD.signal"]   
@@ -2593,7 +2533,7 @@ def multiAutotrade():
                         if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
-                            analysis = getSymbolHandler(symbol=symbol)    
+                            analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                             rsi = analysis.indicators["RSI"]
                             macd = analysis.indicators["MACD.macd"]
                             signal = analysis.indicators["MACD.signal"]   
@@ -2613,7 +2553,7 @@ def multiAutotrade():
                         if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
-                            analysis = getSymbolHandler(symbol=symbol)
+                            analysis = getSymbolHandler(symbol=symbol,interval=interval)
                             rsi = analysis.indicators["RSI"]    
                             macd = analysis.indicators["MACD.macd"]
                             signal = analysis.indicators["MACD.signal"]   
@@ -2643,7 +2583,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)    
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
                                 last_stoK = analysis.indicators["Stoch.K[1]"]
@@ -2666,7 +2606,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)    
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
                                 last_stoK = analysis.indicators["Stoch.K[1]"]
@@ -2690,7 +2630,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)    
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
                                 last_stoK = analysis.indicators["Stoch.K[1]"]
@@ -2713,7 +2653,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)    
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
                                 last_stoK = analysis.indicators["Stoch.K[1]"]
@@ -2740,7 +2680,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)    
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
                                 last_stoK = analysis.indicators["Stoch.K[1]"]
@@ -2763,7 +2703,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)    
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
                                 last_stoK = analysis.indicators["Stoch.K[1]"]
@@ -2788,7 +2728,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)    
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
                                 last_stoK = analysis.indicators["Stoch.K[1]"]
@@ -2811,7 +2751,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)    
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
                                 last_stoK = analysis.indicators["Stoch.K[1]"]
@@ -2845,7 +2785,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)    
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                                 rsi = analysis.indicators["RSI"]
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
@@ -2869,7 +2809,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)    
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                                 rsi = analysis.indicators["RSI"]
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
@@ -2894,7 +2834,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade all true cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)    
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                                 rsi = analysis.indicators["RSI"]
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
@@ -2916,7 +2856,7 @@ def multiAutotrade():
                         if checkStatus == 'cancelled':
                             return jsonify('autotrade buy rsi cross sto cancelled')
                         else:
-                            analysis = getSymbolHandler(symbol=symbol)    
+                            analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                             rsi = analysis.indicators["RSI"]
                             stoK = analysis.indicators["Stoch.K"]
                             stoD = analysis.indicators["Stoch.D"] 
@@ -2944,7 +2884,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)    
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                                 rsi = analysis.indicators["RSI"]
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
@@ -2968,7 +2908,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)  
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)  
                                 rsi = analysis.indicators["RSI"]  
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
@@ -2994,7 +2934,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)   
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)   
                                 rsi = analysis.indicators["RSI"] 
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
@@ -3018,7 +2958,7 @@ def multiAutotrade():
                             if checkStatus == 'cancelled':
                                 return jsonify('autotrade buy rsi cross sto cancelled')
                             else:
-                                analysis = getSymbolHandler(symbol=symbol)    
+                                analysis = getSymbolHandler(symbol=symbol,interval=interval)    
                                 rsi = analysis.indicators["RSI"]
                                 stoK = analysis.indicators["Stoch.K"]
                                 stoD = analysis.indicators["Stoch.D"] 
@@ -3042,7 +2982,7 @@ def multiAutotrade():
         return jsonify(f'error: {str(e)}')
 
         
-def getSymbolHandler(symbol):
+def getSymbolHandler(symbol,interval):
     exchanges_to_try = [
         {"screener": "america", "exchange": "NASDAQ"},
         {"screener": "america", "exchange": "NYSE"},
@@ -3057,7 +2997,7 @@ def getSymbolHandler(symbol):
                 symbol=symbol,
                 screener=exchange_info["screener"],
                 exchange=exchange_info["exchange"],
-                interval="1m"
+                interval=interval
             )
             analysis = handler.get_analysis()
             return analysis
@@ -3131,7 +3071,9 @@ def checkStatusOrder(username,order_number):
 @app.route('/technicalVauleOfSymbol', methods=['POST'])
 def technicalVauleOfSymbol():
     symbol = request.json.get('symbol')
-    analysis = getSymbolHandler(symbol=symbol)
+    interval = request.json.get('interval')
+    print(interval)
+    analysis = getSymbolHandler(symbol=symbol,interval=interval)
     rsi = analysis.indicators['RSI']
     stoK = analysis.indicators['Stoch.K']
     stoD = analysis.indicators['Stoch.D']

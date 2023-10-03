@@ -369,7 +369,7 @@ class _PredictPageState extends State<PredictPage> {
                               keyboardType: TextInputType.name,
                               decoration: InputDecoration(
                                 labelText: 'เพิ่ม Symbol หุ้นที่จะทำนาย..',
-                                labelStyle: const TextStyle(fontSize: 16),
+                                labelStyle: const TextStyle(fontSize: 14),
                                 contentPadding: const EdgeInsets.symmetric(
                                     vertical: 16, horizontal: 12),
                                 prefixIcon: Container(

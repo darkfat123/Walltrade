@@ -72,6 +72,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
       'zone_macd': zoneMACDController.text,
       'cross_macd': macd_crossupIsChecked,
       'day': selectedDay,
+      'interval' : selectedInterval
     };
 
     var response =
@@ -407,7 +408,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                const Text('ระบุค่า RSI ที่ต้องการซื้อ'),
+                const Text('ค่า RSI'),
                 const SizedBox(width: 5),
                 Expanded(
                   child: TextField(
@@ -499,7 +500,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  const Text('MACD ตัด Signal และมีโซนต่ำกว่าหรือมากกว่า 0'),
+                  const Text('MACD ตัด Signal มีโซน < หรือ > 0'),
                   const SizedBox(width: 5),
                   Checkbox(
                     value: macd_crossupIsChecked,
@@ -684,7 +685,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                const Text('%K ตัด %D และมีโซนต่ำกว่าหรือมากกว่า'),
+                const Text('%K ตัด %D มีโซน < หรือ >'),
                 const SizedBox(width: 5),
                 Expanded(
                   child: TextField(

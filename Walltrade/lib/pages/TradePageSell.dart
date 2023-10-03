@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:Walltrade/widget/alertDialog/InfoDialog.dart';
 import 'package:Walltrade/widget/alertDialog/OrderConfirmation.dart';
+import 'package:Walltrade/widget/dropdown/timeFrame.dart';
 import 'package:flutter/material.dart';
 import '../variables/serverURL.dart';
 import 'package:http/http.dart' as http;
@@ -53,7 +54,8 @@ class _TradePageSellState extends State<TradePageSell> {
         'symbol': symbol,
         'qty': double.parse(qty),
         'side': side,
-        'lowerRSI': higherRSIController.text
+        'lowerRSI': higherRSIController.text,
+        'interval' : selectedInterval
       },
     );
 
@@ -82,7 +84,8 @@ class _TradePageSellState extends State<TradePageSell> {
         'qty': double.parse(qty),
         'side': side,
         'cross_macd': macd_crossupIsChecked,
-        'zone': double.parse(zoneMACDController.text)
+        'zone': double.parse(zoneMACDController.text),
+        'interval' : selectedInterval
       },
     );
 
@@ -111,7 +114,8 @@ class _TradePageSellState extends State<TradePageSell> {
         'qty': double.parse(qty),
         'side': side,
         'cross_sto': crossdownSTOController.text,
-        'zone': zoneSTOController.text
+        'zone': zoneSTOController.text,
+        'interval' : selectedInterval
       },
     );
 
@@ -140,6 +144,7 @@ class _TradePageSellState extends State<TradePageSell> {
         'qty': double.parse(qty),
         'side': side,
         'day': dayController.text,
+        'interval' : selectedInterval
       },
     );
 
@@ -748,100 +753,6 @@ class _TradePageSellState extends State<TradePageSell> {
         ),
       );
     });
-  }
-}
-
-class TimeframeDropdown extends StatelessWidget {
-  final String selectedInterval;
-  final Function(String?) onChanged;
-
-  const TimeframeDropdown({
-    required this.selectedInterval,
-    required this.onChanged,
-  });
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          const Text(
-            'Timeframe',
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
-          ),
-          DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              dropdownColor: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              value: selectedInterval,
-              onChanged: onChanged,
-              items: const [
-                DropdownMenuItem(
-                  value: '1h',
-                  child: Text(
-                    '1 hour',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ),
-                DropdownMenuItem(
-                  value: '4h',
-                  child: Text(
-                    '4 hours',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ),
-                DropdownMenuItem(
-                  value: '1D',
-                  child: Text(
-                    '1 day',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ),
-                DropdownMenuItem(
-                  value: '1W',
-                  child: Text(
-                    '1 week',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            icon: const Icon(
-              Icons.info,
-              size: 20,
-            ),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: const Text(
-                      'Timeframe คืออะไร?',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    content: const Text(
-                      'ระยะเวลาที่ใช้ในการวิเคราะห์และตัดสินใจในการซื้อหรือขายสินทรัพย์ทางการเงิน เช่น หุ้นหรือสกุลเงิน ระยะเวลาในการเทรดมักถูกแบ่งออกเป็นหลายช่วง โดยที่แต่ละช่วงมีลักษณะและค่าทางเทคนิคในการเทรดต่างกัน',
-                      style: TextStyle(fontSize: 14),
-                    ),
-                    actions: [
-                      TextButton(
-                        child: const Text('OK'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-          ),
-        ],
-      ),
-    );
   }
 }
 

@@ -29,6 +29,7 @@ class _TradePageOptionsState extends State<TradePageOptions>
   late TabController tabController;
   final String username;
   List<dynamic> autoOrders = [];
+  String selectedInterval = '1h';
 
   double _walletBalance = 0;
   bool isLoading = true;
@@ -71,7 +72,7 @@ class _TradePageOptionsState extends State<TradePageOptions>
   Future<void> fetchtechnicalInfo(String symbol) async {
     final url = Uri.parse('${Constants.serverUrl}/technicalVauleOfSymbol');
     final headers = {'Content-Type': 'application/json'};
-    final body = jsonEncode({'symbol': symbol});
+    final body = jsonEncode({'symbol': symbol, 'interval': selectedInterval});
 
     final response = await http.post(url, headers: headers, body: body);
 
@@ -638,10 +639,82 @@ class _TradePageOptionsState extends State<TradePageOptions>
                                 style: TextStyle(
                                     color: Colors.black,
                                     fontWeight: FontWeight.w500),
-                                decoration: const InputDecoration(
+                                decoration: InputDecoration(
                                   labelText: 'พิมพ์สัญลักษณ์หุ้น...',
                                   labelStyle: TextStyle(
                                       fontSize: 14, color: Colors.black),
+                                  suffixIcon: Container(
+                                    alignment: Alignment.center,
+                                    height: 50,
+                                    width: 80,
+                                    margin: const EdgeInsets.only(left: 12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade200,
+                                      borderRadius: const BorderRadius.only(
+                                        topRight: Radius.circular(8),
+                                        bottomRight: Radius.circular(8),
+                                      ),
+                                      border: Border.all(
+                                        strokeAlign:
+                                            BorderSide.strokeAlignOutside,
+                                        width: 2,
+                                        color: const Color(0xFF212436),
+                                      ),
+                                    ),
+                                    child: DropdownButtonHideUnderline(
+                                      child: DropdownButton(
+                                        icon: Icon(
+                                          Icons.arrow_drop_down_rounded,
+                                          color: Color(0xFF212436),
+                                        ),
+                                        borderRadius: BorderRadius.circular(10),
+                                        value: selectedInterval,
+                                        onChanged: (String? newValue) {
+                                          setState(() {
+                                            selectedInterval = newValue!;
+                                          });
+                                        },
+                                        items: const [
+                                          DropdownMenuItem(
+                                            value: '1h',
+                                            child: Center(
+                                                child: Text(
+                                              '1h',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w500),
+                                            )),
+                                          ),
+                                          DropdownMenuItem(
+                                            value: '4h',
+                                            child: Center(
+                                                child: Text(
+                                              '4h',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w500),
+                                            )),
+                                          ),
+                                          DropdownMenuItem(
+                                            value: '1D',
+                                            child: Center(
+                                                child: Text(
+                                              '1D',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w500),
+                                            )),
+                                          ),
+                                          DropdownMenuItem(
+                                            value: '1w',
+                                            child: Center(
+                                                child: Text(
+                                              '1W',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w500),
+                                            )),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
 
                                   filled: true, // กำหนดให้มีสีพื้นหลัง
                                   fillColor: Colors.white,
@@ -705,11 +778,8 @@ class _TradePageOptionsState extends State<TradePageOptions>
                                       },
                                     )
                                   : showDialog(
-                                      context:
-                                          context, // BuildContext จำเป็นต้องใช้ในการสร้าง AlertDialog
+                                      context: context,
                                       builder: (BuildContext context) {
-                                        fetchtechnicalInfo(
-                                            symbolController.text);
                                         return FutureBuilder<void>(
                                             future: fetchtechnicalInfo(
                                                 symbolController.text),
