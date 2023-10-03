@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:Walltrade/pages/TradePageSell.dart';
 import 'package:Walltrade/pages/MoreTechnicalOrder.dart';
+import 'package:Walltrade/primary.dart';
 import 'package:Walltrade/widget/bottomSheet/KnowledgeSheet.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:http/http.dart' as http;
@@ -8,6 +9,7 @@ import 'package:Walltrade/pages/TradePageBuy.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:quickalert/quickalert.dart';
 import '../model/knowledge.dart';
 import '../variables/serverURL.dart';
 import '../variables/symbolInput.dart';
@@ -755,28 +757,16 @@ class _TradePageOptionsState extends State<TradePageOptions>
                           child: ElevatedButton(
                             onPressed: () {
                               symbolController.text == ''
-                                  ? showDialog(
-                                      context:
-                                          context, // BuildContext จำเป็นต้องใช้ในการสร้าง AlertDialog
-                                      builder: (BuildContext context) {
-                                        return AlertDialog(
-                                          title: Text(
-                                              "เกิดข้อผิดพลาด"), // ข้อความหัวเรื่องของ AlertDialog
-                                          content: Text(
-                                              "โปรดพิมพ์สัญลักษณ์หุ้นให้ถูกต้อง"), // เนื้อหาของ AlertDialog
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () {
-                                                Navigator.of(context)
-                                                    .pop(); // ปิด AlertDialog เมื่อปุ่มถูกกด
-                                              },
-                                              child: Text(
-                                                  "ปิด"), // ปุ่มปิด AlertDialog
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    )
+                                  ? QuickAlert.show(
+                                      context: context,
+                                      type: QuickAlertType.error,
+                                      text: 'โปรดพิมพ์สัญลักษณ์หุ้นให้ถูกต้อง',
+                                      title: "เกิดข้อผิดพลาด",
+                                      confirmBtnText: "ตกลง",
+                                      confirmBtnTextStyle:
+                                          const TextStyle(color: Colors.white),
+                                      width: 0,
+                                      confirmBtnColor: primary)
                                   : showDialog(
                                       context: context,
                                       builder: (BuildContext context) {
@@ -787,15 +777,25 @@ class _TradePageOptionsState extends State<TradePageOptions>
                                               if (snapshot.connectionState ==
                                                   ConnectionState.waiting) {
                                                 return AlertDialog(
+                                                  backgroundColor:
+                                                      Colors.transparent,
+                                                  elevation: 0,
                                                   content: IntrinsicHeight(
                                                     child: Container(
+                                                        color:
+                                                            Colors.transparent,
                                                         child: Center(
                                                             child:
-                                                                CircularProgressIndicator())),
+                                                                CircularProgressIndicator(
+                                                          color: Colors.white,
+                                                        ))),
                                                   ),
                                                 );
                                               } else {
                                                 return AlertDialog(
+                                                  backgroundColor:
+                                                      Colors.transparent,
+                                                  elevation: 0,
                                                   title: Center(
                                                     child: Text("ค่าเทคนิค"),
                                                   ),
@@ -818,19 +818,6 @@ class _TradePageOptionsState extends State<TradePageOptions>
                                                                 BorderRadius
                                                                     .circular(
                                                                         20),
-                                                            boxShadow: [
-                                                              BoxShadow(
-                                                                color: Colors
-                                                                    .grey
-                                                                    .withOpacity(
-                                                                        0.5),
-                                                                spreadRadius: 2,
-                                                                blurRadius: 5,
-                                                                offset: Offset(
-                                                                    0,
-                                                                    3), // changes the position of the shadow
-                                                              ),
-                                                            ],
                                                           ),
                                                           child: Row(
                                                             mainAxisAlignment:
@@ -875,19 +862,6 @@ class _TradePageOptionsState extends State<TradePageOptions>
                                                                 BorderRadius
                                                                     .circular(
                                                                         10),
-                                                            boxShadow: [
-                                                              BoxShadow(
-                                                                color: Colors
-                                                                    .grey
-                                                                    .withOpacity(
-                                                                        0.5),
-                                                                spreadRadius: 2,
-                                                                blurRadius: 5,
-                                                                offset: Offset(
-                                                                    0,
-                                                                    3), // changes the position of the shadow
-                                                              ),
-                                                            ],
                                                           ),
                                                           child: Row(
                                                             children: [
@@ -925,19 +899,6 @@ class _TradePageOptionsState extends State<TradePageOptions>
                                                                 BorderRadius
                                                                     .circular(
                                                                         10),
-                                                            boxShadow: [
-                                                              BoxShadow(
-                                                                color: Colors
-                                                                    .grey
-                                                                    .withOpacity(
-                                                                        0.5),
-                                                                spreadRadius: 2,
-                                                                blurRadius: 5,
-                                                                offset: Offset(
-                                                                    0,
-                                                                    3), // changes the position of the shadow
-                                                              ),
-                                                            ],
                                                           ),
                                                           child: Column(
                                                             children: [
@@ -1001,19 +962,6 @@ class _TradePageOptionsState extends State<TradePageOptions>
                                                                 BorderRadius
                                                                     .circular(
                                                                         10),
-                                                            boxShadow: [
-                                                              BoxShadow(
-                                                                color: Colors
-                                                                    .grey
-                                                                    .withOpacity(
-                                                                        0.5),
-                                                                spreadRadius: 2,
-                                                                blurRadius: 5,
-                                                                offset: Offset(
-                                                                    0,
-                                                                    3), // changes the position of the shadow
-                                                              ),
-                                                            ],
                                                           ),
                                                           child: Column(
                                                             children: [
@@ -1077,19 +1025,6 @@ class _TradePageOptionsState extends State<TradePageOptions>
                                                                 BorderRadius
                                                                     .circular(
                                                                         10),
-                                                            boxShadow: [
-                                                              BoxShadow(
-                                                                color: Colors
-                                                                    .grey
-                                                                    .withOpacity(
-                                                                        0.5),
-                                                                spreadRadius: 2,
-                                                                blurRadius: 5,
-                                                                offset: Offset(
-                                                                    0,
-                                                                    3), // changes the position of the shadow
-                                                              ),
-                                                            ],
                                                           ),
                                                           child: Column(
                                                             children: [
@@ -1237,8 +1172,17 @@ class _TradePageOptionsState extends State<TradePageOptions>
                                                         Navigator.of(context)
                                                             .pop(); // ปิด AlertDialog เมื่อปุ่มถูกกด
                                                       },
-                                                      child: Text(
-                                                          "ปิด"), // ปุ่มปิด AlertDialog
+                                                      child: Container(
+                                                        padding:
+                                                            EdgeInsets.all(
+                                                                12),
+                                                        margin:
+                                                            EdgeInsets.all(
+                                                                16),
+                                                        decoration:
+                                                            BoxDecoration(color: primary,borderRadius: BorderRadius.circular(10)),
+                                                        child: Center(child: Text("ปิด",style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.w600),)),
+                                                      ), // ปุ่มปิด AlertDialog
                                                     ),
                                                   ],
                                                 );

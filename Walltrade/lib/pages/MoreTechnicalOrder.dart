@@ -72,7 +72,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
       'zone_macd': zoneMACDController.text,
       'cross_macd': macd_crossupIsChecked,
       'day': selectedDay,
-      'interval' : selectedInterval
+      'interval': selectedInterval
     };
 
     var response =
@@ -138,7 +138,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                 Expanded(
                   child: TextField(
                     controller: symbolController,
-                    style: TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white),
                     decoration: const InputDecoration(
                       labelText: 'เช่น META, AAPL, PTT, SCB',
                       labelStyle: TextStyle(fontSize: 14, color: Colors.white),
@@ -184,7 +184,8 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                 Expanded(
                   child: TextField(
                     controller: qtyController,
-                    style: TextStyle(color: Colors.white),
+                    keyboardType: TextInputType.number,
+                    style: const TextStyle(color: Colors.white),
                     decoration: const InputDecoration(
                       labelText: 'เช่น 0.1,1000,5',
                       labelStyle: TextStyle(fontSize: 14, color: Colors.white),
@@ -232,11 +233,131 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                               'โปรดเลือกเทคนิคชี้วัดที่ต้องการใช้อย่างน้อย 2 เทคนิค',
                           title: "เกิดข้อผิดพลาด",
                           confirmBtnText: "ตกลง",
-                          confirmBtnTextStyle: TextStyle(color: Colors.white),
+                          confirmBtnTextStyle:
+                              const TextStyle(color: Colors.white),
                           width: 0,
                           confirmBtnColor: primary);
                     } else {
-                      multiAutotrade('buy');
+                      QuickAlert.show(
+                        context: context,
+                        type: QuickAlertType.confirm,
+                        title: 'ยืนยันคำสั่งซื้อ',
+                        width: 350,
+                        widget: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Text(
+                                  "Symbol: ",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black,
+                                      fontSize: 14),
+                                ),
+                                Text(
+                                  symbolController.text,
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                const Text(
+                                  "ประเภทคำสั่ง: ",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black,
+                                      fontSize: 14),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 1),
+                                  decoration: BoxDecoration(
+                                      color: const Color(0xFFBB2525),
+                                      borderRadius: BorderRadius.circular(15)),
+                                  child: const Text(
+                                    "ขาย",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w400,
+                                        color: Colors.white,
+                                        fontSize: 14),
+                                  ),
+                                )
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                const Text(
+                                  "Timeframe: ",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black,
+                                      fontSize: 14),
+                                ),
+                                Text(
+                                  selectedInterval == '1h'
+                                      ? '1 ชั่วโมง'
+                                      : selectedInterval == '4h'
+                                          ? '4 ชั่วโมง'
+                                          : selectedInterval == '1D'
+                                              ? '1 วัน'
+                                              : '1 สัปดาห์',
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                const Text(
+                                  "จำนวน: ",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black,
+                                      fontSize: 14),
+                                ),
+                                Text(
+                                  qtyController.text,
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                const Text(
+                                  "เทคนิค: ",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black,
+                                      fontSize: 14),
+                                ),
+                                Row(
+                                  children: menuSelectionStatus.entries
+                                      .where((entry) => entry
+                                          .value) // กรองรายการที่มีค่าเป็น true
+                                      .map((entry) => Text(
+                                            "${entry.key} ",
+                                            style:
+                                                const TextStyle(fontSize: 14),
+                                          )) // แสดงรายการที่มีค่าเป็น true
+                                      .toList(),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        onConfirmBtnTap: () => multiAutotrade('buy'),
+                        confirmBtnText: "ยืนยัน",
+                        confirmBtnColor: const Color(0xFFBB2525),
+                        showCancelBtn: true,
+                        cancelBtnText: "ยกเลิก",
+                        cancelBtnTextStyle: TextStyle(
+                          fontSize: 14,
+                        ),
+                        confirmBtnTextStyle:
+                            TextStyle(fontSize: 14, color: Colors.white),
+                      );
                     }
                   },
                   child: const Text("ซื้อ"),
@@ -249,32 +370,144 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                     ),
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 12,
                 ),
                 ElevatedButton(
                   onPressed: () {
                     if (selectedMenus.length < 2) {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: const Text('เกิดข้อผิดพลาด'),
-                            content: const Text(
-                                'โปรดเลือกเทคนิคชี้วัดที่ต้องการใช้อย่างน้อย 2 เทคนิค'),
-                            actions: [
-                              TextButton(
-                                child: const Text('ตกลง'),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                            ],
-                          );
-                        },
-                      );
+                      QuickAlert.show(
+                          context: context,
+                          type: QuickAlertType.error,
+                          text:
+                              'โปรดเลือกเทคนิคชี้วัดที่ต้องการใช้อย่างน้อย 2 เทคนิค',
+                          title: "เกิดข้อผิดพลาด",
+                          confirmBtnText: "ตกลง",
+                          confirmBtnTextStyle:
+                              const TextStyle(color: Colors.white),
+                          width: 0,
+                          confirmBtnColor: primary);
                     } else {
-                      multiAutotrade('sell');
+                      QuickAlert.show(
+                        context: context,
+                        type: QuickAlertType.confirm,
+                        title: 'ยืนยันคำสั่งซื้อ',
+                        width: 350,
+                        widget: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Text(
+                                  "Symbol: ",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black,
+                                      fontSize: 14),
+                                ),
+                                Text(
+                                  symbolController.text,
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                const Text(
+                                  "ประเภทคำสั่ง: ",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black,
+                                      fontSize: 14),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 1),
+                                  decoration: BoxDecoration(
+                                      color: const Color(0xFFBB2525),
+                                      borderRadius: BorderRadius.circular(15)),
+                                  child: const Text(
+                                    "ขาย",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w400,
+                                        color: Colors.white,
+                                        fontSize: 14),
+                                  ),
+                                )
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                const Text(
+                                  "Timeframe: ",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black,
+                                      fontSize: 14),
+                                ),
+                                Text(
+                                  selectedInterval == '1h'
+                                      ? '1 ชั่วโมง'
+                                      : selectedInterval == '4h'
+                                          ? '4 ชั่วโมง'
+                                          : selectedInterval == '1D'
+                                              ? '1 วัน'
+                                              : '1 สัปดาห์',
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                const Text(
+                                  "จำนวน: ",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black,
+                                      fontSize: 14),
+                                ),
+                                Text(
+                                  qtyController.text,
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                const Text(
+                                  "เทคนิค: ",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black,
+                                      fontSize: 14),
+                                ),
+                                Row(
+                                  children: menuSelectionStatus.entries
+                                      .where((entry) => entry
+                                          .value) // กรองรายการที่มีค่าเป็น true
+                                      .map((entry) => Text(
+                                            "${entry.key} ",
+                                            style:
+                                                const TextStyle(fontSize: 14),
+                                          )) // แสดงรายการที่มีค่าเป็น true
+                                      .toList(),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        onConfirmBtnTap: () => multiAutotrade('sell'),
+                        confirmBtnText: "ยืนยัน",
+                        confirmBtnColor: const Color(0xFFBB2525),
+                        showCancelBtn: true,
+                        cancelBtnText: "ยกเลิก",
+                        cancelBtnTextStyle: TextStyle(
+                          fontSize: 14,
+                        ),
+                        confirmBtnTextStyle:
+                            TextStyle(fontSize: 14, color: Colors.white),
+                      );
                     }
                   },
                   child: const Text("ขาย"),
@@ -801,11 +1034,11 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                         ],
                         borderRadius: BorderRadius.circular(10),
                         color: menuSelectionStatus['RSI'] == true
-                            ? Color(0xFF2A3547)
+                            ? const Color(0xFF2A3547)
                             : Colors.white, // สีพื้นหลังของปุ่ม
                       ),
                       child: menuSelectionStatus['RSI'] == true
-                          ? Center(
+                          ? const Center(
                               child: Text(
                                 'RSI',
                                 style: TextStyle(
@@ -814,7 +1047,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                                 ),
                               ),
                             )
-                          : Center(
+                          : const Center(
                               child: Text(
                                 'RSI',
                                 style: TextStyle(
@@ -847,12 +1080,12 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                         borderRadius: BorderRadius.circular(
                             10), // กำหนดให้รูปร่างเป็นวงกลม
                         color: menuSelectionStatus['STO'] == true
-                            ? Color(0xFF2A3547)
+                            ? const Color(0xFF2A3547)
                             : Colors.white, // สีพื้นหลังของปุ่ม
                         // สีพื้นหลังของปุ่ม
                       ),
                       child: menuSelectionStatus['STO'] == true
-                          ? Center(
+                          ? const Center(
                               child: Text(
                                 'STO',
                                 style: TextStyle(
@@ -861,7 +1094,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                                 ),
                               ),
                             )
-                          : Center(
+                          : const Center(
                               child: Text(
                                 'STO',
                                 style: TextStyle(
@@ -894,12 +1127,12 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                         borderRadius: BorderRadius.circular(
                             10), // กำหนดให้รูปร่างเป็นวงกลม
                         color: menuSelectionStatus['MACD'] == true
-                            ? Color(0xFF2A3547)
+                            ? const Color(0xFF2A3547)
                             : Colors.white, // สีพื้นหลังของปุ่ม
                         // สีพื้นหลังของปุ่ม
                       ),
                       child: menuSelectionStatus['MACD'] == true
-                          ? Center(
+                          ? const Center(
                               child: Text(
                                 'MACD',
                                 style: TextStyle(
@@ -908,7 +1141,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                                 ),
                               ),
                             )
-                          : Center(
+                          : const Center(
                               child: Text(
                                 'MACD',
                                 style: TextStyle(
@@ -941,11 +1174,11 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                         borderRadius: BorderRadius.circular(
                             10), // กำหนดให้รูปร่างเป็นวงกลม
                         color: menuSelectionStatus['EMA'] == true
-                            ? Color(0xFF2A3547)
+                            ? const Color(0xFF2A3547)
                             : Colors.white, // สีพื้นหลังของปุ่ม
                       ),
                       child: menuSelectionStatus['EMA'] == true
-                          ? Center(
+                          ? const Center(
                               child: Text(
                                 'EMA',
                                 style: TextStyle(
@@ -954,7 +1187,7 @@ class _MoreTechnicalOrderState extends State<MoreTechnicalOrder> {
                                 ),
                               ),
                             )
-                          : Center(
+                          : const Center(
                               child: Text(
                                 'EMA',
                                 style: TextStyle(
@@ -1056,41 +1289,41 @@ class TimeframeDropdown extends StatelessWidget {
                   return Dialog(
                     backgroundColor: Colors.transparent,
                     child: Container(
-                      padding: EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(20)),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.timeline_sharp,
                             color: Colors.amber,
                             size: 72,
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 24,
                           ),
-                          Text(
+                          const Text(
                             'Timeframe คืออะไร?',
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.w600),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 10,
                           ),
-                          Text(
+                          const Text(
                             'ระยะเวลาที่ใช้ในการวิเคราะห์และตัดสินใจในการซื้อหรือขายสินทรัพย์ทางการเงิน เช่น หุ้นหรือสกุลเงิน ระยะเวลาในการเทรดมักถูกแบ่งออกเป็นหลายช่วง โดยที่แต่ละช่วงมีลักษณะและค่าทางเทคนิคในการเทรดต่างกัน',
                             style: TextStyle(fontSize: 16),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 24,
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               OutlinedButton(
-                                style: ButtonStyle(
+                                style: const ButtonStyle(
                                     backgroundColor: MaterialStatePropertyAll(
                                         Color(0xFFEC5B5B)),
                                     padding: MaterialStatePropertyAll(
@@ -1098,7 +1331,7 @@ class TimeframeDropdown extends StatelessWidget {
                                 onPressed: () {
                                   Navigator.of(context).pop();
                                 },
-                                child: Text(
+                                child: const Text(
                                   'ออก',
                                   style: TextStyle(
                                       color: Colors.white, fontSize: 16),
