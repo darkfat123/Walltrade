@@ -605,7 +605,7 @@ class _TradePageOptionsState extends State<TradePageOptions>
                           child: Column(
                             children: [
                               Text(
-                                "หุ้นไทย (USD)",
+                                "หุ้นไทย (บาท)",
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
@@ -647,7 +647,7 @@ class _TradePageOptionsState extends State<TradePageOptions>
                                       fontSize: 14, color: Colors.black),
                                   suffixIcon: Container(
                                     alignment: Alignment.center,
-                                    height: 50,
+                                    height: 57,
                                     width: 80,
                                     margin: const EdgeInsets.only(left: 12),
                                     decoration: BoxDecoration(

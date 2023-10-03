@@ -11,7 +11,7 @@ class DeleteWatchlistSnackBar extends SnackBar {
             children: [
               Container(
                 padding: EdgeInsets.all(12),
-                height: 90,
+                height: 100,
                 decoration: BoxDecoration(
                   color: Color(0xFFBB2525),
                   borderRadius: BorderRadius.circular(10),

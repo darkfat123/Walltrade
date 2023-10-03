@@ -20,7 +20,6 @@ import asyncio
 from tradingview_ta import TA_Handler, Interval, Exchange
 from settrade_v2 import Investor
 from bs4 import BeautifulSoup
-from forex_python.converter import CurrencyRates
 import random
 
 
