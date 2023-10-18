@@ -1,3 +1,4 @@
+import 'package:Walltrade/main.dart';
 import 'package:Walltrade/pages/FirebaseAuth/login_page.dart';
 import 'package:Walltrade/pages/HomePage.dart';
 import 'package:Walltrade/primary.dart';
@@ -159,7 +160,7 @@ class _ContinueRegisterPageState extends State<ContinueRegisterPage> {
                         alpacaSecretController.text != '' &&
                         settradeAppIDController.text != '' &&
                         settradeSecretController.text != '') {
-                      updateUser().then((value) => HomePage(username: username));
+                      updateUser().then((value) => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home(username: username,initialIndex: 0),)));
                     }
                   },
                   child: Row(

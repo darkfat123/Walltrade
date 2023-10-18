@@ -1,3 +1,3 @@
 class Constants {
-  static const String serverUrl = 'http://192.168.1.36:5000';
+  static const String serverUrl = 'https://b27d-110-171-29-109.ngrok-free.app';
 }

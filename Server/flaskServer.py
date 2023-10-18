@@ -1,7 +1,7 @@
 import time
 import MySQLdb
 from flask_mysqldb import MySQL
-from flask import Flask, request, jsonify , session
+from flask import Flask, request, jsonify
 import requests
 import yfinance as yf
 import pandas as pd
@@ -15,9 +15,7 @@ from flask_cors import CORS
 import alpaca_trade_api as tradeapi
 import mysql.connector
 from alpaca_trade_api import REST
-import websockets
-import asyncio
-from tradingview_ta import TA_Handler, Interval, Exchange
+from tradingview_ta import TA_Handler
 from settrade_v2 import Investor
 from bs4 import BeautifulSoup
 import random
@@ -50,7 +48,7 @@ def predict():
         for x in range(prediction_day, len(scaled_data)):
             x_train.append(scaled_data[x-prediction_day:x, 0])
             y_train.append(scaled_data[x, 0])
-
+    
         x_train, y_train = np.array(x_train), np.array(y_train)
         x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
 
@@ -677,14 +675,23 @@ def get_positions():
 
 @app.route('/autotradeRSI', methods=['POST'])
 def autotradeRSI():
-    username = request.json.get('username')
-    lowerRSI = float(request.json.get('lowerRSI'))
-    symbol = request.json.get('symbol')
-    qty = float(request.json.get('qty'))
-    side = request.json.get('side')
+    username = request.json.get('username') #foczz123
+    lowerRSI = float(request.json.get('lowerRSI')) #36.5
+    symbol = request.json.get('symbol') #META
+    qty = float(request.json.get('qty')) #0.5
+    side = request.json.get('side') #buy
     type = "market"
-    interval = request.json.get('interval')
+    interval = request.json.get('interval') #1D
     time_in_force = "gtc"
+
+    if interval == '1h':
+        wait = 3600
+    elif interval == '4h':
+        wait = 14400
+    elif interval == '1D':
+        wait = 86400
+    else:
+        wait = 604800
 
     conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
     query = f"SELECT api_key, secret_key FROM users_info WHERE username = '{username}'"
@@ -739,7 +746,8 @@ def autotradeRSI():
                     return jsonify('autotrade buy success')
                 except Exception as e:
                     return jsonify(f'error: {str(e)}')
-                # เพิ่มโค้ดที่ต้องการเมื่อตรงเงื่อนไขการซื้อหุ้น
+            time.sleep(wait)
+                
     else:
         while True:
              # Check the status in localhost and break the loop if it's 'completed'
@@ -763,7 +771,7 @@ def autotradeRSI():
                     return jsonify('autotrade sell success')
                 except Exception as e:
                     return jsonify(f'error: {str(e)}')
-                # เพิ่มโค้ดที่ต้องการเมื่อตรงเงื่อนไขการซื้อหุ้น
+            time.sleep(wait)
 
 @app.route('/autotradeMACD', methods=['POST'])
 def autotradeMACD():
@@ -776,6 +784,15 @@ def autotradeMACD():
     type = "market"
     time_in_force = "gtc"
     interval = request.json.get('interval')
+
+    if interval == '1h':
+        wait = 3600
+    elif interval == '4h':
+        wait = 14400
+    elif interval == '1D':
+        wait = 86400
+    else:
+        wait = 604800
 
 
     last_macd = 0
@@ -854,7 +871,7 @@ def autotradeMACD():
                 last_macd = macd
                 last_signal = signal
                 print()
-                time.sleep(5)
+                time.sleep(wait)
         else:
             while True:
                 macd = analysis.indicators["MACD.macd"]
@@ -887,7 +904,7 @@ def autotradeMACD():
                 last_macd = macd
                 last_signal = signal
                 print()
-                time.sleep(5)
+                time.sleep(wait)
             
     else:
         if cross:
@@ -950,13 +967,13 @@ def autotradeMACD():
                 last_macd = macd
                 last_signal = signal
                 print()
-                time.sleep(5)
+                time.sleep(wait)
 
 @app.route('/autotradeSTO', methods=['POST'])
 def autotradeSTO():
-    username = request.json.get('username')
-    symbol = request.json.get('symbol')
-    qty = float(request.json.get('qty')) #"0.0002"
+    username = request.json.get('username') #foczz123
+    symbol = request.json.get('symbol') #META
+    qty = float(request.json.get('qty')) #"0.5"
     zone_sto = float(request.json.get('zone')) #"0.00"
     cross_sto = float(request.json.get('cross_sto')) 
     side = request.json.get('side')
@@ -970,6 +987,15 @@ def autotradeSTO():
     cursor = conn.cursor()
     cursor.execute(query)
     result = cursor.fetchone()
+
+    if interval == '1h':
+        wait = 3600
+    elif interval == '4h':
+        wait = 14400
+    elif interval == '1D':
+        wait = 86400
+    else:
+        wait = 604800
 
     while True:
         order_number = random.randrange(1, 100000)
@@ -1001,7 +1027,6 @@ def autotradeSTO():
     data = (username, symbol, techniques, qty, side,interval)
     print(symbol,qty,side,type,time_in_force)   
     cursor.execute(insert_query, data)
-    print(cursor)
     conn.commit()
 
     if side == 'buy':
@@ -1035,7 +1060,7 @@ def autotradeSTO():
                     except Exception as e:
                         print(f'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ: {str(e)}')
                     break
-                time.sleep(5)
+                time.sleep(wait)
         else:
             print("zone buy")
             while True:
@@ -1067,7 +1092,7 @@ def autotradeSTO():
                     except Exception as e:
                         print(f'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ: {str(e)}')
                     break
-                time.sleep(5)
+                time.sleep(wait)
             
     else: #sell
         if cross_sto>0:
@@ -1100,7 +1125,7 @@ def autotradeSTO():
                     except Exception as e:
                         print(f'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ: {str(e)}')
                     break
-                time.sleep(5)
+                time.sleep(wait)
         else:
             print("zone sell")
             while True:
@@ -1132,7 +1157,7 @@ def autotradeSTO():
                     except Exception as e:
                         print(f'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ: {str(e)}')
                     break
-                time.sleep(5)
+                time.sleep(wait)
     return jsonify('autotrade success')
 
 @app.route('/autotradeEMA', methods=['POST'])
@@ -1145,6 +1170,15 @@ def autotradeEMA():
     type = "market"
     time_in_force = "gtc"
     interval = request.json.get('interval')
+
+    if interval == '1h':
+        wait = 3600
+    elif interval == '4h':
+        wait = 14400
+    elif interval == '1D':
+        wait = 86400
+    else:
+        wait = 604800
 
     conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
     query = f"SELECT api_key, secret_key FROM users_info WHERE username = '{username}'"
@@ -1204,7 +1238,7 @@ def autotradeEMA():
                 break
             last_ema = ema
             last_close = close
-            time.sleep(5)
+            time.sleep(wait)
     else:
          while True:
             ema = anaylsis.indicators[f"EMA{day}"]
@@ -1229,7 +1263,7 @@ def autotradeEMA():
                 break
             last_ema = ema
             last_close = close
-            time.sleep(5)
+            time.sleep(wait)
     return jsonify('autotrade success')
 
 @app.route('/getOneSymbolPrice', methods=['POST'])
@@ -1334,7 +1368,10 @@ def news():
         stock_list = json.loads(watchlist_json) if watchlist_json else []
         stock_string = ','.join(stock_list)
     print(stock_string)
-    url = f"https://data.alpaca.markets/v1beta1/news?limit=20&exclude_contentless=true&symbols={stock_string}"
+    if stock_string != '':
+        url = f"https://data.alpaca.markets/v1beta1/news?limit=20&exclude_contentless=true&symbols={stock_string}"
+    else:
+        url = f"https://data.alpaca.markets/v1beta1/news?limit=20&exclude_contentless=true"
 
     cur.execute("SELECT api_key, secret_key FROM users_info WHERE username = %s", (username,))
     
