@@ -139,10 +139,10 @@ class _TradePageBuyState extends State<TradePageBuy> {
     final body = jsonEncode(
       {
         'username': widget.username,
-        'symbol': "BTCUSD",
+        'symbol': symbol,
         'qty': double.parse(qty),
         'side': side,
-        'day': dayController.text,
+        'day': selectedDay,
         'interval' : selectedInterval
       },
     );
@@ -497,7 +497,7 @@ class _TradePageBuyState extends State<TradePageBuy> {
                         selectedInterval,
                         'buy',
                         (qty, type, symbol, interval, side) {
-                          placeOrderRSI(qty, type, symbol, interval);
+                          placeOrderSTO(qty, type, symbol, interval);
                           print(
                               'Placing order: $qty $type $symbol $interval $side');
                         },
@@ -663,7 +663,7 @@ class _TradePageBuyState extends State<TradePageBuy> {
                         selectedInterval,
                         'buy',
                         (qty, type, symbol, interval, side) {
-                          placeOrderRSI(qty, type, symbol, interval);
+                          placeOrderMACD(qty, type, symbol, interval);
                           print(
                               'Placing order: $qty $type $symbol $interval $side');
                         },
@@ -751,7 +751,7 @@ class _TradePageBuyState extends State<TradePageBuy> {
                         selectedInterval,
                         'buy',
                         (qty, type, symbol, interval, side) {
-                          placeOrderRSI(qty, type, symbol, interval);
+                          placeOrderEMA(qty, type, symbol, interval);
                           print(
                               'Placing order: $qty $type $symbol $interval $side');
                         },

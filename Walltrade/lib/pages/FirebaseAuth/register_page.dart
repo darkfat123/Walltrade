@@ -86,7 +86,7 @@ class _RegisterPageState extends State<RegisterPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Lottie.asset('assets/lottie/registerLottie.json', height: 380),
+              //Lottie.asset('assets/lottie/registerLottie.json', height: 380),
               Container(
                 decoration: BoxDecoration(
                     color: Colors.white,

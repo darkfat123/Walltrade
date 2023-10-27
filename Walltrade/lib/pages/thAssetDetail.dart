@@ -547,16 +547,16 @@ class _AssetTHDetailsScreenState extends State<AssetTHDetailsScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      "ประเภท: ",
+                                      "ประเภท: ${selectedType}",
                                     ),
                                     Text(
-                                      "จำนวน: ",
+                                      "จำนวน: ${qtyController.text}",
                                     ),
                                     Text(
-                                      "ราคาลิมิต: market",
+                                      "ราคาลิมิต: ${selectedType == "Market" ? "Market" : "${limitPriceController.text}"}",
                                     ),
                                     Text(
-                                      "ระยะเวลาของคำสั่ง:",
+                                      "ระยะเวลาของคำสั่ง: ${selectedValidate}",
                                     ),
                                   ],
                                 ),
@@ -615,16 +615,16 @@ class _AssetTHDetailsScreenState extends State<AssetTHDetailsScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      "ประเภท: ",
+                                      "ประเภท: ขาย",
                                     ),
                                     Text(
-                                      "จำนวน: ",
+                                      "จำนวน: ${qtyController.text}",
                                     ),
                                     Text(
-                                      "ราคาลิมิต: market",
+                                      "ราคาลิมิต: ${selectedValidate == "Market" ? "Market" : "${limitPriceController.text}"}",
                                     ),
                                     Text(
-                                      "ระยะเวลาของคำสั่ง:",
+                                      "ระยะเวลาของคำสั่ง: ${selectedValidate}",
                                     ),
                                   ],
                                 ),

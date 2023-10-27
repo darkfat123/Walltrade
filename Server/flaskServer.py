@@ -1180,6 +1180,8 @@ def autotradeEMA():
     else:
         wait = 604800
 
+    print("DAY:",day)
+
     conn = MySQLdb.connect(host="localhost", user="root", passwd="", db="walltrade")
     query = f"SELECT api_key, secret_key FROM users_info WHERE username = '{username}'"
     cursor = conn.cursor()
@@ -1213,6 +1215,9 @@ def autotradeEMA():
     cursor.execute(insert_query, data)
     print("cursor:",cursor)
     conn.commit()
+
+    last_ema=0
+    last_close=0
 
     if side == 'buy':
         while True:
