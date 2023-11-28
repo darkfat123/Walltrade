@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:Walltrade/main.dart';
+import 'package:Walltrade/pages/TradePageOptions.dart';
 import 'package:Walltrade/widget/alertDialog/InfoDialog.dart';
 import 'package:Walltrade/widget/alertDialog/OrderConfirmation.dart';
 import 'package:Walltrade/widget/dropdown/timeFrame.dart';
@@ -54,7 +56,7 @@ class _TradePageBuyState extends State<TradePageBuy> {
         'qty': double.parse(qty),
         'side': side,
         'lowerRSI': lowerRSIController.text,
-        'interval' : selectedInterval
+        'interval': selectedInterval
       },
     );
 
@@ -84,7 +86,7 @@ class _TradePageBuyState extends State<TradePageBuy> {
         'side': side,
         'cross_macd': macd_crossupIsChecked,
         'zone': double.parse(zoneMACDController.text),
-        'interval' : selectedInterval
+        'interval': selectedInterval
       },
     );
 
@@ -114,7 +116,7 @@ class _TradePageBuyState extends State<TradePageBuy> {
         'side': side,
         'cross_sto': crossupSTOController.text,
         'zone': zoneSTOController.text,
-        'interval' : selectedInterval
+        'interval': selectedInterval
       },
     );
 
@@ -143,7 +145,7 @@ class _TradePageBuyState extends State<TradePageBuy> {
         'qty': double.parse(qty),
         'side': side,
         'day': selectedDay,
-        'interval' : selectedInterval
+        'interval': selectedInterval
       },
     );
 
@@ -302,6 +304,7 @@ class _TradePageBuyState extends State<TradePageBuy> {
                             : 'RSI น้อยกว่า ${lowerRSIController.text}',
                         selectedInterval,
                         'buy',
+                        username,
                         (qty, type, symbol, interval, side) {
                           placeOrderRSI(qty, type, symbol, interval);
                           print(
@@ -496,6 +499,7 @@ class _TradePageBuyState extends State<TradePageBuy> {
                                 : "%K และ %D น้อยกว่าหรือเท่ากับ ${zoneSTOController.text}",
                         selectedInterval,
                         'buy',
+                        username,
                         (qty, type, symbol, interval, side) {
                           placeOrderSTO(qty, type, symbol, interval);
                           print(
@@ -662,6 +666,7 @@ class _TradePageBuyState extends State<TradePageBuy> {
                                 : "MACD & Signal น้อยกว่าหรือเท่ากับ ${zoneMACDController.text}",
                         selectedInterval,
                         'buy',
+                        username,
                         (qty, type, symbol, interval, side) {
                           placeOrderMACD(qty, type, symbol, interval);
                           print(
@@ -750,8 +755,18 @@ class _TradePageBuyState extends State<TradePageBuy> {
                         "ซื้อเมื่อราคาน้อยกว่าหรือเท่ากับ EMA$selectedDay",
                         selectedInterval,
                         'buy',
+                        username,
                         (qty, type, symbol, interval, side) {
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Home(
+                                  username: username,
+                                  initialIndex: 2,
+                                ),
+                              ));
                           placeOrderEMA(qty, type, symbol, interval);
+
                           print(
                               'Placing order: $qty $type $symbol $interval $side');
                         },

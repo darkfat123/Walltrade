@@ -1,3 +1,4 @@
+import 'package:Walltrade/pages/TradePageOptions.dart';
 import 'package:flutter/material.dart';
 import 'package:quickalert/quickalert.dart';
 
@@ -8,6 +9,7 @@ void quickAlert(
   String technicalText,
   String interval,
   String side,
+  String username,
   Function(String, String, String, String, String) onPlaceOrder,
 ) {
   symbol == '' || qty == '' || technicalText == ''
@@ -137,6 +139,11 @@ void quickAlert(
           ),
           onConfirmBtnTap: () {
             onPlaceOrder(qty, side, symbol, interval, side);
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TradePageOptions(username: username),
+                ));
             Navigator.of(context).pop();
           },
           onCancelBtnTap: () {

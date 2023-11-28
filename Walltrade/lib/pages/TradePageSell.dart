@@ -55,7 +55,7 @@ class _TradePageSellState extends State<TradePageSell> {
         'qty': double.parse(qty),
         'side': side,
         'lowerRSI': higherRSIController.text,
-        'interval' : selectedInterval
+        'interval': selectedInterval
       },
     );
 
@@ -85,7 +85,7 @@ class _TradePageSellState extends State<TradePageSell> {
         'side': side,
         'cross_macd': macd_crossupIsChecked,
         'zone': double.parse(zoneMACDController.text),
-        'interval' : selectedInterval
+        'interval': selectedInterval
       },
     );
 
@@ -115,7 +115,7 @@ class _TradePageSellState extends State<TradePageSell> {
         'side': side,
         'cross_sto': crossdownSTOController.text,
         'zone': zoneSTOController.text,
-        'interval' : selectedInterval
+        'interval': selectedInterval
       },
     );
 
@@ -144,7 +144,7 @@ class _TradePageSellState extends State<TradePageSell> {
         'qty': double.parse(qty),
         'side': side,
         'day': selectedDay,
-        'interval' : selectedInterval
+        'interval': selectedInterval
       },
     );
 
@@ -293,6 +293,7 @@ class _TradePageSellState extends State<TradePageSell> {
                             : 'RSI มากกว่า ${higherRSIController.text}',
                         selectedInterval,
                         'sell',
+                        username,
                         (qty, type, symbol, interval, side) {
                           placeOrderRSI(qty, type, symbol, interval);
                           print(
@@ -481,6 +482,7 @@ class _TradePageSellState extends State<TradePageSell> {
                                 : "%K และ %D มากกว่าหรือเท่ากับ ${zoneSTOController.text}",
                         selectedInterval,
                         'sell',
+                        username,
                         (qty, type, symbol, interval, side) {
                           placeOrderSTO(qty, type, symbol, interval);
                           print(
@@ -643,6 +645,7 @@ class _TradePageSellState extends State<TradePageSell> {
                                 : "MACD & Signal มากกว่าหรือเท่ากับ ${zoneMACDController.text}",
                         selectedInterval,
                         'sell',
+                        username,
                         (qty, type, symbol, interval, side) {
                           placeOrderMACD(qty, type, symbol, interval);
                           print(
@@ -731,6 +734,7 @@ class _TradePageSellState extends State<TradePageSell> {
                         "ซื้อเมื่อราคามากกว่าหรือเท่ากับ EMA$selectedDay",
                         selectedInterval,
                         'sell',
+                        username,
                         (qty, type, symbol, interval, side) {
                           placeOrderEMA(qty, type, symbol, interval);
                           print(

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:Walltrade/main.dart';
 import 'package:Walltrade/pages/TradePageSell.dart';
 import 'package:Walltrade/pages/MoreTechnicalOrder.dart';
 import 'package:Walltrade/primary.dart';
@@ -57,9 +58,11 @@ class _TradePageOptionsState extends State<TradePageOptions>
       } else {
         for (final order in responseData) {
           final status = order['status'];
-          if (status == 'pending') {
-            autoOrders.add(order);
-          }
+          setState(() {
+            if (status == 'pending') {
+              autoOrders.add(order);
+            }
+          });
         }
       }
 
@@ -363,24 +366,54 @@ class _TradePageOptionsState extends State<TradePageOptions>
                               color: Colors.black,
                             ),
                           ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => HistoryAutoTradePage(
-                                          username: username,
-                                        )),
-                              );
-                            },
-                            child: Text(
-                              "เพิ่มเติม",
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w300,
-                                color: Colors.black,
+                          Row(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => Home(
+                                            username: username,initialIndex: 2,),
+                                      ));
+                                },
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.refresh_rounded,
+                                      size: 20,
+                                    )
+                                  ],
+                                ),
                               ),
-                            ),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            HistoryAutoTradePage(
+                                              username: username,
+                                            )),
+                                  );
+                                },
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      "เพิ่มเติม",
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w300,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -1174,14 +1207,26 @@ class _TradePageOptionsState extends State<TradePageOptions>
                                                       },
                                                       child: Container(
                                                         padding:
-                                                            EdgeInsets.all(
-                                                                12),
+                                                            EdgeInsets.all(12),
                                                         margin:
-                                                            EdgeInsets.all(
-                                                                16),
-                                                        decoration:
-                                                            BoxDecoration(color: primary,borderRadius: BorderRadius.circular(10)),
-                                                        child: Center(child: Text("ปิด",style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.w600),)),
+                                                            EdgeInsets.all(16),
+                                                        decoration: BoxDecoration(
+                                                            color: primary,
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10)),
+                                                        child: Center(
+                                                            child: Text(
+                                                          "ปิด",
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.white,
+                                                              fontSize: 18,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600),
+                                                        )),
                                                       ), // ปุ่มปิด AlertDialog
                                                     ),
                                                   ],
