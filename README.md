@@ -12,7 +12,7 @@
 
 ### The model of Deep learning is using LSTM. 🚀
 ### Dataset from library of python (yfinance) period 3 years. 📊
-
+</br>
 
 <img align="left" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/1e9eceb4-6b1b-4830-b32a-6597495c3368"> 
 <img align="right" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/ef048fa8-15d1-469c-99c0-02fcd65239c9">
