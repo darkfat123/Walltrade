@@ -42,6 +42,7 @@
 <img align="right" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/afde4a88-d9f5-4108-9945-8a85778aaba5">
 <img src="https://i.imgur.com/dBaSKWF.gif" height="30" width="100%">
 
+
 <img align="right" alt="Coding" width="300" src="https://media.tenor.com/ztRyBgFCYDEAAAAi/buy-degen.gif">
 <h3 align="left">Languages and tools used in this web application:</h3>
 
