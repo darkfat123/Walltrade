@@ -1,49 +1,42 @@
-# Walltrade (Trading TH & US With Technical Indicator)
+<!-- PROJECT LOGO -->
+<div align="center">
+  <a href="https://github.com/github_username/repo_name">
+    <img src="https://media.tenor.com/5IO4OoRLymUAAAAi/gofourward-webdesign.gif" alt="Logo" height="100">
+  </a>
 
-### An application that uses technical indicators to set up automatic trading of US and TH equities without waiting for technical indicator value in front of computer or mobile phone
+<h3 align="center">Walltrade (Trading TH & US With Technical Indicator)</h3>
 
-### Using Firebase Authentication for one-time log-in until sign-out 🦊
-
-### Technical Indicator which used in this application 🧑‍🔧
-#### 1. RSI
-#### 2. STO
-#### 3. MACD
-#### 4. EMA
-
-### The model of Deep learning is using LSTM. 🚀
-### Dataset from library of python (yfinance) period 3 years. 📊
-</br>
-
-<img align="left" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/1e9eceb4-6b1b-4830-b32a-6597495c3368"> 
-<img align="right" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/ef048fa8-15d1-469c-99c0-02fcd65239c9">
-</br>
-
-<img align="left" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/a608af0e-def3-478e-83ee-03c485ff38e0"> 
-<img align="right" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/14485548-e5e3-4a28-8ffe-a32df7f956f7"> 
-</br>
-
-<img align="left" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/3aa2f12c-0724-45c5-ad81-efde67afd74d">
-<img align="right" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/31349ecd-323e-4338-a6ac-f5c6ee8ab7d1"> 
-</br>
-
-<img align="left" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/7214ef94-742b-4616-a0ed-ec0599bc00ab">
-<img align="right" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/c866296f-bb18-4246-844b-7db428190594">
-</br>
-
-<img align="left" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/14485548-e5e3-4a28-8ffe-a32df7f956f7"> 
-<img align="right" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/b93c51d1-a487-4249-b0e4-d9863850e039">
-</br>
-
-<img align="left" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/34ba2ced-c8df-4dd5-b854-910259d85fb3"> 
-<img align="right" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/1d87420f-8f08-44e6-9e62-be29ab7b2a85">
-</br>
-
-<img align="left" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/bb1278d6-8892-442c-ae13-2e0217eee2c5">
-<img align="right" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/afde4a88-d9f5-4108-9945-8a85778aaba5">
+  <p align="center">
+    An mobile application that uses technical indicators to set up automatic trading of US and TH equities without waiting for technical indicator value in front of computer or mobile phone.
+    <br />
+    <br />
+    <a href="https://github.com/darkfat123/TodoList-Web-App/issues">🚨 Report Bug</a>
+    ·
+    <a href="https://github.com/darkfat123/TodoList-Web-App/issues">✉️ Request Feature</a>
+  </p>
+</div>
 <img src="https://i.imgur.com/dBaSKWF.gif" height="30" width="100%">
 
+<h3 align="left">About this web application:</h3>
 
-<img align="right" alt="Coding" width="300" src="https://media.tenor.com/ztRyBgFCYDEAAAAi/buy-degen.gif">
+  * The model of Deep learning is using LSTM 🚀, Dataset from library of python (yfinance) period 3 years. 📊
+  * Using Firebase Authentication for one-time log-in until sign-out. 🦊
+  * Use technical indicators to set up automatic trading of US and TH equities depends on user input.
+  * [*Settrade API*](https://open-api.settrade.com/open-api/) used for TH equity.
+  * [*Alpaca API*](https://alpaca.markets/) used for US equity.
+  * Get API Key from [*Settrade API*](https://open-api.settrade.com/open-api/) and [*Alpaca API*](https://alpaca.markets/) for use this applcation.
+
+<h4 align="left">Technical Indicator which used in this application 🧑‍🔧:</h4>
+
+  * Relative Strength Index (RSI)
+  * Stochastic Oscillator (STO)
+  * Moving Average Convergence Divergence (MACD)
+  * Exponential Moving Average (EMA)
+
+</br>
+<img src="https://i.imgur.com/dBaSKWF.gif" height="30" width="100%">
+
+<img align="right" alt="Coding" width="400" src="https://media.tenor.com/ztRyBgFCYDEAAAAi/buy-degen.gif">
 <h3 align="left">Languages and tools used in this web application:</h3>
 
 - Backend
@@ -74,6 +67,35 @@
   </a>
 </p>
 
+<img src="https://i.imgur.com/dBaSKWF.gif" height="30" width="100%">
+
+<img align="left" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/1e9eceb4-6b1b-4830-b32a-6597495c3368"> 
+<img align="right" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/ef048fa8-15d1-469c-99c0-02fcd65239c9">
+</br>
+
+<img align="left" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/a608af0e-def3-478e-83ee-03c485ff38e0"> 
+<img align="right" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/14485548-e5e3-4a28-8ffe-a32df7f956f7"> 
+</br>
+
+<img align="left" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/3aa2f12c-0724-45c5-ad81-efde67afd74d">
+<img align="right" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/31349ecd-323e-4338-a6ac-f5c6ee8ab7d1"> 
+</br>
+
+<img align="left" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/7214ef94-742b-4616-a0ed-ec0599bc00ab">
+<img align="right" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/c866296f-bb18-4246-844b-7db428190594">
+</br>
+
+<img align="left" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/14485548-e5e3-4a28-8ffe-a32df7f956f7"> 
+<img align="right" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/b93c51d1-a487-4249-b0e4-d9863850e039">
+</br>
+
+<img align="left" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/34ba2ced-c8df-4dd5-b854-910259d85fb3"> 
+<img align="right" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/1d87420f-8f08-44e6-9e62-be29ab7b2a85">
+</br>
+
+<img align="left" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/bb1278d6-8892-442c-ae13-2e0217eee2c5">
+<img align="right" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/afde4a88-d9f5-4108-9945-8a85778aaba5">
+</br>
 <img src="https://i.imgur.com/dBaSKWF.gif" height="30" width="100%">
 
 <h4> Connect with me 🎊: <h4>
