@@ -18,7 +18,6 @@
 <img align="right" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/ef048fa8-15d1-469c-99c0-02fcd65239c9">
 </br>
 
-
 <img align="left" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/a608af0e-def3-478e-83ee-03c485ff38e0"> 
 <img align="right" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/14485548-e5e3-4a28-8ffe-a32df7f956f7"> 
 </br>
@@ -41,5 +40,56 @@
 
 <img align="left" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/bb1278d6-8892-442c-ae13-2e0217eee2c5">
 <img align="right" height="800" src="https://github.com/darkfat123/Walltrade/assets/140593160/afde4a88-d9f5-4108-9945-8a85778aaba5">
+<img src="https://i.imgur.com/dBaSKWF.gif" height="30" width="100%">
 
+<img align="right" alt="Coding" width="300" src="https://media.tenor.com/ztRyBgFCYDEAAAAi/buy-degen.gif">
+<h3 align="left">Languages and tools used in this web application:</h3>
 
+- Backend
+<p align="left">
+  <a href="https://skillicons.dev">
+    <img src="https://skillicons.dev/icons?i=flask,python" />
+  </a>
+</p>
+
+- Frontend
+<p align="left">
+  <a href="https://skillicons.dev">
+    <img src="https://skillicons.dev/icons?i=flutter,dart" />
+  </a>
+</p>
+
+- Databases
+<p align="left">
+  <a href="https://skillicons.dev">
+    <img src="https://skillicons.dev/icons?i=mysql" />
+  </a>
+</p>
+
+- Tools
+<p align="left">
+  <a href="https://skillicons.dev">
+    <img src="https://skillicons.dev/icons?i=git,github,vscode,postman,firebase" />
+  </a>
+</p>
+
+<img src="https://i.imgur.com/dBaSKWF.gif" height="30" width="100%">
+
+<h4> Connect with me 🎊: <h4>
+  <a href="https://www.linkedin.com/in/supakorn-yookack-39a730289/">
+   <img align="left" alt="Supakorn Yookack | Linkedin" width="30px" src="https://www.vectorlogo.zone/logos/linkedin/linkedin-icon.svg" />
+  </a>
+  <a href="mailto:supakorn.yookack@gmail.com">
+    <img align="left" alt="Supakorn Yookack | Gmail" width="32px" src="https://www.vectorlogo.zone/logos/gmail/gmail-icon.svg" />
+  </a>
+  <a href="https://medium.com/@yookack_s">
+    <img align="left" alt="Supakorn Yookack | Medium" width="32px" src="https://www.vectorlogo.zone/logos/medium/medium-tile.svg" />
+  </a>
+   <a href="https://www.facebook.com/supakorn.yookaek/">
+    <img align="left" alt="Supakorn Yookack | Facebook" width="32px" src="https://www.vectorlogo.zone/logos/facebook/facebook-tile.svg" />
+  </a>
+   <a href="https://github.com/darkfat123">
+    <img align="left" alt="Supakorn Yookack | Github" width="32px" src="https://www.vectorlogo.zone/logos/github/github-tile.svg" />
+  </a>
+<p align="right" > Created by <a href="https://github.com/darkfat123">darkfat</a></p>
+<p align="right" > <img src="https://komarev.com/ghpvc/?username=darkfat123&label=Profile%20views&color=0e75b6&style=flat" alt="darkfat123" /> </p>
