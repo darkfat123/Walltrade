@@ -17,11 +17,13 @@
 </div>
 <img src="https://i.imgur.com/dBaSKWF.gif" height="30" width="100%">
 
-<h3 align="left">About this web application:</h3>
+<h3 align="left">About this application:</h3>
 
   * The model of Deep learning is using LSTM 🚀, Dataset from library of python (yfinance) period 3 years. 📊
   * Using Firebase Authentication for one-time log-in until sign-out. 🦊
+  * Display stock news and filter which stocks belong to watchlist. Each of news will contain tags to help users know the stocks that are related to the news. 🌍
   * Use technical indicators to set up automatic trading of US and TH equities depends on user input.
+  * Users can check the current technical indicators in this application.
   * [*Settrade API*](https://open-api.settrade.com/open-api/) used for TH equity.
   * [*Alpaca API*](https://alpaca.markets/) used for US equity.
   * Get API Key from [*Settrade API*](https://open-api.settrade.com/open-api/) and [*Alpaca API*](https://alpaca.markets/) for use this applcation.
@@ -33,10 +35,13 @@
   * Moving Average Convergence Divergence (MACD)
   * Exponential Moving Average (EMA)
 
+#### Get technical indicator value from [*tradingview-ta*](https://pypi.org/project/tradingview-ta/).
+
 </br>
 <img src="https://i.imgur.com/dBaSKWF.gif" height="30" width="100%">
 
-<img align="right" alt="Coding" width="400" src="https://media.tenor.com/ztRyBgFCYDEAAAAi/buy-degen.gif">
+<img align="right" alt="Buying" width="300" src="https://media.tenor.com/ztRyBgFCYDEAAAAi/buy-degen.gif">
+
 <h3 align="left">Languages and tools used in this web application:</h3>
 
 - Backend
@@ -114,5 +119,5 @@
    <a href="https://github.com/darkfat123">
     <img align="left" alt="Supakorn Yookack | Github" width="32px" src="https://www.vectorlogo.zone/logos/github/github-tile.svg" />
   </a>
-<p align="right" > Created by <a href="https://github.com/darkfat123">darkfat</a></p>
-<p align="right" > <img src="https://komarev.com/ghpvc/?username=darkfat123&label=Profile%20views&color=0e75b6&style=flat" alt="darkfat123" /> </p>
+    <p align="right" > Created by <a href="https://github.com/darkfat123">darkfat</a></p> <p align="right" > <img src="https://komarev.com/ghpvc/?username=darkfat123&label=Profile%20views&color=0e75b6&style=flat" alt="darkfat123" /> </p>
+
