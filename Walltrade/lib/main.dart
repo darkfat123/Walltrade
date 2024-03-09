@@ -16,9 +16,9 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
       options: const FirebaseOptions(
-    apiKey: 'AIzaSyD5Ntd5aan0rYJTrkM0STIMgLPZzXgCJmw',
-    appId: '1:207848542192:android:68540f26183154fbb99735',
-    messagingSenderId: '207848542192',
+    apiKey: '{YOUR_API_KEY}',
+    appId: '{YOUR_APP_ID}',
+    messagingSenderId: '{YOUR_MESSAGING_SENDER_ID}',
     projectId: 'walltrade-b174e',
   ));
   runApp(MyApp());
